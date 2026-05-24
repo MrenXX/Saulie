@@ -1,0 +1,10 @@
+torch
+transformers
+trl>=1.4.0
+peft
+bitsandbytes
+optuna
+mlflow
+datasets
+numpy
+accelerate

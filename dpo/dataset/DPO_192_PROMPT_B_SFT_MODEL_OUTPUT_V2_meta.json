@@ -1,0 +1,16 @@
+{
+  "output": "DPO_192_PROMPT_B_SFT_MODEL_OUTPUT_V2.jsonl",
+  "lines": 192,
+  "dpo_source_counts": {
+    "prompt_b_repaired": 92,
+    "prompt_b_exp500": 100
+  },
+  "inputs": {
+    "repaired": "DPO_PART_B\\final\\DPO2_pairs_repaired.jsonl",
+    "exp500_golden": "DPO_PART_B\\eval\\results\\DPO2_pairs_exp500_golden_merged.jsonl"
+  },
+  "dpo_source_legend": {
+    "prompt_b_repaired": "Prompt B, 92-row repaired on-policy batch",
+    "prompt_b_exp500": "Prompt B, 100-row exp500 web golden merge"
+  }
+}

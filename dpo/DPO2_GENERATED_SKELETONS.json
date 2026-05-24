@@ -1,0 +1,2508 @@
+[
+  {
+    "id": "dpo2_A6_001",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "neck_pain_workday_end",
+    "user_turns": [
+      "My neck kills me by the end of the day at work.",
+      "It happens mostly when I look at my monitor for hours.",
+      "I already tried a different chair but nothing helps."
+    ]
+  },
+  {
+    "id": "dpo2_A8_008",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "wrist_ache_typing_hour",
+    "user_turns": [
+      "My wrists ache after typing for more than an hour.",
+      "The pain starts in my right wrist and shoots up to my forearm.",
+      "I use a split keyboard but the pain still returns.",
+      "I cannot afford to take breaks every twenty minutes."
+    ]
+  },
+  {
+    "id": "dpo2_B6_022",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "ocean_buoy_question_curiosity",
+    "user_turns": [
+      "How do ocean buoys measure wave height and weather at sea?",
+      "I find it fascinating how they stay in place in rough water.",
+      "Are there different types for different ocean conditions?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_029",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "nearest_galaxy_distance_question",
+    "user_turns": [
+      "What is the nearest galaxy to our Milky Way and how far away is it?",
+      "I have seen it mentioned in documentaries but need clarity.",
+      "Can you see it without a telescope?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_036",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "virus_mutation_rate_ability",
+    "user_turns": [
+      "Why do viruses mutate so quickly and can they mutate forever?",
+      "The speed of mutations seems terrifying from a health perspective.",
+      "Do all viruses mutate at the same rate?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_043",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "glass_break_usage_reason",
+    "user_turns": [
+      "Why does glass break easily but still is used for so many things?",
+      "It seems like a bad trade-off for everyday items.",
+      "Is there a stronger type that is practical?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_050",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "desert_dune_wind_motion",
+    "user_turns": [
+      "How do desert dunes keep shifting even when the wind feels gentle?",
+      "I only know dunes from photos and they look frozen in place.",
+      "Does the sand actually travel as loose grains or in bigger sheets?",
+      "Could someone living near dunes predict movement week to week or is it basically chaotic?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_057",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "observable_universe_star_count",
+    "user_turns": [
+      "How many stars are estimated to exist in the observable universe?",
+      "That number seems beyond comprehension.",
+      "Has the estimate changed with better telescopes?",
+      "Do most stars have planets orbiting them?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_064",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "human_fire_cooking_start",
+    "user_turns": [
+      "When did humans first start using fire for cooking food?",
+      "The discovery seems fundamental to human evolution.",
+      "How did early humans actually create fire?",
+      "Did all cultures discover it independently?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_071",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "genetic_test_health_info",
+    "user_turns": [
+      "How do genetic tests work and what can they actually tell you about health?",
+      "I see them advertised everywhere now.",
+      "Can they predict future diseases accurately?",
+      "How reliable are the health predictions?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_106",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "vegetarian_diet_switch_stomach",
+    "user_turns": [
+      "I switched to a plant based diet last month and feel hungrier than before.",
+      "I eat larger portions but still feel empty.",
+      "The hunger hits hardest around mid-afternoon."
+    ]
+  },
+  {
+    "id": "dpo2_C8_113",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "painting_hobby_hand_cramp",
+    "user_turns": [
+      "I picked up painting as a hobby and now my hands cramp up.",
+      "It happens after about thirty minutes of fine brushwork.",
+      "I tried switching to bigger brushes but it does not help.",
+      "I do not want to stop painting entirely."
+    ]
+  },
+  {
+    "id": "dpo2_D6_137",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "general_fatigue_feeling_off",
+    "user_turns": [
+      "I just feel off lately and cannot pinpoint why.",
+      "It is hard to describe but everything feels harder than it should.",
+      "I wake up tired even after a full night sleep."
+    ]
+  },
+  {
+    "id": "dpo2_D6_144",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "sluggish_sleep_enough",
+    "user_turns": [
+      "I feel sluggish and slow all the time but I sleep enough.",
+      "My body feels like it is moving through mud.",
+      "Coffee does not help much anymore."
+    ]
+  },
+  {
+    "id": "dpo2_D6_151",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "cold_intolerance_age_change",
+    "user_turns": [
+      "I cannot tolerate cold temperatures like I used to when I was younger.",
+      "My hands go numb in air conditioning now.",
+      "I wear sweaters even in summer sometimes."
+    ]
+  },
+  {
+    "id": "dpo2_D6_158",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "sleep_paralysis_wake_move",
+    "user_turns": [
+      "Sometimes when I wake up I cannot move but I am fully awake.",
+      "It lasts for several seconds which feels like forever.",
+      "I can never tell when it will happen again."
+    ]
+  },
+  {
+    "id": "dpo2_D6_165",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "stomach_upset_trigger_find",
+    "user_turns": [
+      "My stomach is always upset but I cannot find what triggers it.",
+      "It comes and goes without any pattern I notice.",
+      "I have tried keeping a food diary but no luck."
+    ]
+  },
+  {
+    "id": "dpo2_D6_172",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "hand_skin_cracked_pain",
+    "user_turns": [
+      "The skin on my hands is cracked and painful but I use moisturizer.",
+      "It happens even in the middle of summer.",
+      "I apply cream several times a day."
+    ]
+  },
+  {
+    "id": "dpo2_D6_179",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "thirsty_plenty_water_drink",
+    "user_turns": [
+      "I feel thirsty all the time but I drink plenty of water already.",
+      "I drink over eight glasses daily without fail.",
+      "Nothing seems to satisfy the thirst feeling."
+    ]
+  },
+  {
+    "id": "dpo2_D8_186",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "brain_fog_think_straight",
+    "user_turns": [
+      "My brain feels foggy all the time and I cannot think straight.",
+      "I lose track of what I was saying in the middle of sentences.",
+      "It affects my work performance significantly.",
+      "I tried cutting back on screen time but no improvement."
+    ]
+  },
+  {
+    "id": "dpo2_D8_193",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "focus_difficulty_mind_wander",
+    "user_turns": [
+      "I cannot focus on anything anymore and my mind wanders constantly.",
+      "I start one task and immediately think about another.",
+      "It happens even when I am interested in what I am doing.",
+      "I have tried making lists but never follow through."
+    ]
+  },
+  {
+    "id": "dpo2_D8_200",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "stomach_feels_off_figure",
+    "user_turns": [
+      "Something feels off with my stomach but I cannot figure out what.",
+      "It is not painful exactly but definitely uncomfortable.",
+      "It happens at random times throughout the day.",
+      "I cannot connect it to any particular meal."
+    ]
+  },
+  {
+    "id": "dpo2_D8_207",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "light_bother_eyes_more",
+    "user_turns": [
+      "Bright lights bother my eyes more than they used to.",
+      "I need to wear sunglasses even on cloudy days now.",
+      "Driving at night has become difficult with oncoming lights.",
+      "I bought blue light glasses but they do not help."
+    ]
+  },
+  {
+    "id": "dpo2_A10_018",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "foot_pain_stand_work",
+    "user_turns": [
+      "My feet hurt after standing for just a few hours at work.",
+      "The pain is worst in my heels and arches.",
+      "I already wear supportive shoes but it does not help.",
+      "I cannot sit down much during my shift.",
+      "I need something that allows me to keep standing for now."
+    ]
+  },
+  {
+    "id": "dpo2_B10_081",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "cancer_cell_healthy_difference",
+    "user_turns": [
+      "Why do some cells become cancerous while others stay healthy?",
+      "I want to understand how cancer starts at the cell level.",
+      "Are there early warning signs in cells?",
+      "Can the body detect and remove bad cells naturally?",
+      "What triggers a cell to turn cancerous?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_088",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "space_body_no_spacesuit",
+    "user_turns": [
+      "What would happen to the human body in space without a spacesuit?",
+      "I have seen movies showing this but want scientific facts.",
+      "How quickly would someone pass out?",
+      "Does the body freeze or boil first?",
+      "Would the lungs burst from pressure?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_095",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "adult_body_bone_count",
+    "user_turns": [
+      "How many bones are in the adult human body and why do we have so many?",
+      "Babies have more bones which seems backwards.",
+      "Do all adults have the same number?",
+      "Why do some bones fuse together as we grow?",
+      "Are there bones that are not necessary anymore?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_102",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "human_body_hair_why",
+    "user_turns": [
+      "Why do humans still have body hair if it does not serve much purpose?",
+      "It seems like an evolutionary leftover.",
+      "Does hair serve any function at all now?",
+      "Why do we have different hair patterns than other apes?",
+      "What determines where hair grows on our bodies?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_123",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "remote_work_house_stay",
+    "user_turns": [
+      "I moved to fully remote work and now I barely leave my house.",
+      "I used to walk to my office every day without thinking about it.",
+      "I stopped seeing friends as often because there is no reason to go out.",
+      "I gained weight from not commuting anymore.",
+      "I need to build physical activity back into my routine."
+    ]
+  },
+  {
+    "id": "dpo2_C10_130",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "job_lost_life_lost",
+    "user_turns": [
+      "I lost my job and I feel lost about what to do with my life now.",
+      "I spent years in the same industry and cannot imagine starting over.",
+      "Everyone says to take time for myself but I feel behind.",
+      "My skills seem specific to a job that no longer exists.",
+      "I need to figure out what I actually want to do."
+    ]
+  },
+  {
+    "id": "dpo2_A6_002",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "back_pain_lounge_sofa",
+    "user_turns": [
+      "My back hurts when I sit on my couch for too long.",
+      "It has been going on for several months now and I am not sure what to do.",
+      "I have tried different sitting positions but nothing seems to help."
+    ]
+  },
+  {
+    "id": "dpo2_A8_009",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "knee_pain_stairs_years",
+    "user_turns": [
+      "My knees hurt when I go up and down stairs and I am only in my thirties.",
+      "It happens every single time I use the stairs at home.",
+      "I have been dealing with this for about a year now and it is getting worse.",
+      "I am worried it will keep getting worse as I get older."
+    ]
+  },
+  {
+    "id": "dpo2_B6_024",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "hurricane_season_travel_plan",
+    "user_turns": [
+      "How do meteorologists predict hurricane paths during storm season?",
+      "I have heard different methods are used but I do not know which ones are most accurate.",
+      "Is it possible to predict exactly where a hurricane will make landfall?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_031",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "sky_color_sunset_question",
+    "user_turns": [
+      "Why does the sky turn orange and red during sunset?",
+      "I have always wondered about the science behind those colors.",
+      "Does this happen everywhere or only in certain locations?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_038",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "bird_migration_navigate_question",
+    "user_turns": [
+      "How do birds know where to migrate during different seasons?",
+      "I have read that some use the stars but I am not sure how that works.",
+      "Are there other methods birds use to navigate?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_045",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "climate_change_weather_extreme",
+    "user_turns": [
+      "Why are weather events getting more extreme due to climate change?",
+      "I have noticed storms seem stronger than they used to be.",
+      "Is this something that will keep getting worse over time?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_051",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "earthquake_tectonic_plate_shift",
+    "user_turns": [
+      "What causes earthquakes and how do tectonic plates move?",
+      "I understand plates float on something but I am not sure what.",
+      "How long does it take for plates to actually move and create earthquakes?",
+      "Should people in earthquake-prone areas be worried about big ones?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_058",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "hurricane_category_wind_speed",
+    "user_turns": [
+      "How are hurricanes categorized and what wind speeds define each category?",
+      "I know there is a scale but I cannot remember the specific numbers.",
+      "What happens to infrastructure when winds reach category four or five?",
+      "Which category hurricanes cause the most damage historically?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_065",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "continental_drift_coastline_evidence",
+    "user_turns": [
+      "How does continental drift explain matching coastlines between continents?",
+      "I saw it on a map once and it looked too neat to be coincidence.",
+      "Does the drift happen fast enough that humans could notice it in a lifetime?",
+      "What evidence besides coastlines convinced geologists it was real?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_072",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "moon_landing_technology_verification",
+    "user_turns": [
+      "How can we verify that humans actually landed on the moon?",
+      "I have seen conspiracy theories online but I want to know the facts.",
+      "What physical evidence exists that we can independently verify?",
+      "Why do some people still not believe it happened despite the evidence?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_107",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "prescription_insomnia_night",
+    "user_turns": [
+      "I started a new prescription and now I cannot sleep at night.",
+      "It has been about two weeks since I started taking it and the problem continues.",
+      "I am wondering if this is a common side effect or if I should be concerned."
+    ]
+  },
+  {
+    "id": "dpo2_C8_114",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "new_hobby_running_breath",
+    "user_turns": [
+      "I started running as a hobby and I get out of breath really quickly.",
+      "I can barely make it around the block without stopping to catch my breath.",
+      "It has been a month now and I am not seeing any improvement in my stamina.",
+      "Should I try a different type of exercise instead?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_138",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "energy_level_food_sleep",
+    "user_turns": [
+      "I have no energy lately but I sleep and eat regularly.",
+      "Even after a full night sleep I still feel exhausted in the morning.",
+      "I have tried taking vitamins but they do not seem to help."
+    ]
+  },
+  {
+    "id": "dpo2_D6_145",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "heat_intolerance_summer",
+    "user_turns": [
+      "I cannot handle heat anymore and it is only spring.",
+      "Even being outside for a short time makes me feel extremely uncomfortable.",
+      "I am worried about how I will manage during the summer months."
+    ]
+  },
+  {
+    "id": "dpo2_D6_152",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "sleep_restless_legs_move",
+    "user_turns": [
+      "My legs feel restless at night and I cannot get comfortable.",
+      "It only happens when I try to fall asleep and I have to keep moving them.",
+      "I have tried taking hot baths before bed but it does not help."
+    ]
+  },
+  {
+    "id": "dpo2_D6_159",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "tongue_taste_bitter_medication",
+    "user_turns": [
+      "Everything tastes bitter or metallic lately and I started new medication.",
+      "Food does not taste right anymore and it is affecting my appetite.",
+      "I have tried eating different foods but they all taste strange."
+    ]
+  },
+  {
+    "id": "dpo2_D6_166",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "skin_itch_dry_winter",
+    "user_turns": [
+      "My skin gets incredibly itchy during winter even with lotion.",
+      "The itching is worse at night and I have scratched my arms until they are red.",
+      "I have tried different types of moisturizer but none seem to provide relief."
+    ]
+  },
+  {
+    "id": "dpo2_D6_173",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "nail_break_frequent_weak",
+    "user_turns": [
+      "My nails break constantly and they never used to do this.",
+      "They split and peel even when I keep them trimmed and moisturized.",
+      "I have wondering if there might be a medical condition causing this."
+    ]
+  },
+  {
+    "id": "dpo2_D8_187",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "work_stress_overwhelm_nothing_wrong",
+    "user_turns": [
+      "I feel overwhelmed but nothing specific is wrong in my life.",
+      "I get anxious about things that never used to bother me at all.",
+      "Even on days when nothing difficult happens I still feel on edge.",
+      "I am not sure how to manage these feelings."
+    ]
+  },
+  {
+    "id": "dpo2_D8_194",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "skin_itch_rash_no_bite",
+    "user_turns": [
+      "My skin has been acting up but I have not changed anything in my routine.",
+      "I have developed patches of irritation that come and go randomly.",
+      "It is not connected to any specific food or environmental trigger that I can identify.",
+      "I have considered seeing a dermatologist but I am not sure if it is necessary."
+    ]
+  },
+  {
+    "id": "dpo2_D8_201",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "weight_loss_no_diet_stress",
+    "user_turns": [
+      "I have been losing weight without trying and I am not on a diet.",
+      "My clothes are fitting looser than they did just a few months ago.",
+      "I have not changed my eating habits but my weight keeps dropping.",
+      "I am starting to worry that something might be wrong."
+    ]
+  },
+  {
+    "id": "dpo2_D8_208",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "urination_frequency_medical",
+    "user_turns": [
+      "I have to urinate much more frequently than before but nothing hurts.",
+      "I wake up several times during the night to use the bathroom now.",
+      "I can barely make it through a meeting without needing to step out.",
+      "I am wondering if I should see a doctor about this."
+    ]
+  },
+  {
+    "id": "dpo2_A10_019",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "desk_sciatica_pain_long_sitting",
+    "user_turns": [
+      "I have sharp pain shooting down my leg when I sit too long at my desk.",
+      "The pain goes all the way down to my foot and it is extremely uncomfortable.",
+      "It started happening a few months ago and it has gotten progressively worse.",
+      "I have tried adjusting my chair but the pain still comes back every day.",
+      "Is there anything specific I can do to relieve this pain?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_082",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "battery_lithium_chemistry_working",
+    "user_turns": [
+      "Why do lithium batteries work better than regular batteries for devices?",
+      "I understand they are rechargeable but what makes the chemistry different?",
+      "How does the energy density compare to older battery technologies?",
+      "What are the limitations that prevent lithium batteries from being even better?",
+      "Are there newer battery technologies on the horizon that might replace them?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_089",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "black_hole_event_horizon_escape",
+    "user_turns": [
+      "What happens at the event horizon of a black hole and can anything escape?",
+      "I have heard that nothing can escape once it crosses that boundary.",
+      "Does time actually slow down near the event horizon from an outside observer?",
+      "What would happen to a person falling into a black hole based on current physics?",
+      "Could there be any way to survive falling into a black hole?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_096",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "ice_melting_point_salt_road",
+    "user_turns": [
+      "Why does salt melt ice and do they use it on roads everywhere?",
+      "I understand it lowers the freezing point but how does that actually work chemically?",
+      "Are there environmental concerns associated with using salt on roads?",
+      "What temperature does salt stop being effective at melting ice?",
+      "Are there better alternatives to salt for melting road ice?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_103",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "human_eye_resolution_megapixel",
+    "user_turns": [
+      "How many megapixels is the human eye equivalent to and can cameras match it?",
+      "I have heard various numbers thrown around but I am not sure what is accurate.",
+      "Is the comparison even valid since our eyes and cameras work in different ways?",
+      "What aspects of vision does a camera still struggle to replicate compared to human eyes?",
+      "Are there camera technologies that come close to matching human vision?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_124",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "career_change_mid_life_anxiety",
+    "user_turns": [
+      "I switched careers and now I stress about everything I used to know.",
+      "I feel behind compared to people who have been in this field for years.",
+      "Every small mistake makes me wonder if I made the wrong decision changing jobs.",
+      "I keep comparing myself to younger colleagues who seem to pick things up so easily.",
+      "How do I stop feeling like I made a mistake?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_131",
+    "opening_type": "C",
+    "target_turns": 10,
+    "stress_intent": "repetition",
+    "problem_domain": "burnout_recovery_tired_work",
+    "opening_seed": "I am completely burned out from work and feel exhausted all the time.",
+    "scenario_note": "User shares work burnout causing persistent tiredness.",
+    "user_turns": [
+      "I am completely burned out from work and feel exhausted all the time.",
+      "Even on weekends I cannot seem to recover from the week before.",
+      "I have lost interest in activities that I used to enjoy outside of work.",
+      "I dread going to work and feel drained before the day even starts.",
+      "I am not sure how much longer I can keep doing this."
+    ]
+  },
+  {
+    "id": "dpo2_A6_003",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "desk_headache_afternoon",
+    "user_turns": [
+      "I keep getting terrible headaches in the afternoons at my desk.",
+      "It really hurts and I cannot focus on my work at all.",
+      "I have tried taking breaks but the pain keeps coming back."
+    ]
+  },
+  {
+    "id": "dpo2_A8_010",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "shoulder_stiff_work_computer",
+    "user_turns": [
+      "My shoulders feel incredibly stiff after working at my computer all day.",
+      "The tension spreads up into my neck and down my arms.",
+      "It gets worse the longer I sit at my desk typing.",
+      "I am not sure what stretches or exercises would actually help."
+    ]
+  },
+  {
+    "id": "dpo2_B6_040",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "computer_history_year",
+    "user_turns": [
+      "What year did the first programmable computer actually come out?",
+      "I have seen different dates mentioned in various sources.",
+      "How did the first computers actually work compared to today?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_059",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "physics_momentum_collision_question",
+    "user_turns": [
+      "What determines momentum in a collision between two objects?",
+      "Does the mass of the objects matter more than their speed?",
+      "I remember something about conservation of momentum but I am not sure how it works.",
+      "Are there different types of collisions that behave differently?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_066",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "immune_system_fight_infection",
+    "user_turns": [
+      "How does the immune system fight infections in the body?",
+      "What are the different parts of the immune system and how do they work?",
+      "I have heard about white blood cells but what exactly do they do?",
+      "Why do some people get sick more easily than others?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_073",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "star_life_cycle_formation",
+    "user_turns": [
+      "How do stars form and what determines their lifespan?",
+      "What happens to a star when it runs out of fuel?",
+      "I have heard about red giants and white dwarfs but I am not sure what those mean.",
+      "Are there stars that live much longer than our sun?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_108",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "new_city_climate_adjust",
+    "user_turns": [
+      "I moved to a new city and I am having trouble adjusting to the climate.",
+      "The humidity here is so different from where I lived before.",
+      "I did not expect the weather to affect how I feel this much."
+    ]
+  },
+  {
+    "id": "dpo2_C8_115",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "friend_group_size_shrink",
+    "user_turns": [
+      "My group of friends has gotten smaller over the years and I do not know why.",
+      "People have moved away or gotten busy with their own lives.",
+      "It seems like fewer people reach out to me now compared to before.",
+      "I am not sure if something changed about me or if this is just normal."
+    ]
+  },
+  {
+    "id": "dpo2_D6_139",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "morning_motivation_loss_no_energy",
+    "user_turns": [
+      "I used to be so motivated but now I just do not care about anything.",
+      "Even things I used to enjoy do not seem to interest me anymore.",
+      "Getting out of bed feels like such a big effort every single day."
+    ]
+  },
+  {
+    "id": "dpo2_D6_146",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "dizzy_lightheaded_randomly",
+    "user_turns": [
+      "I get dizzy and lightheaded at random times during the day.",
+      "It happens even when I am sitting still and not moving around.",
+      "I cannot figure out what triggers these episodes or why they happen."
+    ]
+  },
+  {
+    "id": "dpo2_D6_153",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "appetite_change_no_reason",
+    "user_turns": [
+      "My appetite has changed a lot recently but I have not changed anything.",
+      "Some days I am not hungry at all and other days I eat way more.",
+      "I do not know if this is something I should be worried about or not."
+    ]
+  },
+  {
+    "id": "dpo2_D6_160",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "sweating_excess_nothing_stress",
+    "user_turns": [
+      "I sweat more than usual even when I am not stressed or hot.",
+      "It happens at random times and I cannot predict when it will happen.",
+      "It is embarrassing and I do not understand why this is occurring."
+    ]
+  },
+  {
+    "id": "dpo2_D6_167",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "tinnitus_intermittent_random",
+    "user_turns": [
+      "I have a ringing in my ears that comes and goes randomly.",
+      "It is not constant but when it happens it is really annoying.",
+      "I am not sure what causes this or if there is anything I can do."
+    ]
+  },
+  {
+    "id": "dpo2_D6_174",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "dehydration_feeling_water_not_help",
+    "user_turns": [
+      "I feel dehydrated constantly but drinking water does not help.",
+      "I drink plenty of water every day but still feel dry and parched.",
+      "I am wondering if there might be something else going on."
+    ]
+  },
+  {
+    "id": "dpo2_D8_188",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "body_aches_no_exertion",
+    "user_turns": [
+      "My whole body aches sometimes but I have not done anything strenuous.",
+      "It feels like I have been exercising even though I have not.",
+      "The aching gets worse on some days and I do not know why.",
+      "It is hard to get comfortable and find relief from this pain."
+    ]
+  },
+  {
+    "id": "dpo2_D8_195",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "food_taste_different_sick",
+    "user_turns": [
+      "Food does not taste right anymore but I have not been sick or anything.",
+      "Everything seems bland or has a weird taste I cannot describe.",
+      "I have tried different foods but nothing tastes normal anymore.",
+      "I am starting to worry that something might be wrong with me."
+    ]
+  },
+  {
+    "id": "dpo2_D8_202",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "dry_mouth_water_not_help",
+    "user_turns": [
+      "My mouth is always dry even when I drink plenty of water.",
+      "It happens all day long and it is very uncomfortable.",
+      "I have tried different things but nothing seems to fix it.",
+      "It makes it hard to talk and swallow sometimes."
+    ]
+  },
+  {
+    "id": "dpo2_A10_020",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "afternoon_migraine_screen_strain",
+    "user_turns": [
+      "I get migraines that make me nauseous and sensitive to light after screen work.",
+      "The pain is so bad I have to stop working and lie down in the dark.",
+      "It happens almost every afternoon and it is affecting my job.",
+      "I have tried different settings on my screen but nothing helps.",
+      "I am wondering if there is anything I can do to prevent these migraines."
+    ]
+  },
+  {
+    "id": "dpo2_B10_083",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "soil_erosion_farming_land",
+    "user_turns": [
+      "What causes soil erosion and how does it affect farming?",
+      "I have heard about wind erosion and water erosion but how do they differ?",
+      "Once soil erodes is it gone forever or can it be restored?",
+      "Are there farming practices that help prevent erosion naturally?",
+      "I have seen videos of farmland being destroyed by erosion."
+    ]
+  },
+  {
+    "id": "dpo2_B10_090",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "enzyme_function_biology_chemical",
+    "user_turns": [
+      "How do enzymes work to speed up chemical reactions in the body?",
+      "I know enzymes are involved in digestion but what about other processes?",
+      "What happens if the body does not produce enough of a certain enzyme?",
+      "Are enzymes specific to certain reactions or can they work on multiple things?",
+      "How do enzymes not get used up if they help reactions happen over and over?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_097",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "plastic_recycling_break_down",
+    "user_turns": [
+      "Why does plastic take so long to break down in the environment?",
+      "What actually happens to plastic when it decomposes naturally?",
+      "I have heard that some plastics can be recycled but not all of them.",
+      "What is the difference between biodegradable plastic and regular plastic?",
+      "Why do we even use materials that take hundreds of years to break down?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_104",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "volcano_eruption_impact_weather",
+    "user_turns": [
+      "How do volcanic eruptions affect global climate and weather patterns?",
+      "I know there is something about ash and sulfur in the atmosphere.",
+      "How long do these effects last after an eruption happens?",
+      "Have there been historical eruptions that actually changed the climate?",
+      "Does the size of the eruption matter in terms of climate impact?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_125",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "new_pet_adoption_adjust",
+    "user_turns": [
+      "I adopted a new pet and it has been harder than I expected to adjust.",
+      "The pet does not seem comfortable in the new home yet.",
+      "I am not sure if I am doing the right things to help it settle in.",
+      "My schedule has changed a lot since getting this pet.",
+      "I wonder if I made a mistake adopting or if this is just normal adjustment."
+    ]
+  },
+  {
+    "id": "dpo2_C10_132",
+    "opening_type": "C",
+    "target_turns": 10,
+    "stress_intent": "product_fit",
+    "problem_domain": "seasonal_affective_dark_months",
+    "opening_seed": "The seasons changed and I feel sad and tired during the dark months.",
+    "scenario_note": "User shares seasonal affective pattern causing mood changes.",
+    "user_turns": [
+      "The seasons changed and I feel sad and tired during the dark months.",
+      "I have less energy and I do not want to do anything social anymore.",
+      "It happens every year when there is less sunlight and shorter days.",
+      "I have tried using a light box but I am not sure if it is helping.",
+      "Is there anything else I can do to feel better during these months?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_216",
+    "opening_type": "D",
+    "target_turns": 10,
+    "stress_intent": "product_fit",
+    "problem_domain": "sleep_patterns_restless",
+    "opening_seed": "My sleep has been very restless lately and I wake up tired.",
+    "scenario_note": "User shares trouble sleeping through the night.",
+    "user_turns": [
+      "My sleep has been very restless lately and I wake up tired.",
+      "I wake up several times during the night and cannot fall back asleep.",
+      "Even when I do sleep through the night I still feel exhausted.",
+      "I have tried going to bed at different times but nothing helps.",
+      "I am starting to dread bedtime because I know I will not rest well."
+    ]
+  },
+  {
+    "id": "dpo2_A6_004",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "wrist_pain_typing",
+    "user_turns": [
+      "My wrist hurts when I type for long periods.",
+      "It started as a dull ache but now it hurts even when I rest.",
+      "I think I need to see a doctor about it."
+    ]
+  },
+  {
+    "id": "dpo2_A8_011",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "knee_pain_running",
+    "user_turns": [
+      "My knee aches after I go running, especially when I climb stairs.",
+      "The pain usually goes away after a day of rest.",
+      "I tried switching to low-impact exercises but the ache still returns.",
+      "Should I get an MRI or just rest more between runs?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_027",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "introvert_energy_drain",
+    "user_turns": [
+      "Why do introverts feel drained after social interactions?",
+      "Is it a mental energy thing or something physical?",
+      "How can introverts manage their energy better social settings?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_053",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "earth_core_temperature",
+    "user_turns": [
+      "How hot is the Earth's core in Celsius?",
+      "I have heard it is as hot as the surface of the sun.",
+      "What keeps it so hot after all this time?",
+      "Are there any plans to drill down and study it directly?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_109",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "career_study_motivation",
+    "user_turns": [
+      "I started studying for certifications to advance my career.",
+      "It is hard to stay motivated after work.",
+      "Do you have any tips for staying focused while studying?"
+    ]
+  },
+  {
+    "id": "dpo2_C8_116",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "new_city_isolation",
+    "user_turns": [
+      "I moved to a new city and I do not know anyone here.",
+      "It is hard to meet new people as an adult.",
+      "Where are good places to meet others who are new to the city?",
+      "Any recommendations for finding community groups or events?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_140",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "weight_change_unexplained",
+    "user_turns": [
+      "I seem to be gaining weight even though I have not changed my diet.",
+      "I am not sure what is causing the weight gain.",
+      "Could stress or lack of sleep be affecting my metabolism?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_189",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "morning_body_aches",
+    "user_turns": [
+      "My whole body aches after I wake up in the morning.",
+      "It takes a while for the pain to subside.",
+      "I have a comfortable mattress so I am not sure what is causing it.",
+      "Should I see a doctor or try supplements first?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_078",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "quantum_physics_questions",
+    "user_turns": [
+      "What is the quantum vacuum and does it contain energy?",
+      "I heard physicists debate whether empty space is truly empty.",
+      "How does this relate to the Casimir effect?",
+      "Could we ever harvest this energy someday?",
+      "What are the practical implications of vacuum energy?"
+    ]
+  },
+  {
+    "id": "dpo2_A10_021",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "shoulder_mobility_limited",
+    "user_turns": [
+      "I cannot raise my arm above my shoulder without pain.",
+      "It started as a small twinge but got worse over months.",
+      "I tried stretching and taking anti-inflammatories.",
+      "The pain wakes me up at night when I sleep on my side.",
+      "Is this something that will heal on its own or do I need surgery?"
+    ]
+  },
+  {
+    "id": "dpo2_A6_005",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "elbow_pain_tennis",
+    "user_turns": [
+      "My elbow hurts when I try to lift anything heavy after mousing all day.",
+      "Is this from my desk setup or something more serious?",
+      "What can I do to make the pain go away faster?"
+    ]
+  },
+  {
+    "id": "dpo2_A8_012",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "elbow_pain_tennis",
+    "user_turns": [
+      "I have pain on the outside of my elbow that will not go away after playing tennis on weekends.",
+      "Should I take a break from playing completely?",
+      "What kind of exercises can help strengthen my arm?",
+      "How long before I can play again without hurting it?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_028",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "country_border_curiosity",
+    "user_turns": [
+      "Why do some countries have such weird borders that do not follow natural features?",
+      "Can you give me some examples of unusual borders?",
+      "What is the weirdest border you know of?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_035",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "deep_sea_creatures",
+    "user_turns": [
+      "What is the deepest ocean creature that scientists have discovered?",
+      "How deep can fish actually survive?",
+      "Are there creatures living deeper than that?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_042",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "magnetism_explanation",
+    "user_turns": [
+      "How do magnets work and what creates the magnetic field?",
+      "Why do some magnets only attract certain metals?",
+      "Can magnets lose their power over time?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_049",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "autumn_leaf_colors",
+    "user_turns": [
+      "How do leaves change color in the fall and why do some trees not lose leaves?",
+      "What determines if a tree is deciduous or evergreen?",
+      "Why do some trees turn red and others turn yellow?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_061",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "time_dilation_physics",
+    "user_turns": [
+      "What is time dilation and does it really happen at everyday speeds?",
+      "How fast do you need to go for time dilation to matter?",
+      "Is this proven or just a theory?",
+      "Would astronauts actually age slower in space?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_068",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "genetic_inheritance",
+    "user_turns": [
+      "Why do some genetic traits skip generations before reappearing?",
+      "How does DNA pass down through families?",
+      "Can you predict if a trait will show up in children?",
+      "What determines which genes are dominant?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_075",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "hormone_balance",
+    "user_turns": [
+      "How do hormones affect mood and energy levels in the body?",
+      "What are the main hormones that control energy?",
+      "Can hormone levels change naturally over time?",
+      "How do doctors test hormone levels?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_110",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "sunburn_peeling",
+    "user_turns": [
+      "I spent time in the sun and now my skin is peeling badly.",
+      "Should I put moisturizer on peeling skin?",
+      "How long until my skin looks normal again?"
+    ]
+  },
+  {
+    "id": "dpo2_C8_117",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "new_city_isolation",
+    "user_turns": [
+      "I moved to a new city alone and I feel lonely in my apartment.",
+      "How do I meet new people when I do not know anyone?",
+      "Is it normal to feel this way when moving somewhere new?",
+      "What can I do to make my apartment feel less empty?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_141",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "breathing_difficulty",
+    "user_turns": [
+      "Sometimes I have trouble catching my breath when I take a deep breath.",
+      "Does this mean something is wrong with my lungs?",
+      "Should I be worried about this?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_148",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "hearing_muffled",
+    "user_turns": [
+      "Sometimes things sound muffled to me but my hearing tests are normal.",
+      "What could cause muffled hearing if my ears are fine?",
+      "Should I see a specialist about this?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_155",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "easy_bruising",
+    "user_turns": [
+      "I bruise really easily now but I do not remember bumping into anything.",
+      "Is easy bruising a sign of something serious?",
+      "Should I be concerned about the bruising?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_162",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "sunburn_peeling",
+    "user_turns": [
+      "My eyes look sunken and I look tired even when I am not.",
+      "What causes eyes to look sunken?",
+      "Could this be a health issue?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_169",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "morning_body_aches",
+    "user_turns": [
+      "Bright lights hurt my eyes and give me headaches now.",
+      "Why would lights suddenly bother me more than before?",
+      "Is this something I should see a doctor for?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_176",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "skin_itching_no_rash",
+    "user_turns": [
+      "My skin itches but there is no rash or visible cause.",
+      "What could cause itching without a rash?",
+      "Should I be worried about this?"
+    ]
+  },
+  {
+    "id": "dpo2_A10_015",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "life_stress_situation",
+    "user_turns": [
+      "My eyes are so dry and irritated after staring at screens all day.",
+      "Is this causing permanent damage to my eyes?",
+      "What can I do to help my eyes feel better?",
+      "Should I use eye drops or take breaks?",
+      "How often should I look away from my screen?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_085",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "How do tornadoes actually form and why are some more powerful than others?",
+      "What weather conditions cause tornadoes to form?",
+      "What makes one tornado stronger than another?",
+      "How do scientists predict when a tornado will happen?",
+      "What is the safest place to be during a tornado?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_092",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "What happens during mitosis and how does one cell become two?",
+      "What are the stages of cell division?",
+      "How long does the whole process take?",
+      "What controls when cells divide?",
+      "What happens if cell division goes wrong?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_099",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "Why does baking bread make it rise and become fluffy inside?",
+      "What makes the dough expand in the oven?",
+      "What is yeast and how does it work?",
+      "Why does bread get hard on the outside?",
+      "What causes the holes in bread texture?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_106",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "lipid_panel_after_checkup",
+    "user_turns": [
+      "Why does LDL cholesterol get labeled bad when your body still needs some fat transport?",
+      "My last blood panel showed numbers I did not fully understand.",
+      "The doctor mentioned ratios but I walked out confused about what to change first.",
+      "I cook at home most nights and I am not sure where diet fat actually moves the needle.",
+      "If my goal is mostly prevention, what lifestyle lever usually helps before medication comes up?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_127",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "life_stress_situation",
+    "user_turns": [
+      "My partner and I are going through fertility treatments and it is emotionally exhausting.",
+      "How do people cope with the stress of fertility treatments?",
+      "Is it normal to feel this drained during treatment?",
+      "What support options exist for people going through this?",
+      "How long do fertility treatments usually take?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_134",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "chronic_illness_life",
+    "user_turns": [
+      "I was diagnosed with a chronic condition and adjusting to managing it daily is hard.",
+      "How do people normally adjust to living with a chronic illness?",
+      "What daily changes do I need to make?",
+      "How do I deal with the emotional side of a chronic diagnosis?",
+      "Will it get easier to manage over time?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_080",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "sleep_exhaustion",
+    "user_turns": [
+      "I wake up every morning feeling like I did not sleep at all.",
+      "Why do I feel exhausted even after a full night in bed?",
+      "Could this be a sleep disorder?",
+      "What could cause me to not feel rested after sleeping?",
+      "Should I see a doctor about my sleep?"
+    ]
+  },
+  {
+    "id": "dpo2_A6_006",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "My sinuses are constantly blocked and it makes my head feel heavy in the winter mornings.",
+      "What products work best for sinus congestion in cold weather?",
+      "Are there any natural remedies I could try for this?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_050",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "Why do some volcanoes erupt explosively while others flow gently?",
+      "What factors determine how violent a volcanic eruption will be?",
+      "Can we predict what type of eruption a volcano will have?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_055",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "How does the brain physically store the memories we recall?",
+      "What parts of the brain are involved in memory storage?",
+      "How do long-term and short-term memories differ in the brain?",
+      "Can memories be physically seen or measured in the brain?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_062",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "Why is Mars considered the most likely place for humans to colonize?",
+      "What makes Mars better than the Moon for human settlement?",
+      "What resources on Mars could support human life?",
+      "What are the biggest dangers humans would face on Mars?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_069",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "What did the last common ancestor of humans and apes look like?",
+      "When did humans and apes diverge from their common ancestor?",
+      "What features did this ancestor share with modern humans and apes?",
+      "How do scientists determine what ancient ancestors looked like?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_111",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "morning_body_aches",
+    "user_turns": [
+      "I cut out caffeine and now I have terrible headaches every morning.",
+      "How long do caffeine withdrawal symptoms typically last?",
+      "What can help me manage these caffeine withdrawal headaches?"
+    ]
+  },
+  {
+    "id": "dpo2_C8_118",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "life_stress_situation",
+    "user_turns": [
+      "I take care of my elderly parent and it is getting harder to manage.",
+      "What makes caregiving for elderly parents so challenging?",
+      "What resources exist to help family caregivers manage their load?",
+      "How do I balance my own life with caregiving responsibilities?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_142",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I lose my balance sometimes when I walk and I am not sure why.",
+      "What could cause someone to lose their balance while walking?",
+      "Are there tests doctors can do to check balance issues?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_149",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "sleep_exhaustion",
+    "user_turns": [
+      "I cannot fall asleep at night because my mind races with thoughts.",
+      "What techniques help quiet a racing mind at bedtime?",
+      "Could this be a sign of anxiety or something more serious?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_163",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "My eyes feel like they have pressure in them and everything looks a bit blurry.",
+      "What could cause eye pressure and blurry vision together?",
+      "Should I see an eye doctor about this symptoms?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_170",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "My skin is so sensitive now that certain clothes bother me.",
+      "What could cause sudden increased skin sensitivity to fabrics?",
+      "Are there specific fabrics that are better for sensitive skin?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_177",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I have digestive issues and feel bloated after eating certain foods.",
+      "What foods commonly cause bloating and digestive problems?",
+      "How can I figure out which foods are causing my bloating?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_198",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "My hands and feet are always cold even when the rest of me is warm.",
+      "What causes poor circulation in extremities?",
+      "Could this be a sign of a circulation disorder?",
+      "What tests do doctors use to check blood flow in extremities?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_205",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "The skin on my hands cracks and hurts during winter.",
+      "What causes skin to crack and become painful in cold weather?",
+      "What moisturizers or treatments prevent hand skin cracking?",
+      "Should I see a dermatologist for this skin problem?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_081",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "seasonal_mood_changes",
+    "user_turns": [
+      "Why do allergies get worse during certain seasons each year?",
+      "What seasonal allergens trigger allergy symptoms each year?",
+      "How does weather affect seasonal allergy severity?",
+      "What over-the-counter allergy medications work best?",
+      "Can allergy shots or immunotherapy reduce seasonal allergies?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_086",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "Can scientists actually predict when an earthquake will happen?",
+      "What methods do scientists use to forecast earthquakes?",
+      "How accurate are current earthquake prediction techniques?",
+      "What early warning systems exist for earthquakes?",
+      "Why is earthquake prediction so difficult compared to weather?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_093",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "What is the gut microbiome and why does it matter for health?",
+      "What is the gut microbiome composed of in healthy people?",
+      "How does the gut microbiome affect overall health?",
+      "What damages the gut microbiome and gut health?",
+      "How do you test the gut microbiome?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_107",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "Why do bacteria become resistant to antibiotics over time?",
+      "How do bacteria develop resistance to antibiotics?",
+      "What accelerates antibiotic resistance in bacteria?",
+      "How does antibiotic resistance spread between bacteria?",
+      "What happens when antibiotics no longer work against bacteria?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_128",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "sleep_exhaustion",
+    "user_turns": [
+      "I retired and now I feel like I have lost my sense of purpose.",
+      "Why does retirement often cause loss of purpose feelings?",
+      "How do retirees find new meaning after leaving work?",
+      "What activities give retired people a sense of purpose?",
+      "Is this loss of purpose a normal part of retirement?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_135",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "I started my own business and the uncertainty is really stressful.",
+      "What makes running your own business so psychologically challenging?",
+      "How do successful entrepreneurs handle business uncertainty?",
+      "What strategies reduce stress from business unpredictability?",
+      "Should I seek professional help for business-related stress?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_082",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I get exhausted by early evening and go to bed much earlier than I used to.",
+      "What causes someone to feel extremely tired in early evening?",
+      "Could this early evening fatigue indicate a health problem?",
+      "What medical conditions cause excessive evening tiredness?",
+      "Should I see a doctor about this changed sleep pattern?"
+    ]
+  },
+  {
+    "id": "dpo2_A6_007",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "I have tingling in my fingers that gets worse when I type at my desk.",
+      "The tingling gets worse after about an hour of typing and radiates up my forearm.",
+      "Is there anything I can do to help with this without changing jobs?"
+    ]
+  },
+  {
+    "id": "dpo2_A8_014",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "My heel hurts badly when I take my first steps in the morning.",
+      "The pain eases after I walk around for a few minutes but comes back after sitting.",
+      "It is especially bad when I walk on hard floors like tile or wood.",
+      "Could this be something serious that needs medical attention?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_030",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "How accurate are weather forecasts and why are they sometimes wrong?",
+      "What factors affect the accuracy the most?",
+      "How do meteorologists make predictions for places like mountain towns?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_037",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "How does the brain send signals throughout the body?",
+      "What is the difference between the central and peripheral nervous systems?",
+      "Can the signals be interrupted or slowed down by health conditions?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_044",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "Why is carbon the basis of all organic life on Earth?",
+      "What properties make carbon so special compared to other elements?",
+      "Could carbon-based life exist on other planets?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_051",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "Why does a hot cup of coffee cool down over time?",
+      "Does the material of the cup affect how fast it cools?",
+      "What is the best way to keep coffee hot for longer?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_056",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "What happens when you cross the international date line?",
+      "How does this affect the day of the week and the date?",
+      "Do people living near the date line have to constantly adjust their schedules?",
+      "Can traveling across it cause health effects like jet lag?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_063",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "Why did some species evolve to become extinct while others survived?",
+      "What factors determine whether a species can adapt to changing conditions?",
+      "How do scientists study extinction events that happened millions of years ago?",
+      "Could humans cause a mass extinction similar to previous events in Earth's history?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_070",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "quantum_physics_questions",
+    "user_turns": [
+      "What is the uncertainty principle in quantum mechanics?",
+      "Does this mean we can never know the exact position and speed of a particle?",
+      "How does this affect everyday objects versus tiny particles?",
+      "Does this limit what we can ever know about the universe?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_077",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "How do food webs work in ecosystems and why are they important?",
+      "What happens when one species is removed from a food web?",
+      "How do energy transfers work between different trophic levels?",
+      "How do human activities affect food webs in different environments?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_112",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "I put my phone away for a week and felt anxious without it.",
+      "I kept reaching for it out of habit even though it was not there.",
+      "What are healthy ways to reduce screen time without feeling anxious?"
+    ]
+  },
+  {
+    "id": "dpo2_C8_119",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "life_stress_situation",
+    "user_turns": [
+      "My pet died and I am having a harder time dealing with it than I expected.",
+      "It has been several weeks and I still feel sad every day.",
+      "Is it normal to feel this way months later?",
+      "Should I consider getting another pet or would that be disrespectful to my lost pet?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_143",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I feel like something is stuck in my throat but nothing is there.",
+      "This sensation comes and goes throughout the day.",
+      "Could this be related to my acid reflux or something else?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_150",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "My vision gets blurred sometimes especially when I look at screens.",
+      "The blur goes away after I look away for a few minutes.",
+      "Could this be a sign of something serious wrong with my eyes?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_157",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I get sores in my mouth that take forever to heal.",
+      "The sores keep coming back in different spots.",
+      "Could this be related to my diet or is it a medical condition?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_164",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "My joints are stiff in the morning and it takes an hour to loosen up.",
+      "The stiffness is in my hands and knees mostly.",
+      "Should I be worried about arthritis at my age?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_171",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "skin_itching_no_rash",
+    "user_turns": [
+      "My skin itches at night specifically and keeps me awake.",
+      "I have tried different lotions and creams but nothing works.",
+      "Could this be a sign of a skin condition or something more serious?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_192",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I forget things easily now and it is starting to worry me.",
+      "I lose my keys and wallet almost every day.",
+      "I also forget names of people I just met.",
+      "Is this normal for someone my age or should I be worried about memory loss?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_199",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I have poor circulation in my hands and they always feel cold.",
+      "My fingers sometimes go numb and change color.",
+      "Is poor circulation a sign of a more serious health problem?",
+      "What medical tests would help diagnose the cause of my circulation issues?"
+    ]
+  },
+  {
+    "id": "dpo2_A10_017",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "knee_pain_running",
+    "user_turns": [
+      "My knee swells up after I stand for a long time or go up stairs.",
+      "The swelling goes down after I sit and rest for a while.",
+      "I have tried using ice and taking ibuprofen but it keeps happening.",
+      "Is this something that will get worse if I do not address it now?",
+      "What could be causing this recurring swelling in my knee?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_087",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "What causes the northern lights and where is the best place to see them?",
+      "What colors can the aurora display and why do they vary?",
+      "Is there a specific season or time of year that is best for viewing?",
+      "How far south can the northern lights be seen?",
+      "What should I bring and prepare for a trip to see the aurora borealis?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_094",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "scientific_curiosity",
+    "user_turns": [
+      "How does machine learning work and can computers actually think?",
+      "What is the difference between machine learning and traditional programming?",
+      "Can AI be creative or is it just following patterns?",
+      "What are the limitations of current machine learning systems?",
+      "Will AI eventually surpass human intelligence and what would that mean?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_101",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "How efficient is photosynthesis compared to solar panels?",
+      "What is the maximum efficiency that photosynthesis can achieve?",
+      "Why do plants not convert all sunlight into energy?",
+      "Are there efforts to improve photosynthesis in crops?",
+      "Could engineered photosynthesis ever match or exceed solar panel efficiency?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_108",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "Why is it important to recycle batteries and what happens if we do not?",
+      "What toxic materials are in batteries that harm the environment?",
+      "How long does it take for batteries to decompose in landfills?",
+      "What percentage of batteries are actually recycled?",
+      "What are the safest ways to dispose of batteries at home?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_129",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "life_stress_situation",
+    "user_turns": [
+      "I had a baby and have not slept through the night in months.",
+      "I am exhausted during the day and have trouble focusing at work.",
+      "My partner helps but the baby still wakes up multiple times each night.",
+      "When will I finally get more than a few hours of sleep?",
+      "Is this normal or should I be concerned about my health?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_136",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "product_information_seek",
+    "user_turns": [
+      "My partner and I have been trying to have a child and it has been emotionally difficult.",
+      "We have been trying for over a year without success.",
+      "I feel jealous when I see other couples with babies.",
+      "When should we seek medical help for fertility issues?",
+      "What are the most common causes of infertility and what treatments are available?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_084",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "physical_symptom_concern",
+    "user_turns": [
+      "I wake up with no energy and dragging through my morning routine takes all my strength.",
+      "I go to bed at a reasonable hour but still feel exhausted in the morning.",
+      "Coffee helps a little but the tiredness comes back by noon.",
+      "I exercise sometimes but it does not seem to improve my energy levels.",
+      "Could this be a thyroid problem or something else?"
+    ]
+  },
+  {
+    "id": "dpo2_A8_013",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "office_piriformis_syndrome_sitting",
+    "user_turns": [
+      "I have pain in my buttock that radiates down my leg when I sit at my office all day.",
+      "It started about two months ago and gets worse the longer I sit.",
+      "I tried standing desks but the pain still comes back after a while.",
+      "I am not sure if I should see a doctor or just get a better chair."
+    ]
+  },
+  {
+    "id": "dpo2_B6_025",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "thunderstorm_location_frequency",
+    "user_turns": [
+      "Why do some places have more thunderstorms than others?",
+      "I live in Florida and we get them almost every afternoon in summer.",
+      "Is it just about geography or something else?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_032",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "appendix_function_body",
+    "user_turns": [
+      "Why do we have appendix if it does not serve a function?",
+      "I read it might have been useful for our ancestors.",
+      "Can the body actually function without it?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_039",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "blood_type_inheritance",
+    "user_turns": [
+      "Why do humans have different blood types and what determines them?",
+      "My parents are both O but I am A, which does not make sense.",
+      "Does it affect anything besides transfusions?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_046",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "satellite_orbit_physics",
+    "user_turns": [
+      "Why do satellites stay in orbit and not fall back to Earth?",
+      "They must be moving really fast to not crash.",
+      "What happens if they slow down?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_180",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "lightheaded_random_comes",
+    "user_turns": [
+      "I get lightheaded sometimes but it comes and goes randomly.",
+      "It happens whether I am sitting or standing.",
+      "I have not figured out what triggers it."
+    ]
+  },
+  {
+    "id": "dpo2_D8_181",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "mouth_dry_drink_water_day",
+    "user_turns": [
+      "My mouth is constantly dry even though I drink water all day.",
+      "It is worse in the morning when I wake up.",
+      "I tried different mouthwashes but nothing helps.",
+      "It makes my throat feel scratchy too."
+    ]
+  },
+  {
+    "id": "dpo2_B10_078",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "rust_formation_metal_stop",
+    "user_turns": [
+      "Why does rust form on metal and can it be stopped completely?",
+      "I have an old bike outside and it is getting covered in rust.",
+      "I tried painting over it but it keeps coming back.",
+      "Are there metals that do not rust at all?",
+      "What is the best way to protect metal from rusting?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_120",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "jogging_knees_ache_week",
+    "user_turns": [
+      "I started jogging last week and my knees are already aching.",
+      "I only go about two miles three times a week.",
+      "I warm up before I go but the pain still happens.",
+      "I run on pavement because there are no trails near me.",
+      "Should I keep going or wait until the pain goes away?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_121",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "work_home_miss_commute",
+    "user_turns": [
+      "I started working from home three months ago and miss my commute.",
+      "I thought I would love not having to drive anymore.",
+      "The separation between work and home feels blurry now.",
+      "I used to use that time to listen to podcasts and unwind.",
+      "Has anyone figured out how to create that transition at home?"
+    ]
+  },
+  {
+    "id": "dpo2_C10_122",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "side_sleep_shoulder_hurt",
+    "user_turns": [
+      "I started sleeping on my side and now my shoulder hurts every morning.",
+      "I switched because I read it is better for my back.",
+      "The pillow I use feels like it is in the wrong position.",
+      "I tried a body pillow but it did not help much.",
+      "Should I go back to sleeping on my back or get a different pillow?"
+    ]
+  },
+  {
+    "id": "dpo2_A10_217",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "carpal_tunnel_numbness_typing",
+    "user_turns": [
+      "My fingers feel numb and tingly after typing for extended periods.",
+      "The numbness sometimes wakes me up at night.",
+      "I tried wearing a wrist brace but it does not seem to help.",
+      "The symptoms are getting worse over time.",
+      "Should I see a specialist about this?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_217",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "sleep_deprivation_effects_brain",
+    "user_turns": [
+      "What happens to the brain when someone does not get enough sleep?",
+      "I have been sleeping only four hours a night for a week.",
+      "Does the brain recover after getting normal sleep again?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_218",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "blood_pressure_high_reading",
+    "user_turns": [
+      "What is considered a high blood pressure reading and why is it dangerous?",
+      "My doctor said my blood pressure is slightly elevated.",
+      "Can diet and exercise actually lower blood pressure?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_219",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "antibiotic_resistance_explain",
+    "user_turns": [
+      "Why do antibiotics stop working against some infections?",
+      "I heard that bacteria can become resistant to antibiotics.",
+      "What can I do to prevent antibiotic resistance?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_220",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "meditation_brain_changes",
+    "user_turns": [
+      "Does meditation actually change the brain physically?",
+      "I have heard that meditation can improve focus.",
+      "How long does it take to see benefits from meditation?"
+    ]
+  },
+  {
+    "id": "dpo2_B6_221",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "dna_genetic_information_store",
+    "user_turns": [
+      "How does DNA store genetic information?",
+      "I understand that DNA is like a blueprint.",
+      "How does the body read the information in DNA?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_217",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "gut_brain_connection_science",
+    "user_turns": [
+      "How does the gut communicate with the brain?",
+      "I have heard that gut health affects mental health.",
+      "What is the vagus nerve and how does it work?",
+      "Can improving gut health help with anxiety?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_218",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "aging_process_slow_down",
+    "user_turns": [
+      "What actually causes aging at the cellular level?",
+      "Is there any way to slow down the aging process?",
+      "Do anti-aging supplements or treatments actually work?",
+      "What lifestyle factors affect how quickly we age?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_219",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "vaccine_immunity_duration",
+    "user_turns": [
+      "How long does immunity from vaccines last?",
+      "I have heard that some vaccines need boosters.",
+      "Why do some vaccines provide longer immunity than others?",
+      "Do natural infections provide better immunity than vaccines?"
+    ]
+  },
+  {
+    "id": "dpo2_B8_220",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "quantum_entanglement_explain",
+    "user_turns": [
+      "What is quantum entanglement in simple terms?",
+      "I have heard it called spooky action at a distance.",
+      "How can two particles be connected across vast distances?",
+      "Are there practical applications for quantum entanglement?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_217",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "multiple_sclerosis_cause_treatment",
+    "user_turns": [
+      "What causes multiple sclerosis and can it be cured?",
+      "My cousin was just diagnosed with MS.",
+      "What are the treatment options available?",
+      "How does MS affect daily life over time?",
+      "Is there anything that can slow the progression?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_218",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "CRISPR_gene_editing_explain",
+    "user_turns": [
+      "How does CRISPR gene editing work?",
+      "I have heard it can cure genetic diseases.",
+      "Are there ethical concerns about editing human genes?",
+      "What diseases could potentially be treated with CRISPR?",
+      "Is CRISPR safe for use in humans?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_220",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "circadian_rhythm_sleep_cycle",
+    "user_turns": [
+      "What is the circadian rhythm and how does it control sleep?",
+      "How does light exposure affect our internal clock?",
+      "What happens when our circadian rhythm is out of sync?",
+      "How do shift workers manage their sleep cycles?",
+      "Can supplements help reset circadian rhythm?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_221",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "neuroplasticity_brain_change",
+    "user_turns": [
+      "Can the brain really change and rewire itself?",
+      "I have heard about neuroplasticity but I am not sure how it works.",
+      "At what age does neuroplasticity decrease?",
+      "Can older adults still learn new skills effectively?",
+      "What activities promote neuroplasticity?"
+    ]
+  },
+  {
+    "id": "dpo2_B10_222",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "inflammation_chronic_disease",
+    "user_turns": [
+      "What is chronic inflammation and why is it harmful?",
+      "I have heard inflammation is linked to many diseases.",
+      "What causes chronic inflammation in the body?",
+      "How can I reduce inflammation through diet?",
+      "Are there tests to measure inflammation levels?"
+    ]
+  },
+  {
+    "id": "dpo2_C6_217",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "new_mom_isolated_no_support",
+    "user_turns": [
+      "I am a new mom and feel isolated from my friends.",
+      "Everyone seems busy with their own lives.",
+      "I miss having adult conversations during the day."
+    ]
+  },
+  {
+    "id": "dpo2_C6_218",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "relationship_feeling_grow_apart",
+    "user_turns": [
+      "I feel like my partner and I are growing apart.",
+      "We used to talk about everything but now we barely communicate.",
+      "We have different interests now."
+    ]
+  },
+  {
+    "id": "dpo2_C6_219",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "career_stagnation_no_growth",
+    "user_turns": [
+      "I have been in the same position for years with no promotion.",
+      "I do not see a clear path forward in my company.",
+      "My skills feel stagnant."
+    ]
+  },
+  {
+    "id": "dpo2_C8_217",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "parent_teen_no_communication",
+    "user_turns": [
+      "My teenager will not talk to me about anything.",
+      "We used to be close but now there is a wall between us.",
+      "I do not know what is happening in their life.",
+      "How do I reconnect with my teen?"
+    ]
+  },
+  {
+    "id": "dpo2_C8_218",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "divorce_financial_impact_recovery",
+    "user_turns": [
+      "I am going through a divorce and worried about finances.",
+      "I was dependent on my spouse income.",
+      "I need to learn how to manage money on my own.",
+      "How long does it take to recover financially from divorce?"
+    ]
+  },
+  {
+    "id": "dpo2_C8_219",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "elderly_parent_caregiver_burnout",
+    "user_turns": [
+      "I take care of my elderly parent and feel exhausted.",
+      "I have no time for myself anymore.",
+      "The responsibility is overwhelming.",
+      "How do I get help without feeling guilty?"
+    ]
+  },
+  {
+    "id": "dpo2_D6_217",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "frequent_headache_no_cause",
+    "user_turns": [
+      "I get headaches frequently but I do not know why.",
+      "They happen almost every day now.",
+      "I have tried over-the-counter pain relievers."
+    ]
+  },
+  {
+    "id": "dpo2_D6_218",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "joint_pain_cold_weather",
+    "user_turns": [
+      "My joints ache more when it is cold outside.",
+      "It happens every winter now.",
+      "Is this related to arthritis or something else?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_217",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "chronic_fatigue_no_diagnosis",
+    "user_turns": [
+      "I am exhausted all the time but doctors cannot find anything wrong.",
+      "Blood tests come back normal.",
+      "I have been like this for months.",
+      "Could this be chronic fatigue syndrome?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_218",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "digestive_issues_stress_related",
+    "user_turns": [
+      "My stomach is always upset and I think it is stress related.",
+      "I get stomachaches before meetings at work.",
+      "It affects my appetite and digestion.",
+      "How do I manage stress-related digestive issues?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_219",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "heart_palpitations_anxiety",
+    "user_turns": [
+      "I get heart palpitations when I feel anxious.",
+      "It happens even when I am not in a stressful situation.",
+      "My heart races and I feel like something is wrong.",
+      "Are heart palpitations dangerous?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_220",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "sleep_apnea_snoring_treatment",
+    "user_turns": [
+      "My partner says I snore loudly and sometimes stop breathing at night.",
+      "I wake up feeling tired even after a full night.",
+      "I have heard of sleep apnea but I am not sure what it is.",
+      "Is sleep apnea serious and how is it treated?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_217",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "fibromyalgia_diagnosis_treatment",
+    "user_turns": [
+      "I have widespread pain that doctors cannot explain.",
+      "I am exhausted all the time and my body aches.",
+      "Blood tests come back normal but I feel terrible.",
+      "I think it might be fibromyalgia.",
+      "What treatments actually work for fibromyalgia?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_218",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "autoimmune_disease_diagnosis_journey",
+    "user_turns": [
+      "I think I might have an autoimmune condition.",
+      "I have various symptoms that come and go.",
+      "Doctors keep saying nothing is wrong.",
+      "How do I get a proper diagnosis?",
+      "What should I ask my doctor to test for?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_219",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "chronic_pain_mental_health_impact",
+    "user_turns": [
+      "I have been dealing with chronic pain for years.",
+      "It has affected my mood and relationships.",
+      "I feel depressed because I cannot do the things I used to.",
+      "How do people cope with chronic pain emotionally?",
+      "Is there a connection between pain and mental health?"
+    ]
+  },
+  {
+    "id": "dpo2_D10_220",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "lyme_diseasechronic_symptoms",
+    "user_turns": [
+      "I had a tick bite years ago and now I have strange symptoms.",
+      "I am tired all the time and have joint pain.",
+      "I tested negative for Lyme but I still feel sick.",
+      "Can Lyme disease be chronic?",
+      "What doctors specialize in tick-borne diseases?"
+    ]
+  },
+  {
+    "id": "dpo2_D8_221",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "migraine_triggers_identify",
+    "user_turns": [
+      "I get migraines that seem to come out of nowhere.",
+      "I cannot figure out what triggers them.",
+      "They happen at least twice a week.",
+      "Should I keep a migraine diary to find patterns?"
+    ]
+  }
+]

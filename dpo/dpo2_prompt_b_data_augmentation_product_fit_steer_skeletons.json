@@ -1,0 +1,1806 @@
+[
+  {
+    "id": "dpo2_skel_steer_a_001",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "model-train-layout",
+    "user_turns": [
+      "My thumbs are cracked and bleeding from gluing tiny model train track pieces all weekend.",
+      "I tried PVA for the larger joints but the bond is too weak for the track risers, so I keep going back to the super glue.",
+      "What do you mean by protecting it beforehand?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_002",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "fountain-pen-ink-flow",
+    "user_turns": [
+      "The ink in my fountain pen keeps skipping on every upstroke and it ruins whole pages of writing.",
+      "Now that you mention it, my office is pretty cold in the mornings. Could that really be the whole problem?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_003",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "climbing-finger-pulley",
+    "user_turns": [
+      "I tweaked something in my ring finger on a crimpy bouldering route and now it hurts to grip anything.",
+      "Is there anything I can do at home to help it recover without just sitting around doing nothing?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_004",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "gutter-ice-dam",
+    "user_turns": [
+      "Every winter my gutters turn into a solid block of ice and the meltwater backs up under my roof shingles.",
+      "I tried raking the snow off the lower part of the roof last year but it did not help much.",
+      "So the real fix is something that keeps the gutter area from freezing?",
+      "What kind of solution targets just the eave line?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_005",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "long-session-finger-strain",
+    "user_turns": [
+      "After about three hours of continuous crochet my index finger locks up and I have to pry it straight.",
+      "I have tried taking breaks every hour but as soon as I get back to it the stiffness returns almost immediately.",
+      "So the hook itself might be the problem more than my technique?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_006",
+    "opening_type": "A",
+    "target_turns": 2,
+    "problem_domain": "attic-moisture-buildup",
+    "user_turns": [
+      "There is condensation dripping off the underside of my attic roof boards every cold morning this winter."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_007",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "pottery-wheel-centering",
+    "user_turns": [
+      "Every time I try to throw a bowl on the wheel, the clay wobbles off center and I end up with lopsided walls.",
+      "I have watched tutorials and I think my hand technique is decent, but the wobble starts before I even open the clay.",
+      "Is there a way to make sure it sits perfectly centered every time?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_008",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "hand-plane-chatter",
+    "user_turns": [
+      "My hand plane keeps chattering across the grain and leaving these awful ridges in the board surface.",
+      "I sharpen on a waterstone but I can never seem to hold the angle steady. My results are different every time."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_009",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "rope-splicing-strength",
+    "user_turns": [
+      "The eye splice I made on my sailboat dock line unraveled after just two weeks of tidal pull.",
+      "I followed a tutorial but I was guessing at how deep to push the strands through. Is there a better way to learn this?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_010",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "canoe-portage-weight",
+    "user_turns": [
+      "Portaging my canoe between lakes is destroying my shoulders because the thing weighs a small car.",
+      "Mine is closer to 75 pounds. I flip it over my head and rest the yoke on my shoulders, but after ten minutes the pain is unbearable.",
+      "I tried wrapping towels around the yoke last trip but they just slid off within the first few steps.",
+      "So is there an actual replacement that fits better?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_011",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "urban-foraging-greens",
+    "user_turns": [
+      "How can you tell which wild plants growing in city parks are actually safe to eat?",
+      "Is there a quick way to identify them in the field without carrying a textbook around?",
+      "What kind of reference works best when you are actually standing in front of the plant?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_012",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "bike-frame-alignment",
+    "user_turns": [
+      "What actually causes a steel bicycle frame to go out of alignment over time?",
+      "How would someone check their frame at home without taking it to a shop?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_013",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "honey-harvest-capping",
+    "user_turns": [
+      "Why do bees seal their honeycomb cells with wax before the honey is ready to harvest?",
+      "So the capping is basically the bees telling you the honey is finished?",
+      "Is removing the caps difficult?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_014",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "overnight-train-sleep",
+    "user_turns": [
+      "How do people actually get decent sleep on long-distance overnight trains?",
+      "I will be in a regular seat, so what do people do about the head-falling problem?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_015",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "vinyl-record-static",
+    "user_turns": [
+      "Why do vinyl records pop and crackle even when you keep them really clean?",
+      "So cleaning alone will not fix it if the static keeps pulling new dust in?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_016",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "cold-soak-trail-meals",
+    "user_turns": [
+      "How does cold-soaking work for preparing backpacking meals without a stove?",
+      "Does it actually taste decent compared to cooking?",
+      "What container do people usually soak the food in?",
+      "Is there something designed specifically for cold-soaking?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_017",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "ferment-temp-control",
+    "user_turns": [
+      "What temperature range do lacto-fermented vegetables actually need to develop properly?",
+      "My kitchen temperature swings a lot depending on the season. Could that explain why my batches are so inconsistent?",
+      "Is there a practical way to monitor and stabilize the temperature right at the jar?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_018",
+    "opening_type": "B",
+    "target_turns": 2,
+    "problem_domain": "piano-tuning-drift",
+    "user_turns": [
+      "Why does a piano go out of tune even if nobody plays it for months?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_019",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "letterpress-ink-spread",
+    "user_turns": [
+      "What makes letterpress ink bleed beyond the edges of the type on certain papers?",
+      "I am using a decent cotton stock, so it should not be too absorbent. Could I be putting too much ink on the plate?",
+      "How do I get a thinner, more even ink layer on the type?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_020",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "aquarium-algae-bloom",
+    "user_turns": [
+      "What triggers sudden green-water algae blooms in a freshwater aquarium?",
+      "I already cut back on feeding, but the tank sits near a window and the light is on about twelve hours a day. Could the lighting schedule be the main trigger?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_021",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "fly-tying-precision",
+    "user_turns": [
+      "I have been tying my own flies for trout fishing and the tiny thread wraps are oddly meditative.",
+      "Honestly, my eyes get tired after about an hour, especially with the really small dry flies."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_022",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "classical-guitar-nails",
+    "user_turns": [
+      "I picked up classical guitar a few months ago and shaping my right-hand nails has become its own weird hobby.",
+      "Just a regular emery board from the drugstore. It gets them roughly the right shape but the edges still feel a little ragged when I play.",
+      "I tried sandpaper at different grits but it is hard to hold a consistent angle on something that small.",
+      "Is there something specifically designed for getting that smooth edge on guitar nails?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_023",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "espresso-puck-prep",
+    "user_turns": [
+      "I started pulling espresso shots at home and dialing in the grind has become an obsession I did not expect.",
+      "Mostly consistency. I can get a great shot one morning and then the next three are sour or bitter even though I did not change the grind.",
+      "I just tap the portafilter on the counter a few times before tamping. Is there a better way to get even distribution?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_024",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "bookbinding-spine-glue",
+    "user_turns": [
+      "I have been hand-binding journals from scrap paper and the whole process feels like a lost art coming back to life.",
+      "Mostly coptic stitch, but my folds are never crisp enough and the spine ends up uneven."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_025",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "cast-net-throwing",
+    "user_turns": [
+      "I learned to throw a cast net off the dock last summer and now I catch my own bait every morning.",
+      "That is actually the problem. I snagged it on some oyster shell last week and now there is a fist-sized hole in the mesh. I have been throwing around it but the bait escapes right through.",
+      "Is it worth trying to fix, or should I just buy a whole new net?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_026",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "weaving-loom-warp-tension",
+    "user_turns": [
+      "I set up a floor loom in my spare room and weaving cloth from scratch feels absolutely magical.",
+      "That is where I am struggling. The tension is all over the place and some threads are loose while others are so tight they snap."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_027",
+    "opening_type": "C",
+    "target_turns": 2,
+    "problem_domain": "bonsai-wire-scarring",
+    "user_turns": [
+      "I have been training a juniper bonsai for two years now and watching it take shape week by week is incredible."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_028",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "salt-curing-timing",
+    "user_turns": [
+      "I started salt-curing egg yolks in my kitchen and the texture that comes out after a week is unreal.",
+      "I have been eyeballing it with measuring cups, roughly half and half by volume.",
+      "That might explain why my last batch came out way saltier than the one before. What is the right way to measure it?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_029",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "seed-starting-leggy",
+    "user_turns": [
+      "I have been starting vegetable seeds indoors under a window and it feels like spring arrives in my kitchen weeks early.",
+      "They are growing, but they are all really tall and spindly. The stems are so thin they fall over if I do not prop them up.",
+      "Is there a way to give them more light without a greenhouse setup?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_030",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "duck-decoy-painting",
+    "user_turns": [
+      "I started carving and painting duck decoys this fall and every one teaches me something new about color and form.",
+      "That is exactly my issue. My brushwork looks blocky and I cannot get the soft blending between feather zones."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_031",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "airport-layover-fatigue",
+    "user_turns": [
+      "I had a seven-hour layover last week and by the end my neck felt like it had aged ten years.",
+      "I tried leaning against my bag on the armrest but my neck kinked within twenty minutes.",
+      "I travel for work at least twice a month and layovers are unavoidable. I need something that actually works.",
+      "What would you recommend for someone who needs it to fit in a carry-on without taking up too much space?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_032",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "senior-cat-hydration",
+    "user_turns": [
+      "My older cat barely touches her water bowl anymore and I noticed her fur has gone dull and papery.",
+      "I have tried different bowls and even moved the water away from her food, but she still barely sips."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_033",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "shrimp-tank-cycling",
+    "user_turns": [
+      "I added cherry shrimp to my planted tank last week and three of them have already turned up dead near the filter intake.",
+      "The filter came with a sponge pre-filter but it fell off within a day. Is there something more reliable?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_034",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "sourdough-scoring-blade",
+    "user_turns": [
+      "I baked my third loaf of sourdough this morning and the scoring still looks like a cat attacked it.",
+      "I have been using a sharp kitchen knife. It cuts fine for everything else, but the dough just sticks to it and pulls.",
+      "So a thinner blade would fix the problem?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_035",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "pasta-drying-crack",
+    "user_turns": [
+      "I rolled out fresh fettuccine yesterday and half the noodles cracked apart while drying on the rack.",
+      "I draped them over a coat hanger. Could that be the issue?",
+      "So I need something with a broader surface where the pasta hangs?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_036",
+    "opening_type": "D",
+    "target_turns": 2,
+    "problem_domain": "canning-seal-failure",
+    "user_turns": [
+      "I pulled a batch of tomato sauce jars out of the water bath and four of the twelve lids never sealed."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_037",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "ferret-cage-odor",
+    "user_turns": [
+      "No matter how often I clean my ferret's cage, the whole room smells musky within a day.",
+      "I use fleece blankets in the cage and wash them every few days, but the smell comes right back.",
+      "I tried switching to paper bedding but it created a huge mess and my ferret kicked it everywhere.",
+      "Does something like that actually exist?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_038",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "composting-worm-escape",
+    "user_turns": [
+      "I set up a vermicompost bin on my balcony and the worms keep crawling out onto the floor at night.",
+      "The bin I am using is just a plastic storage tote with holes drilled in the lid. Could the design itself be part of the problem?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_039",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "cider-press-yield",
+    "user_turns": [
+      "I pressed about forty pounds of apples through my cider press last weekend and barely got two gallons of juice.",
+      "I noticed a lot of thick pulp mixed in with the juice at the bottom of the bucket. Could that be where my yield is going?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_a_040",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "ham-radio-ground-loop",
+    "user_turns": [
+      "I finally got my ham radio setup on the air but there is a constant buzz on every frequency that I cannot track down.",
+      "I have the radio, the power supply, and the antenna tuner all plugged into the same power strip. That should be one ground path, right?",
+      "So how do I stop the interference from traveling along those cables?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_001",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "climbing-finger-strain",
+    "user_turns": [
+      "My fingers are so raw from climbing that I can barely grip a coffee cup the next morning.",
+      "Usually three days in a row, then a rest day. By day three the tips are shredded."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_002",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "garden-wrist-ache",
+    "user_turns": [
+      "My wrists throb after every weekend gardening session and the pain lingers into Monday.",
+      "All ground level. I kneel on a mat but I still push off my wrists constantly to stand back up."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_003",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "mech-key-finger-strain",
+    "user_turns": [
+      "After a full day of typing on my mechanical keyboard my pinky joints feel like they are on fire.",
+      "I never thought about it that way. I just assumed mechanical meant better for typing in every way.",
+      "I am not sure of the exact weight. They feel fairly stiff and there is a definite click on each press."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_004",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "chainsaw-kickback-fear",
+    "user_turns": [
+      "I need to take down a dead oak in my yard but every time I pick up my chainsaw I freeze up thinking about kickback.",
+      "Exactly. I know the technique matters but I do not trust my reflexes to catch it once it starts."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_005",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "chimney-draft-problem",
+    "user_turns": [
+      "Cold air pours down my chimney all winter and makes the living room feel like a walk-in cooler.",
+      "I keep the damper closed but it still feels like there is a gap somewhere letting air through."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_006",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "orchid-root-rot",
+    "user_turns": [
+      "Three of my orchids have mushy brown roots and I only just noticed when I went to repot them.",
+      "I water once a week on a schedule. Is that too much?",
+      "They are in standard ceramic pots with one drain hole at the bottom. I thought that was enough."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_007",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "pond-liner-puncture",
+    "user_turns": [
+      "My backyard pond keeps losing water overnight and I suspect a liner puncture somewhere I cannot find.",
+      "I have felt around the edges and checked where the rocks sit but nothing obvious shows up."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_008",
+    "opening_type": "A",
+    "target_turns": 4,
+    "problem_domain": "rain-barrel-overflow",
+    "user_turns": [
+      "Every heavy rain my rain barrel overflows and floods the flower bed right next to the foundation.",
+      "Exactly. I do not want to stop collecting rainwater but I cannot have it pooling against the foundation either."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_009",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "pottery-kiln-cracking",
+    "user_turns": [
+      "Half my pottery pieces crack in the kiln and I am running out of patience with losing entire batches.",
+      "My walls are fairly even but I still get cracks. Could it be the kiln itself heating unevenly?",
+      "I just turn the kiln on and let it go to temperature. I have never adjusted the speed of the ramp."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_010",
+    "opening_type": "A",
+    "target_turns": 2,
+    "problem_domain": "crochet-tension-uneven",
+    "user_turns": [
+      "My crochet stitches come out wildly uneven no matter how carefully I try to keep my yarn tension consistent."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_011",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "kite-surfing-wind",
+    "user_turns": [
+      "How do kite surfers actually read wind conditions before they launch?",
+      "So is there a more reliable way to know if conditions are safe for launching?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_012",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "freshwater-shrimp-cycle",
+    "user_turns": [
+      "What actually happens during the nitrogen cycle in a freshwater shrimp tank?",
+      "How long does it take for those bacteria to establish in a new tank?",
+      "Is there a way to know when the cycle is actually complete and it is safe to add shrimp?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_013",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "leather-edge-burnish",
+    "user_turns": [
+      "Why does burnishing leather edges with a wooden slicker produce a glossy finish?",
+      "Does the shape of the slicker matter, or will any smooth wood surface do the same thing?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_014",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "calligraphy-ink-bleed",
+    "user_turns": [
+      "What causes ink to feather and bleed on certain papers when doing calligraphy?",
+      "So is it mainly about the paper rather than the ink itself?",
+      "What should I look for in a paper that will not bleed?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_015",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "kombucha-scoby-mold",
+    "user_turns": [
+      "How can you tell if the fuzzy stuff growing on a kombucha scoby is mold or just normal yeast?",
+      "What causes mold to show up in the first place if the brew is supposed to be acidic enough to prevent it?",
+      "How do I know if my brew temperature is in the right zone?",
+      "I keep mine on a shelf in the kitchen but I have no idea what the actual temperature is near the jar."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_016",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "homebrew-carbonation",
+    "user_turns": [
+      "Why do some homebrewed beers end up flat while others are dangerously overcarbonated?",
+      "Is there a way to check what is happening inside the bottle before opening it?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_017",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "cheese-aging-humidity",
+    "user_turns": [
+      "How does humidity control actually affect the rind formation when aging cheese at home?",
+      "What range should I be aiming for in my aging space?",
+      "I have a modified fridge I use for aging but I honestly have no idea what the humidity is inside it."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_018",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "telescope-collimation",
+    "user_turns": [
+      "What does it mean to collimate a telescope and why does it matter so much for image quality?",
+      "How does a reflector go out of collimation in the first place?",
+      "How do people check whether their scope needs collimating before a session?",
+      "Is there something that makes the check faster or more obvious?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_019",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "forge-heat-control",
+    "user_turns": [
+      "How did traditional blacksmiths judge the temperature of metal just by looking at its color?",
+      "Is there a modern equivalent that gives you that precision without the years of experience?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_020",
+    "opening_type": "B",
+    "target_turns": 4,
+    "problem_domain": "accordion-bellows-leak",
+    "user_turns": [
+      "What causes an accordion's bellows to start leaking air over time?",
+      "Is that something you can fix at home or does it need a specialist?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_021",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "vacuum-seal-freshness",
+    "user_turns": [
+      "I have been batch cooking on Sundays but by Thursday everything in the fridge tastes like it gave up on life.",
+      "I use regular containers with snap lids. They seem airtight but clearly something is getting in.",
+      "Is there a way to actually remove that trapped air without buying a giant machine?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_022",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "guitar-nail-care",
+    "user_turns": [
+      "Playing classical guitar has become weirdly stressful because my right-hand nails keep splitting mid-practice.",
+      "I file them carefully but one bad split and I lose a week of practice waiting for it to grow back."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_023",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "candle-tunnel-burn",
+    "user_turns": [
+      "I keep buying nice candles and they all end up with a crater down the middle while the edges stay untouched.",
+      "Is there anything I can do once a candle has already started tunneling, or is it a lost cause?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_024",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "film-camera-light-leak",
+    "user_turns": [
+      "I picked up film photography a few months ago and some of my rolls come back with these strange orange streaks I cannot explain.",
+      "Could it be happening during loading or unloading the roll?",
+      "Mine do show up in roughly the same spot on most frames. What part of the camera would cause that?",
+      "So the foam just breaks down from age? Is that fixable?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_025",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "coffee-roast-unevenness",
+    "user_turns": [
+      "I started roasting my own coffee beans at home and the flavor is inconsistent in a way I find maddening.",
+      "I use a pan on the stove and stir constantly but some beans always come out darker than others.",
+      "Is there a setup that actually roasts them evenly without a commercial machine?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_026",
+    "opening_type": "C",
+    "target_turns": 2,
+    "problem_domain": "marquetry-veneer-curl",
+    "user_turns": [
+      "I have been trying marquetry for the first time and the veneer pieces keep curling before I can glue them down."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_027",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "embroidery-hoop-slip",
+    "user_turns": [
+      "Embroidery has become my evening ritual but the fabric keeps slipping loose in my hoop halfway through a piece.",
+      "I retighten the screw constantly but it only holds for a few minutes before it loosens again.",
+      "So it is the material of the hoop itself that is the problem, not how tight I make it?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_028",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "soldering-cold-joint",
+    "user_turns": [
+      "I got into building my own electronics kits and half my solder joints look dull and lumpy instead of shiny.",
+      "I hold the iron on each joint for what feels like a long time but they still come out looking wrong."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_029",
+    "opening_type": "C",
+    "target_turns": 4,
+    "problem_domain": "paddleboard-balance",
+    "user_turns": [
+      "I tried paddleboarding a few times this summer and I spend more time falling in than actually standing up.",
+      "I have been borrowing a friend's board. I have no idea what the width is but it feels very narrow under my feet."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_030",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "terrarium-condensation",
+    "user_turns": [
+      "I built a closed terrarium last month and the glass is so foggy with condensation that I cannot even see the plants inside.",
+      "I sealed it completely because I read that closed terrariums are supposed to be self-sustaining.",
+      "Is opening the lid periodically the only fix, or is there something more controlled?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_031",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "lake-ice-fishing",
+    "user_turns": [
+      "I sat on a bucket on a frozen lake for four hours yesterday and caught exactly nothing, but my back will remember it for weeks.",
+      "The bucket is the worst part honestly. I can handle the cold but the back pain ruins the next few days.",
+      "I thought about bringing a folding chair but those sink into the ice or blow over in the wind."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_032",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "drafty-window-frame",
+    "user_turns": [
+      "I held a candle up to my bedroom window last night and the flame danced sideways from the draft coming through the frame.",
+      "The windows are old single-pane and I cannot afford to replace them right now.",
+      "Right, it is both. Air comes through the frame and the glass itself feels like an ice sheet radiating cold inward."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_033",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "motion-sickness-ferry",
+    "user_turns": [
+      "I took the ferry to the island last weekend and spent the entire crossing staring at the horizon trying not to be sick.",
+      "It barely helped this time. The swells were big and I was miserable the entire ninety minutes.",
+      "I have tried the anti-nausea pills but they make me so drowsy that I am useless for hours afterward.",
+      "Exactly. I need something that does not knock me out. Is there anything non-pharmaceutical that actually works?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_034",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "tiling-wm-fatigue",
+    "user_turns": [
+      "I switched to a tiling window manager on my computer three months ago and my eyes feel more strained than before, not less.",
+      "I work at night mostly and the only light in the room is the screen itself. Could that be making it worse?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_035",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "pasta-extruder-clog",
+    "user_turns": [
+      "I tried making fresh pasta with my extruder attachment last night and the dough kept jamming up every thirty seconds.",
+      "I followed the recipe exactly but it still clogged. Is there something about the die itself that could help?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_036",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "bread-crust-separation",
+    "user_turns": [
+      "I pulled my sourdough out of the oven this morning and the entire crust separated from the crumb like a hollow shell.",
+      "I sprayed water in the oven at the start but it still happened.",
+      "My home oven vents steam almost immediately. Is there a way to trap it around the bread?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_037",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "sausage-casing-snap",
+    "user_turns": [
+      "I tried stuffing sausages for the first time yesterday and the casings kept bursting before I could twist them off.",
+      "I was using a funnel and pushing the meat through with my hand. It was almost impossible to control the speed."
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_038",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "whittling-blade-control",
+    "user_turns": [
+      "I started whittling a walking stick from a branch and sliced right into my thumb on the third cut.",
+      "I was gripping the stick with my left hand and cutting toward it. The blade just jumped right into my thumb.",
+      "I want to keep learning but I am nervous about cutting myself again. Is there a way to protect my hand while I build the skill?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_039",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "screen-print-bleed",
+    "user_turns": [
+      "I tried screen printing my own t-shirts last weekend and the ink bled under the stencil on every single one.",
+      "I was holding the screen down with one hand and pulling the squeegee with the other. It was hard to keep everything steady.",
+      "So the problem is that I cannot keep the screen locked flat against the shirt while printing?",
+      "Is there a setup that holds the screen in place so I only have to focus on the squeegee stroke?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_steer_b_040",
+    "opening_type": "D",
+    "target_turns": 4,
+    "problem_domain": "letterpress-ink-coverage",
+    "user_turns": [
+      "I just ran a batch of wedding invitations on my letterpress and the ink coverage is patchy on every single card.",
+      "I am using the rollers that came with the press but they are old and I noticed the surface feels uneven in spots."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_001",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "tent-condensation-fix",
+    "user_turns": [
+      "The inside walls of my tent are soaking wet every morning even when it doesn't rain, and my sleeping bag ends up damp.",
+      "It is a single-wall tent. I keep everything sealed tight at night because of bugs.",
+      "Usually down into the low forties at night. The temperature difference between inside and outside makes the dripping pretty bad.",
+      "I tried once but mosquitoes got in within minutes. I need air moving through without giving bugs a way in."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_002",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "boot-waterproofing-wax",
+    "user_turns": [
+      "My leather work boots let water in through the seams after about an hour in wet grass, and the leather itself is starting to crack.",
+      "About two years of daily wear for outdoor work.",
+      "I used a waterproofing spray once when they were new, but I never reapplied it.",
+      "Wet grass, mud, and sometimes standing water around irrigation lines for a couple of hours in the morning.",
+      "That is exactly what worries me. I would rather save these boots than replace them if I can."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_003",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "pet-nail-grinder",
+    "user_turns": [
+      "My small dog's nails click on the floor and she flinches every time I try to use clippers because I quicked her once.",
+      "She is a little nervous about loud things, but she tolerates the hair dryer on low if I ease into it.",
+      "Yes, anything that avoids that sudden clip would be a huge relief for both of us."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_004",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "rug-corner-gripper",
+    "user_turns": [
+      "The corners of my area rug keep curling up and my toddler trips on them at least once a day.",
+      "Hardwood floors. The rug itself stays in place fine, it is just the corners that flip up.",
+      "I tried stacking books on the corners for a week and they curled right back up within a day of removing them.",
+      "Pretty thin, almost like a flatweave. The corners are light enough that even a slight breeze from the door makes them flip."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_005",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "curtain-rod-weight",
+    "user_turns": [
+      "My curtain rod keeps sagging in the middle under the weight of my heavy blackout panels and the brackets are pulling away from the drywall.",
+      "About eight feet. It is a big living room window.",
+      "It is a hollow decorative rod, the kind you buy in a box set with finials. Looked nice when I put it up but it was not built for this.",
+      "Plastic anchors. The studs do not line up with where the brackets need to go.",
+      "I am willing to do the work to fix it properly. I just want to hang these panels once and not worry about it again."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_006",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "drill-bit-depth",
+    "user_turns": [
+      "I keep drilling too deep when I mount things on the wall and the anchors just spin freely in oversized holes.",
+      "Totally eyeballing it. I try to go slow but I always end up pushing through further than I meant to.",
+      "Standard drywall anchors, the plastic ribbed kind. They work fine when I accidentally get the depth right, but most of the time the hole ends up too deep."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_007",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "whetstone-grit-grade",
+    "user_turns": [
+      "My kitchen knives are sharp enough to cut but they tear through tomato skin instead of slicing cleanly, and I already own a honing steel.",
+      "I have a pull-through sharpener that I run them through every few weeks.",
+      "Never. I always assumed they were for professional chefs or knife collectors.",
+      "So I need the polishing step that my pull-through sharpener skips. That makes sense."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_008",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "step-stool-height",
+    "user_turns": [
+      "I can barely reach the top shelf in my kitchen and I keep standing on my tiptoes on a wobbly chair to grab things.",
+      "Maybe a foot or so. I can touch the shelf edge on tiptoes, I just cannot see into it or pull things out safely.",
+      "Not really. Counter space is tight and floor space is worse. Whatever I get needs to tuck away somewhere.",
+      "At least once a day. I keep the spices and baking supplies up there because there is nowhere else for them.",
+      "Exactly. I do not want to wrestle with something heavy or complicated every time I need paprika."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_009",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "french-press-mesh",
+    "user_turns": [
+      "There is always a thick layer of gritty sludge at the bottom of my coffee when I use my press pot, and it ruins the last third of every cup.",
+      "I have had it about three years and it still has the original screen. The mesh looks a little stretched in one spot.",
+      "I would rather keep using my press pot. I like the flavor it produces, just not the grit."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_010",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "tire-pressure-gauge",
+    "user_turns": [
+      "My car pulls to the right on the highway and my tires wear unevenly, but the mechanic says the alignment is fine.",
+      "Honestly, I just kick them and eyeball whether they look low. I do not own a gauge.",
+      "That would explain why it gets worse on longer highway drives. The pull is mild around town but really noticeable at speed.",
+      "A few months, maybe. It got worse gradually so I did not notice right away."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_011",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "yarn-tension-guide",
+    "user_turns": [
+      "Why does yarn tension matter so much in knitting, and how do experienced knitters keep it consistent across a whole project?",
+      "I have definitely experienced that. My gauge swatch looks fine but the actual sweater comes out a different size. Is that purely a tension problem?",
+      "That makes sense. I notice my evening knitting is looser than my morning knitting. Is there a technique fix for that?",
+      "I have heard of yarn bowls for keeping the ball from tangling. Would that help with tension?",
+      "So I need something that works right at my fingertips, not something that holds the yarn ball."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_012",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "bike-chain-lube",
+    "user_turns": [
+      "What actually causes a bicycle chain to get noisy and stiff after riding in the rain a few times?",
+      "So the noise is basically metal on metal because the lube is gone. Does the type of lubricant matter for how well it survives rain?",
+      "I ride in a pretty wet climate. It rains a few times a week here and I commute year-round. What should I look for?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_013",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "paint-roller-nap",
+    "user_turns": [
+      "Why do some painted walls end up with that bumpy orange-peel texture even when the surface underneath was smooth?",
+      "So even if the wall is perfectly smooth, the roller can add texture. I never thought about that.",
+      "I just finished painting a bedroom and the walls look bumpy even though they were smooth drywall. What nap length was I probably using?",
+      "What should I have used instead for a smooth finish on smooth drywall?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_014",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "chisel-bevel-angle",
+    "user_turns": [
+      "How do woodworkers decide which chisel to grab for paring versus chopping, and is it really about the steel or something else?",
+      "So the shape of the chisel determines how it is used more than what metal it is made from?",
+      "I have been trying to pare tenon cheeks by hand with a chisel from a boxed set, and it feels like I am fighting the wood instead of slicing through it. Could the chisel geometry be the problem?",
+      "What bevel angle would make paring feel easier?",
+      "I had no idea the angle difference was that significant. Is there a specific type I should look for?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_015",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "mortar-pestle-texture",
+    "user_turns": [
+      "What is it about a stone mortar and pestle that makes curry pastes taste different from ones made in a blender?",
+      "So the texture of the mortar surface matters because it helps tear the ingredients apart rather than just crushing them flat?",
+      "That explains why the one I tried at a friend's house worked so well. It felt gritty on the inside. What material should I look for?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_016",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "colander-hole-size",
+    "user_turns": [
+      "Why does orzo always slip through my colander when I drain it, but regular pasta stays put perfectly?",
+      "I never looked at the hole size that way. My colander has those round punched holes that are probably a quarter inch across.",
+      "It is the same problem with couscous and small shell pasta. Anything tiny just falls right through.",
+      "So I need something with much smaller holes. Does that exist as a colander, or am I looking at something else entirely?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_017",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "fish-spatula-flex",
+    "user_turns": [
+      "Why do restaurant cooks always seem to flip fish fillets in one clean motion while mine fall apart every single time?",
+      "Different how? I use the same spatula I flip burgers with.",
+      "I never thought about the edge thickness. I always assumed I was just using too much force or flipping too early.",
+      "The flexibility part surprises me. I would have thought a rigid spatula gives you more control.",
+      "That makes a lot of sense. What should I look for specifically?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_018",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "roasting-pan-depth",
+    "user_turns": [
+      "How do people get that crispy golden skin on a whole roast chicken when mine always comes out pale and steamed-looking?",
+      "A big deep roasting pan with a lid. I thought the lid would keep the heat even.",
+      "So I basically need the opposite of what I have been doing. Open air and lower sides?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_019",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "wok-flat-bottom",
+    "user_turns": [
+      "Why do stir-fry recipes always talk about wok hei but my food just sort of steams and never gets that charred flavor?",
+      "A regular electric coil stove. Nothing fancy.",
+      "A round-bottom wok that came with a metal ring to sit on the burner.",
+      "So the wok shape does not match my stove. Is there a way to make it work?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_020",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "dutch-oven-oval",
+    "user_turns": [
+      "What makes braised short ribs so much better at restaurants than when I try the same recipe in my big stockpot at home?",
+      "A big stainless steel stockpot. I figured it was fine since it holds enough liquid for the ribs.",
+      "So the ribs on the bottom of my pot are probably getting more heat than the ones on top?",
+      "I do notice I have to add liquid halfway through because it cooks down. I assumed that was normal.",
+      "What kind of pot do restaurants use for braising?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_021",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "window-draft-seal",
+    "user_turns": [
+      "There is a persistent chill near my windows in winter that space heaters do not really solve, and I think the cold is radiating off the glass itself.",
+      "I held a tissue around the edges and it did not flutter at all. The frame seems tight. It really does feel like the cold comes from the glass.",
+      "Is there a way to do that without replacing the windows? These are old single-pane windows in a rental and I cannot make permanent changes."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_022",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "closet-moth-trap",
+    "user_turns": [
+      "Something has been slowly eating holes in my wool sweaters and I only notice when I pull them out for the season.",
+      "I found a few tiny beige moths flying near the closet light last week. Are those the culprits?",
+      "So I need to stop the breeding cycle, not just deter them from landing on my clothes?",
+      "What actually catches them? I cannot just spray insecticide in a closet full of clothes."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_023",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "sewing-seam-ripper",
+    "user_turns": [
+      "Every time I make a sewing mistake I end up mangling the fabric trying to pull out the stitches with scissors.",
+      "Probably once or twice per project. I am still learning and I mess up seam placement or topstitching lines pretty regularly.",
+      "Mostly cotton quilting fabric. Nothing too delicate, but I still manage to nick it with the scissors when I am trying to pick out stitches.",
+      "I have seen electric stitch removers online. Are those worth it for someone at my level?",
+      "So what is the right tool for occasional corrections on home sewing projects?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_024",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "candle-wick-trimmer",
+    "user_turns": [
+      "My candles always tunnel down the center and leave a thick ring of wasted wax around the edges no matter how long I burn them.",
+      "It gets really tall and flickers a lot after burning for a while. There is a big mushroom of carbon at the top of the wick.",
+      "I have never trimmed a wick. How short should it be, and is there a specific tool for it?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_025",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "gutter-leaf-guard",
+    "user_turns": [
+      "I spend every fall weekend up on a ladder scooping wet leaves out of my rain gutters and I am getting tired of the whole routine.",
+      "Two big oaks in the front yard and a maple on the side. They drop a lot of leaves but it is not like the house is in a forest.",
+      "Maybe sixty feet total along the front and one side. It is a single-story ranch house.",
+      "I have seen ads for gutter guard systems that claim you never clean your gutters again. Are those worth the cost?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_026",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "soap-dish-drain",
+    "user_turns": [
+      "My bar soap keeps dissolving into a gooey puddle on the counter between uses and I go through bars twice as fast as I should.",
+      "A flat ceramic dish. It looks nice but there is always a pool of water sitting in it after every shower.",
+      "I tried tipping the water out after each use but I always forget, and the soap still ends up mushy by the next morning.",
+      "Like a dish with holes in it?",
+      "What kind of dish actually does that well?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_027",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "camping-pillow-pack",
+    "user_turns": [
+      "Sleeping in a tent always leaves my neck stiff and sore, and stuffing a jacket under my head never quite works.",
+      "Mostly on my side. My neck is fine on my pillow at home, but in a tent I wake up feeling like I slept wrong every single night.",
+      "I want something compact enough to fit in my pack without taking up much space. Is that realistic?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_028",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "rain-boot-liner",
+    "user_turns": [
+      "My rain boots keep my feet dry from outside water but by midday they feel swampy from sweat on the inside.",
+      "That explains the squelching sound by afternoon. It feels like I am walking in damp socks.",
+      "Just my normal everyday socks, yes.",
+      "Is there a way to add something inside the boot that manages the sweat while I am wearing them?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_029",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "bottle-brush-reach",
+    "user_turns": [
+      "No matter how hard I scrub, my narrow-neck water bottles still have a film at the bottom that I can see but cannot reach.",
+      "I pour in hot soapy water, shake it around, and try to get a sponge in through the opening. The sponge barely fits.",
+      "I tried soaking with vinegar overnight and it helped a little, but the film came back within a week.",
+      "The bottle does have a textured interior near the bottom. Some kind of grip pattern molded into the plastic.",
+      "So I need a brush that can get through the neck and actually reach and scrub the bottom. Does something like that exist?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_030",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "trivet-heat-limit",
+    "user_turns": [
+      "I keep leaving scorch marks on my wooden dining table from hot pots, and the cork pads I use do not seem thick enough.",
+      "That is exactly what is happening. The cork itself has dark spots on it now too, so it is clearly not handling the heat well.",
+      "What material actually handles that level of heat?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_031",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "hose-nozzle-spray",
+    "user_turns": [
+      "I was watering my new seedlings yesterday and the hose blasted them right out of the soil, even on the gentlest setting.",
+      "A trigger nozzle with a dial for different spray patterns. Even the mist setting comes out with too much force at close range.",
+      "That makes sense. The mist looks gentle but it still flattens the seedlings when I point it at them. Is there a way to water gently from above?",
+      "Like a watering can but attached to a hose so I do not have to keep refilling it?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_032",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "fence-post-anchor",
+    "user_turns": [
+      "I tried to set a fence post in my backyard this weekend and spent four hours digging a hole that kept filling with water and collapsing.",
+      "Just one. A single post rotted at the base and the whole fence panel is leaning.",
+      "I would love to avoid digging altogether. Four hours of shoveling in mud was miserable.",
+      "That sounds almost too easy. Does it hold as well as a concrete footing?",
+      "I just want the fence panel to stop leaning. What exactly do I need?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_033",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "iron-water-spot",
+    "user_turns": [
+      "I ironed my white dress shirt this morning and it came out with brown splotchy stains that were not there before I started.",
+      "About a year. I have always just filled it with tap water from the sink.",
+      "Is there a way to prevent the buildup from happening in the first place?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_034",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "broom-dustpan-set",
+    "user_turns": [
+      "I just swept the kitchen floor and there is still a thin line of dust and crumbs that refuses to go into the dustpan no matter how many passes I make.",
+      "I have tried pressing the dustpan harder against the floor and sweeping at different angles. Nothing works.",
+      "So the problem is the dustpan, not my technique?",
+      "What kind of dustpan does that?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_035",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "pet-water-fountain",
+    "user_turns": [
+      "I refilled my cat's water bowl this morning and she just stared at it, walked to the bathroom, and drank from the dripping faucet instead.",
+      "She has always been more interested in the faucet, but lately she barely touches her bowl at all.",
+      "I moved it closer to her food, tried a ceramic bowl instead of plastic, and even added ice cubes. Nothing worked.",
+      "So what she really wants is water that moves.",
+      "Can I give her flowing water without leaving the faucet running all day?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_036",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "pie-weight-fill",
+    "user_turns": [
+      "I blind-baked a pie crust yesterday and the bottom puffed up into a giant bubble even though I poked fork holes everywhere.",
+      "I tried laying a sheet of foil over the crust, but the dough still pushed up underneath it.",
+      "What do people usually use for that?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_037",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "rolling-pin-taper",
+    "user_turns": [
+      "I rolled out pie dough last night and one side was paper thin while the other was still a quarter inch thick, no matter how carefully I worked.",
+      "A wooden one with handles on each end and ball bearings inside. It rolls very smoothly.",
+      "I never thought of it that way. The pin feels effortless, which I assumed was a good thing.",
+      "What kind of rolling pin gives you that feedback?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_038",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "pastry-brush-silicone",
+    "user_turns": [
+      "I was glazing pastries with egg wash this morning and the brush kept shedding bristles right onto the dough, ruining the finish.",
+      "I bought it about six months ago. It started shedding after the first few uses.",
+      "Is there a way to get one that lasts longer? I am willing to spend more if it means no shedding.",
+      "So the material itself is the problem, not the quality of the brush.",
+      "What material would that be?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_039",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "peeler-julienne-blade",
+    "user_turns": [
+      "I spent twenty minutes trying to cut carrots into thin matchstick strips for a salad last night and they all came out uneven and chunky.",
+      "A chef's knife. I tried slicing thin planks and then cutting those into strips, but they ended up all different sizes.",
+      "I would love something that just gives me even strips without all the knife work. What should I look for?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_a_040",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "steamer-basket-fit",
+    "user_turns": [
+      "I tried to steam broccoli in a regular pot last night by balancing a plate over boiling water and nearly burned myself pulling it out.",
+      "A few times a week, usually just one vegetable as a side dish for dinner.",
+      "A regular medium saucepan. It is big enough for the amount of broccoli I was cooking.",
+      "I do not want another bulky gadget taking up cabinet space. Is there something compact that works with the pots I already have?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_001",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "aquarium-flow-pump",
+    "user_turns": [
+      "The fish in my tank keep getting pushed around by the current and they look stressed out.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_002",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "notebook-binding-repair",
+    "user_turns": [
+      "The cover on my favorite sketchbook is peeling away from the spine after a year of daily use.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_003",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "candle-soot-ceiling",
+    "user_turns": [
+      "Every pillar candle I burn leaves black soot marks on the ceiling directly above it.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_004",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "garage-oil-stain",
+    "user_turns": [
+      "Oil stains on my concrete garage floor have soaked in so deep that hosing it down does absolutely nothing.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Go ahead, I am all ears. I just want to get this sorted out.",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_005",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "saw-blade-drift",
+    "user_turns": [
+      "My hand saw drifts off the cut line every time I try to rip a straight board.",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Go ahead, I am all ears. I just want to get this sorted out."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_006",
+    "opening_type": "A",
+    "target_turns": 8,
+    "problem_domain": "patio-weed-cracks",
+    "user_turns": [
+      "Weeds keep sprouting through the cracks between my patio pavers every couple of weeks.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "That would be great. What are you thinking?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_007",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "shower-grout-stain",
+    "user_turns": [
+      "The grout lines between my shower tiles keep turning black no matter how often I scrub them.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "That would be great. What are you thinking?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_008",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "seasoning-repair",
+    "user_turns": [
+      "My cast iron skillet has developed patches where eggs stick horribly even though the rest of the surface is fine.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_009",
+    "opening_type": "A",
+    "target_turns": 6,
+    "problem_domain": "rain-gutter-overflow",
+    "user_turns": [
+      "Water pours right over the edge of my rain gutters during heavy storms instead of flowing to the downspout.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_010",
+    "opening_type": "A",
+    "target_turns": 10,
+    "problem_domain": "camp-stove-simmer",
+    "user_turns": [
+      "My portable camp stove only runs at full blast and I keep scorching the food I try to cook on it.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this.",
+      "Go ahead, I am all ears. I just want to get this sorted out.",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_011",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "jar-ferment-lid",
+    "user_turns": [
+      "How do fermentation lids actually keep oxygen out while letting gas escape?",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Sure, I am open to suggestions. What do you think would actually work?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_012",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "telescope-tracking",
+    "user_turns": [
+      "How does a telescope mount compensate for the rotation of the earth during long exposures?",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "That would be great. What are you thinking?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_013",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "roller-orange-peel",
+    "user_turns": [
+      "Why do some paint rollers leave orange peel texture on walls even with good technique?",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Go ahead, I am all ears. I just want to get this sorted out."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_014",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "vinyl-plank-gap",
+    "user_turns": [
+      "What causes vinyl plank flooring to separate at the seams after a few months?",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this.",
+      "Sure, I am open to suggestions. What do you think would actually work?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_015",
+    "opening_type": "B",
+    "target_turns": 6,
+    "problem_domain": "sourdough-hydration-level",
+    "user_turns": [
+      "Why does my sourdough dough spread flat on the counter instead of holding its shape before baking?",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_016",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "bobbin-tension-set",
+    "user_turns": [
+      "What controls thread tension on a home sewing machine and why does it keep producing loose stitches?",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "Go ahead, I am all ears. I just want to get this sorted out.",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_017",
+    "opening_type": "B",
+    "target_turns": 10,
+    "problem_domain": "acoustic-echo-room",
+    "user_turns": [
+      "Why does my home studio recording always have a tinny echo in the background?",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "That would be great. What are you thinking?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_018",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "compost-moisture-ratio",
+    "user_turns": [
+      "Why does my backyard compost bin smell like ammonia instead of earthy soil?",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "Sure, I am open to suggestions. What do you think would actually work?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_019",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "concrete-wall-anchor",
+    "user_turns": [
+      "What kind of drill bit actually works for putting a few anchors into a concrete wall?",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "That would be great. What are you thinking?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_020",
+    "opening_type": "B",
+    "target_turns": 8,
+    "problem_domain": "knife-angle-clamp",
+    "user_turns": [
+      "How do you maintain a consistent angle when sharpening a blade on a whetstone?",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this.",
+      "That would be great. What are you thinking?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_021",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "balcony-wind-privacy",
+    "user_turns": [
+      "Sitting on my balcony used to feel like a retreat but lately every gust makes it uncomfortable and exposed.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "That would be great. What are you thinking?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_022",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "turntable-static",
+    "user_turns": [
+      "Something about pulling a record out of its sleeve and hearing it crackle before the needle even drops bothers me more than it should.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "Go ahead, I am all ears. I just want to get this sorted out.",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_023",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "herb-drying-method",
+    "user_turns": [
+      "I have been growing way more herbs than I can use fresh and it feels wasteful just watching them wilt.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this.",
+      "Sure, I am open to suggestions. What do you think would actually work?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_024",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "fountain-pen-skip",
+    "user_turns": [
+      "There is something about the way ink lays down from my pen that feels inconsistent and it takes the joy out of writing.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Go ahead, I am all ears. I just want to get this sorted out.",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_025",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "firepit-smoke-direction",
+    "user_turns": [
+      "Every time I sit around the fire pit the smoke finds me no matter where I move my chair.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "Go ahead, I am all ears. I just want to get this sorted out."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_026",
+    "opening_type": "C",
+    "target_turns": 8,
+    "problem_domain": "bike-spoke-tension",
+    "user_turns": [
+      "My rear wheel has developed a wobble and the ride feels off in a way I cannot ignore anymore.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Go ahead, I am all ears. I just want to get this sorted out."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_027",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "moth-pantry-trap",
+    "user_turns": [
+      "Opening the pantry lately fills me with dread because tiny moths flutter out every single time.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this.",
+      "Sure, I am open to suggestions. What do you think would actually work?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_028",
+    "opening_type": "C",
+    "target_turns": 10,
+    "problem_domain": "terrace-drainage-slope",
+    "user_turns": [
+      "After any rain my terrace turns into a shallow pond and takes hours to dry out.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "That would be great. What are you thinking?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_029",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "picture-rail-hanging",
+    "user_turns": [
+      "I keep wanting to rearrange the art on my walls but the thought of more holes stops me every time.",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_030",
+    "opening_type": "C",
+    "target_turns": 6,
+    "problem_domain": "cold-brew-bitterness",
+    "user_turns": [
+      "I switched to making iced coffee at home and no matter what I try the flavor comes out harsh and over-extracted.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_031",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "clay-pot-cracking",
+    "user_turns": [
+      "I pulled my favorite clay planter inside for winter and a crack appeared right through the base overnight.",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Sure, I am open to suggestions. What do you think would actually work?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_032",
+    "opening_type": "D",
+    "target_turns": 10,
+    "problem_domain": "attic-condensation-drip",
+    "user_turns": [
+      "I went into my attic this morning and there were water droplets all over the underside of the roof sheathing.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Sure, I am open to suggestions. What do you think would actually work?",
+      "Longer-term for sure. I do not want to deal with this again in a few weeks."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_033",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "spice-label-jar",
+    "user_turns": [
+      "I just reorganized all my spices into matching jars and now I cannot tell cumin from coriander without opening every single one.",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_034",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "laptop-hinge-angle",
+    "user_turns": [
+      "I set up a second screen at my desk and now I keep craning my neck down to look at the laptop below it.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_035",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "fence-post-lean",
+    "user_turns": [
+      "One of the fence posts in my yard started leaning after the last big storm and the whole section sags now.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_036",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "drawer-mat-grip",
+    "user_turns": [
+      "I opened my kitchen drawer and every utensil had slid to the back because the liner bunched up again.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "I think I have a decent idea of what is going wrong. I just need something practical that fits my situation without going overboard.",
+      "Go ahead, I am all ears. I just want to get this sorted out."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_037",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "projector-tilt-fix",
+    "user_turns": [
+      "I mounted a projector on the ceiling for movie nights and the image comes out wider at the bottom than the top.",
+      "Yeah, it happens pretty consistently. I have looked into a few options but I am not sure what would actually work.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "Sure, I am open to suggestions. What do you think would actually work?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_038",
+    "opening_type": "D",
+    "target_turns": 8,
+    "problem_domain": "tuckpoint-mortar",
+    "user_turns": [
+      "I noticed chunks of mortar crumbling out from between the bricks on the front of my house.",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it.",
+      "That would be great. What are you thinking?"
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_039",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "fountain-algae-fix",
+    "user_turns": [
+      "The birdbath in my garden turned green with algae within a week of filling it and now the birds avoid it.",
+      "It is a recurring thing at this point. I just want something that will actually solve it for good.",
+      "Honestly I am not totally sure, but I know the current approach is not cutting it. I would rather get something purpose-built for this."
+    ]
+  },
+  {
+    "id": "dpo2_skel_fit_b_040",
+    "opening_type": "D",
+    "target_turns": 6,
+    "problem_domain": "stair-tread-slip",
+    "user_turns": [
+      "I slipped on my hardwood staircase in socks last night and grabbed the railing just in time.",
+      "It has been going on for a while now. I have tried a couple of things but nothing really sticks.",
+      "I have narrowed it down a bit. I think the main issue is pretty specific and I just need the right tool for it."
+    ]
+  }
+]

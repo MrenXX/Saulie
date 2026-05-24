@@ -1,0 +1,39 @@
+{
+  "row_count": 522,
+  "row_count_matches_v3": true,
+  "ids_match_v3_order": true,
+  "ids_match_v2_order": true,
+  "dpo_source_counts": {
+    "prompt_a": 330,
+    "prompt_b_repaired": 92,
+    "prompt_b_exp500": 100
+  },
+  "category_counts": {
+    "style": 220,
+    "steering": 121,
+    "product_fit": 181
+  },
+  "manifest_entries": 49,
+  "changed_row_count": 32,
+  "manifest_entries_by_source": {
+    "prompt_a": 36,
+    "prompt_b_repaired": 5,
+    "prompt_b_exp500": 8
+  },
+  "manifest_entries_by_change_type": {
+    "malformed_product_intro_capitalization": 35,
+    "prompt_a_rejected_exclusion_repair": 1,
+    "fertility_timing_correction": 1,
+    "chosen_product_signal_repair": 4,
+    "chosen_style_and_product_signal_repair": 8
+  },
+  "prompt_b_source_branch_mismatches_vs_v3": [],
+  "prompt_b_source_branch_mismatches_vs_v2": [],
+  "manifest_prompt_b_source_branch_entries": [],
+  "remaining_malformed_needles": [],
+  "chosen_scaffold_hits": [],
+  "em_dash_hits": [],
+  "equal_chosen_rejected_assistant_text": [],
+  "empty_assistant_branch_hits": [],
+  "passes_core_validation": true
+}

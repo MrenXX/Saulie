@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DPO study — steering-dpo-v1.0-v4-seed42</title>
+<style>
+:root { --bg:#0f1419; --card:#1a2332; --text:#e6edf3; --muted:#8b949e;
+  --ok:#3fb950; --warn:#d29922; --bad:#f85149; --pruned:#a371f7; --border:#30363d; }
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text);
+  margin: 0; padding: 1rem 1.5rem 3rem; line-height: 1.45; }
+h1 { font-size: 1.35rem; margin: 0 0 0.5rem; }
+h3 { font-size: 0.95rem; margin: 0 0 0.5rem; color: var(--muted); }
+.muted { color: var(--muted); font-size: 0.9rem; }
+.header { margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; }
+.card.alert { border-color: var(--warn); }
+table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+.mini td, .mini th { padding: 0.25rem 0.4rem; text-align: left; }
+.mini tr.warn td { color: var(--warn); }
+#main-table { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+#main-table thead { position: sticky; top: 0; background: #21262d; z-index: 1; }
+#main-table th { cursor: pointer; user-select: none; padding: 0.5rem 0.35rem; text-align: left;
+  border-bottom: 1px solid var(--border); white-space: nowrap; }
+#main-table th:hover { background: #30363d; }
+#main-table td { padding: 0.35rem; border-bottom: 1px solid var(--border); }
+#main-table tr.trial-row:nth-child(4n+1) { background: rgba(255,255,255,0.02); }
+#main-table tr.row-warn td { background: rgba(210,153,34,0.08); }
+.badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.badge.complete { background: rgba(63,185,80,0.2); color: var(--ok); }
+.badge.pruned { background: rgba(163,113,247,0.2); color: var(--pruned); }
+.badge.fail { background: rgba(248,81,73,0.2); color: var(--bad); }
+.badge.running { background: rgba(210,153,34,0.2); color: var(--warn); }
+.toolbar { margin: 1rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.toolbar button { background: var(--card); color: var(--text); border: 1px solid var(--border);
+  padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; }
+.toolbar button.active { border-color: var(--ok); color: var(--ok); }
+.detail-row td { background: #161b22; font-size: 0.8rem; }
+.kv .k { color: var(--muted); padding-right: 1rem; vertical-align: top; }
+code { font-size: 0.78rem; word-break: break-all; }
+.flags { font-size: 0.75rem; color: var(--muted); max-width: 8rem; }
+a { color: #58a6ff; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>DPO Optuna study report</h1>
+  <p class="muted"><b>steering-dpo-v1.0-v4-seed42</b></p>
+  <p class="muted">Run dir: <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252</code></p>
+  <p class="muted">Optuna DB: <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/optuna_study.db</code></p>
+  <p>COMPLETE <b>21</b> · PRUNED <b>2</b> ·
+     FAIL <b>2</b> · target 20
+      ✓ reached</p>
+  <p>Best trial <b>#1</b> accuracy <b>1.000</b><br>beta=0.05<br>num_train_epochs=1<br>learning_rate=2.3604024417191132e-05<br>lora_r=16<br>lora_dropout=0.05<br>per_device_train_batch_size=1<br>gradient_accumulation_steps=8<br>lr_scheduler_type=constant_with_warmup<br>max_grad_norm=1.0<br>neftune_noise_alpha=5.0<br>length_mode=ld_0.3</p>
+</div>
+<div class="cards"><div class="card"><h3>Top by accuracy</h3><table class="mini"><thead><tr><th>Trial</th><th>Acc</th><th>Margin</th><th>Macro</th><th>LenΔ corr</th></tr></thead><tbody><tr class=""><td>#1</td><td>1.000</td><td>2.080</td><td>1.000</td><td>0.4025</td></tr><tr class=""><td>#23</td><td>1.000</td><td>1.532</td><td>1.000</td><td>0.4268</td></tr><tr class=""><td>#3</td><td>0.9808</td><td>2.099</td><td>0.9848</td><td>0.4038</td></tr><tr class=""><td>#4</td><td>0.9808</td><td>2.081</td><td>0.9848</td><td>0.4112</td></tr><tr class=""><td>#5</td><td>0.9808</td><td>2.101</td><td>0.9848</td><td>0.3881</td></tr></tbody></table></div><div class="card"><h3>Top by macro (family×category)</h3><table class="mini"><thead><tr><th>Trial</th><th>Acc</th><th>Margin</th><th>Macro</th><th>LenΔ corr</th></tr></thead><tbody><tr class=""><td>#1</td><td>1.000</td><td>2.080</td><td>1.000</td><td>0.4025</td></tr><tr class=""><td>#23</td><td>1.000</td><td>1.532</td><td>1.000</td><td>0.4268</td></tr><tr class=""><td>#3</td><td>0.9808</td><td>2.099</td><td>0.9848</td><td>0.4038</td></tr><tr class=""><td>#4</td><td>0.9808</td><td>2.081</td><td>0.9848</td><td>0.4112</td></tr><tr class=""><td>#5</td><td>0.9808</td><td>2.101</td><td>0.9848</td><td>0.3881</td></tr></tbody></table></div><div class="card"><h3>Top by margin</h3><table class="mini"><thead><tr><th>Trial</th><th>Acc</th><th>Margin</th><th>Macro</th><th>LenΔ corr</th></tr></thead><tbody><tr class="warn"><td>#17</td><td>0.9231</td><td>567.4</td><td>0.9307</td><td>-0.5517</td></tr><tr class=""><td>#16</td><td>0.8269</td><td>4.259</td><td>0.8636</td><td>-0.3133</td></tr><tr class=""><td>#8</td><td>0.9808</td><td>2.116</td><td>0.9848</td><td>0.3889</td></tr><tr class=""><td>#7</td><td>0.9808</td><td>2.102</td><td>0.9848</td><td>0.4131</td></tr><tr class=""><td>#5</td><td>0.9808</td><td>2.101</td><td>0.9848</td><td>0.3881</td></tr></tbody></table></div><div class="card class="alert""><h3>Suspicious length correlation (|ρ|&gt;0.5)</h3><table class="mini"><thead><tr><th>Trial</th><th>Acc</th><th>Margin</th><th>Macro</th><th>LenΔ corr</th></tr></thead><tbody><tr class="warn"><td>#12</td><td>0.3846</td><td>-5.217</td><td>0.4632</td><td>-0.9669</td></tr><tr class="warn"><td>#13</td><td>0.3846</td><td>-5.217</td><td>0.4632</td><td>-0.9669</td></tr><tr class="warn"><td>#17</td><td>0.9231</td><td>567.4</td><td>0.9307</td><td>-0.5517</td></tr><tr class="warn"><td>#19</td><td>0.5385</td><td>-0.2310</td><td>0.5931</td><td>-0.8310</td></tr><tr class="warn"><td>#20</td><td>0.3654</td><td>-1.269</td><td>0.4481</td><td>-0.9683</td></tr><tr class="warn"><td>#21</td><td>0.2885</td><td>-0.3773</td><td>0.3874</td><td>-0.9560</td></tr></tbody></table></div><div class="card"><h3>Weak buckets (macro&amp;lt;0.85, acc&amp;gt;0.9)</h3><p class="muted">None</p></div><div class="card"><h3>OOM / solo recovered</h3><p class="muted">None</p></div></div>
+<div class="toolbar">
+  <span>Filter:</span>
+  <button type="button" class="filter-btn active" data-filter="all">All</button>
+  <button type="button" class="filter-btn" data-filter="COMPLETE">COMPLETE</button>
+  <button type="button" class="filter-btn" data-filter="PRUNED">PRUNED</button>
+  <button type="button" class="filter-btn" data-filter="FAIL">FAIL</button>
+  <span class="muted" style="margin-left:1rem">Click column headers to sort. Click a row to expand details.</span>
+</div>
+<div id="main-table">
+<table id="trials-table">
+<thead><tr>
+  <th data-col="0">Trial</th><th data-col="1">State</th><th data-col="2">Acc</th>
+  <th data-col="3">Margin</th><th data-col="4">Macro</th><th data-col="5">β</th>
+  <th data-col="6">LR</th><th data-col="7">LoRA r</th><th data-col="8">Batch</th>
+  <th data-col="9">Length</th><th data-col="10">Sched</th><th data-col="11">Neftune</th>
+  <th data-col="12">Runtime</th><th data-col="13">VRAM</th><th data-col="14">Ref</th>
+  <th data-col="15">Flags</th>
+</tr></thead>
+<tbody>
+<tr class="trial-row" data-state="COMPLETE" data-trial="1">
+  <td>#1</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="1.0">1.000</td>
+  <td data-sort="2.080363992315072">2.080</td>
+  <td data-sort="1.0">1.000</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1124.0972645282745">1124.1s</td>
+  <td data-sort="9.51717376">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="1" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #1</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-1/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-1/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-266.46224080599274</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-266.61158752441406</td></tr><tr><td class='k'>eval_loss</td><td>0.22478312253952026</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>1.0</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.7159005362504662</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.080363992315072</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.7962645338131833</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>1.0</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>1.0</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>1.0</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.47585435506366014</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.4025464463596147</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.51717376</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.519314432</td></tr><tr><td class='k'>runtime_seconds</td><td>1124.0972645282745</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-1/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.48237368745623893</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="23">
+  <td>#23</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="1.0">1.000</td>
+  <td data-sort="1.5320361755215204">1.532</td>
+  <td data-sort="1.0">1.000</td>
+  <td>0.0500</td>
+  <td>1.85e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="827.7443463802338">827.7s</td>
+  <td data-sort="9.519218688">9.519</td>
+  <td>T:H/E:H</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="23" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #23</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-23/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-23/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-246.7582475222074</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-235.94103772823627</td></tr><tr><td class='k'>eval_loss</td><td>0.27695432305336</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>1.0</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-0.7307008526717814</td></tr><tr><td class='k'>eval_rewards_margin</td><td>1.5320361755215204</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-2.2627370197039385</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>1.0</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>1.0</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>1.0</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.505660095528057</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.4267951081962222</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.519218688</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.519314432</td></tr><tr><td class='k'>runtime_seconds</td><td>827.7443463802338</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-23/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.5293160671333097</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="3">
+  <td>#3</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9807692307692307">0.9808</td>
+  <td data-sort="2.098573095523394">2.099</td>
+  <td data-sort="0.9848484848484849">0.9848</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1109.4099893569946">1109.4s</td>
+  <td data-sort="9.516956672">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="3" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #3</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-3/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-3/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-267.1161026587853</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-267.62963140927826</td></tr><tr><td class='k'>eval_loss</td><td>0.22604916989803314</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9807692307692307</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.748593627439382</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.098573095523394</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.8471667136137304</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.48265891998481825</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.4038275301752657</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.516956672</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.498342912</td></tr><tr><td class='k'>runtime_seconds</td><td>1109.4099893569946</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-3/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.4809744155631875</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="4">
+  <td>#4</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9807692307692307">0.9808</td>
+  <td data-sort="2.0812831819057465">2.081</td>
+  <td data-sort="0.9848484848484849">0.9848</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1071.9247076511383">1071.9s</td>
+  <td data-sort="9.517315584">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="4" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #4</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-4/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-4/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-265.41419058579663</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-265.58192018362195</td></tr><tr><td class='k'>eval_loss</td><td>0.22432753443717957</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9807692307692307</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.6634980128504908</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.0812831819057465</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.744781189239942</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9736842105263157</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.4852200428305457</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.4112093243143252</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.517315584</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.477371392</td></tr><tr><td class='k'>runtime_seconds</td><td>1071.9247076511383</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-4/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.4834595727470686</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="5">
+  <td>#5</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9807692307692307">0.9808</td>
+  <td data-sort="2.101190428321178">2.101</td>
+  <td data-sort="0.9848484848484849">0.9848</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1069.282504081726">1069.3s</td>
+  <td data-sort="9.517186048">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="5" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #5</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-5/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-5/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-266.8599237295297</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-267.4257990763738</td></tr><tr><td class='k'>eval_loss</td><td>0.22279684245586395</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9807692307692307</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.7357846837705717</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.101190428321178</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.8369751137036543</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.4708756263396557</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.388082864098076</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.517186048</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.666115072</td></tr><tr><td class='k'>runtime_seconds</td><td>1069.282504081726</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-5/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.48421132677006273</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="6">
+  <td>#6</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9807692307692307">0.9808</td>
+  <td data-sort="2.087115694697087">2.087</td>
+  <td data-sort="0.9848484848484849">0.9848</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1039.5881214141846">1039.6s</td>
+  <td data-sort="9.517044224">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="6" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #6</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-6/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-6/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-266.32122978797327</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-266.60560967372015</td></tr><tr><td class='k'>eval_loss</td><td>0.22348445653915405</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9807692307692307</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.7088499738333316</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.087115694697087</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.7959656577843885</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.49013632895478726</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.418432400608495</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.517044224</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.519314432</td></tr><tr><td class='k'>runtime_seconds</td><td>1039.5881214141846</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-6/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.4836381572597432</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="7">
+  <td>#7</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9807692307692307">0.9808</td>
+  <td data-sort="2.1015321320066085">2.102</td>
+  <td data-sort="0.9848484848484849">0.9848</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1037.9958021640778">1038.0s</td>
+  <td data-sort="9.517307904">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="7" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #7</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-7/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-7/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-266.60911560058594</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-267.1818251243004</td></tr><tr><td class='k'>eval_loss</td><td>0.2199939787387848</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9807692307692307</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.7232442654382725</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.1015321320066085</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.8247763973016005</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9736842105263157</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.4877908944810099</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.4131121663819508</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.517307904</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.498342912</td></tr><tr><td class='k'>runtime_seconds</td><td>1037.9958021640778</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-7/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.48346010581502374</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="8">
+  <td>#8</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9807692307692307">0.9808</td>
+  <td data-sort="2.115656310549149">2.116</td>
+  <td data-sort="0.9848484848484849">0.9848</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1036.4007139205933">1036.4s</td>
+  <td data-sort="9.517074944">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="8" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #8</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-8/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-8/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-267.2210119687594</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-268.07620496016284</td></tr><tr><td class='k'>eval_loss</td><td>0.21890990436077118</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9807692307692307</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.7538390843412623</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.115656310549149</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.8694954078931074</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9736842105263157</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.47237718189230754</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.3889113687677749</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.517074944</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.498342912</td></tr><tr><td class='k'>runtime_seconds</td><td>1036.4007139205933</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-8/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.4803196731603371</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="9">
+  <td>#9</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9807692307692307">0.9808</td>
+  <td data-sort="2.1010009256693034">2.101</td>
+  <td data-sort="0.9848484848484849">0.9848</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1037.936374425888">1037.9s</td>
+  <td data-sort="9.51763712">9.518</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="9" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #9</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-9/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-9/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-266.7460391704853</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-267.30812417543854</td></tr><tr><td class='k'>eval_loss</td><td>0.22526010870933533</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9807692307692307</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.7300904474865932</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.1010009256693034</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.8310913764513455</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9736842105263157</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9848484848484849</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.48915545476497535</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.4094305598018385</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.51763712</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.833887232</td></tr><tr><td class='k'>runtime_seconds</td><td>1037.936374425888</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-9/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.48060820912415125</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="0">
+  <td>#0</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9615384615384616">0.9615</td>
+  <td data-sort="2.070978717162059">2.071</td>
+  <td data-sort="0.9696969696969697">0.9697</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1128.999135017395">1129.0s</td>
+  <td data-sort="9.51717632">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="0" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #0</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-0/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-0/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-266.36162889920746</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-266.3232700274541</td></tr><tr><td class='k'>eval_loss</td><td>0.22768449783325195</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9615384615384616</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.710869940642554</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.070978717162059</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.7818486507122335</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9696969696969697</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9585326953748006</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9696969696969697</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.47813892049756773</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.3968264141020401</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.51717632</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.519314432</td></tr><tr><td class='k'>runtime_seconds</td><td>1128.999135017395</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-0/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.4807343100601772</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="2">
+  <td>#2</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9615384615384616">0.9615</td>
+  <td data-sort="2.086426899410211">2.086</td>
+  <td data-sort="0.9696969696969697">0.9697</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="1115.2188675403595">1115.2s</td>
+  <td data-sort="9.51715072">9.517</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="2" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #2</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-2/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-2/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-265.70991824223444</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-265.9805233295147</td></tr><tr><td class='k'>eval_loss</td><td>0.2275373935699463</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9615384615384616</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.678284406232146</td></tr><tr><td class='k'>eval_rewards_margin</td><td>2.086426899410211</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-3.764711312376536</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9696969696969697</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9585326953748006</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9696969696969697</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.4889184478432629</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.41741932009037186</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.51715072</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.687086592</td></tr><tr><td class='k'>runtime_seconds</td><td>1115.2188675403595</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-2/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.48240483144544205</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="24">
+  <td>#24</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9423076923076923">0.9423</td>
+  <td data-sort="1.5626605216127176">1.563</td>
+  <td data-sort="0.9545454545454546">0.9545</td>
+  <td>0.0500</td>
+  <td>1.90e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="801.896833896637">801.9s</td>
+  <td data-sort="9.519240704">9.519</td>
+  <td>T:H/E:H</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="24" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #24</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-24/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-24/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-247.96558086688702</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-237.76085787553055</td></tr><tr><td class='k'>eval_loss</td><td>0.27767905592918396</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9423076923076923</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-0.7910675084075103</td></tr><tr><td class='k'>eval_rewards_margin</td><td>1.5626605216127176</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-2.3537280344619202</td></tr><tr><td class='k'>length_mode</td><td>ld_0.3</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9545454545454546</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9210526315789473</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9545454545454546</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.4836148144830841</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.40567854995765923</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.519240704</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.519314432</td></tr><tr><td class='k'>runtime_seconds</td><td>801.896833896637</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-24/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.5234492286196295</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row row-warn" data-state="COMPLETE" data-trial="17">
+  <td>#17</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9230769230769231">0.9231</td>
+  <td data-sort="567.3990099980281">567.4</td>
+  <td data-sort="0.9307359307359307">0.9307</td>
+  <td>0.2000</td>
+  <td>1.65e-05</td>
+  <td>32</td>
+  <td>1×4=4</td>
+  <td>sigmoid_norm</td>
+  <td>linear</td>
+  <td>5.000</td>
+  <td data-sort="2440.652643442154">2440.7s</td>
+  <td data-sort="9.9621888">9.962</td>
+  <td>T:H/E:H</td>
+  <td class="flags">⚠ len-corr</td>
+</tr>
+<tr class="detail-row" data-for-trial="17" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #17</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-17/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-17/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>4</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-3958.986139150766</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-6754.523207444411</td></tr><tr><td class='k'>eval_loss</td><td>0.01636049523949623</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9230769230769231</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-745.3683979327863</td></tr><tr><td class='k'>eval_rewards_margin</td><td>567.3990099980281</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-1312.7674055833083</td></tr><tr><td class='k'>length_mode</td><td>sigmoid_norm</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.8981481481481483</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.9282296650717703</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9307359307359307</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>-0.4105663787486368</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>-0.5516754875205095</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.9621888</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.99956224</td></tr><tr><td class='k'>runtime_seconds</td><td>2440.652643442154</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-17/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.25295581167075354</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="14">
+  <td>#14</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9038461538461539">0.9038</td>
+  <td data-sort="0.4872294681576582">0.4872</td>
+  <td data-sort="0.9242424242424243">0.9242</td>
+  <td>0.0100</td>
+  <td>1.40e-05</td>
+  <td>32</td>
+  <td>2×4=8</td>
+  <td>ld_0.5</td>
+  <td>linear</td>
+  <td>0.00e+00</td>
+  <td data-sort="4696.652787208557">4696.7s</td>
+  <td data-sort="14.549848576">14.550</td>
+  <td>T:H/E:H</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="14" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #14</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-14/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-14/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-313.57895733759955</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-320.8439726462731</td></tr><tr><td class='k'>eval_loss</td><td>0.5010541677474976</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9038461538461539</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-0.8143472461603009</td></tr><tr><td class='k'>eval_rewards_margin</td><td>0.4872294681576582</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-1.3015767129567952</td></tr><tr><td class='k'>length_mode</td><td>ld_0.5</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9116161616161617</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.879585326953748</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9242424242424243</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.24787944325951403</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.13810623336626757</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>14.549848576</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>15.898509312</td></tr><tr><td class='k'>runtime_seconds</td><td>4696.652787208557</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-14/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.6037726905548347</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="15">
+  <td>#15</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.9038461538461539">0.9038</td>
+  <td data-sort="0.5070103722122999">0.5070</td>
+  <td data-sort="0.9242424242424243">0.9242</td>
+  <td>0.0100</td>
+  <td>1.43e-05</td>
+  <td>32</td>
+  <td>2×4=8</td>
+  <td>ld_0.5</td>
+  <td>linear</td>
+  <td>0.00e+00</td>
+  <td data-sort="4706.2228009700775">4706.2s</td>
+  <td data-sort="14.547267584">14.547</td>
+  <td>T:H/E:H</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="15" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #15</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-15/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-15/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-320.46194472679724</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-329.7050495147705</td></tr><tr><td class='k'>eval_loss</td><td>0.49622005224227905</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.9038461538461539</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-0.8831771143640463</td></tr><tr><td class='k'>eval_rewards_margin</td><td>0.5070103722122999</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-1.3901874858599443</td></tr><tr><td class='k'>length_mode</td><td>ld_0.5</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.9116161616161617</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.879585326953748</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.9242424242424243</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>0.2411177635416516</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>0.12799971626878182</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>14.547267584</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>15.961423872</td></tr><tr><td class='k'>runtime_seconds</td><td>4706.2228009700775</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-15/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.5986888911926521</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="COMPLETE" data-trial="16">
+  <td>#16</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.8269230769230769">0.8269</td>
+  <td data-sort="4.258964245135967">4.259</td>
+  <td data-sort="0.8636363636363636">0.8636</td>
+  <td>0.0100</td>
+  <td>1.43e-05</td>
+  <td>32</td>
+  <td>1×4=4</td>
+  <td>sigmoid_norm</td>
+  <td>linear</td>
+  <td>5.000</td>
+  <td data-sort="1657.1760773658752">1657.2s</td>
+  <td data-sort="9.94948352">9.949</td>
+  <td>T:H/E:H</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="16" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #16</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-16/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-16/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>4</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-2808.089654775766</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-3192.5281419020434</td></tr><tr><td class='k'>eval_loss</td><td>0.6344947814941406</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.8269230769230769</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-25.75945368179908</td></tr><tr><td class='k'>eval_rewards_margin</td><td>4.258964245135967</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-30.01841792693505</td></tr><tr><td class='k'>length_mode</td><td>sigmoid_norm</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.8131313131313131</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.8078149920255183</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.8636363636363636</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>-0.17867253289982726</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>-0.31327141169164924</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.94948352</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>11.018436608</td></tr><tr><td class='k'>runtime_seconds</td><td>1657.1760773658752</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-16/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.6791539141110011</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row row-warn" data-state="COMPLETE" data-trial="19">
+  <td>#19</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.5384615384615384">0.5385</td>
+  <td data-sort="-0.23103802966383788">-0.2310</td>
+  <td data-sort="0.593073593073593">0.5931</td>
+  <td>0.0500</td>
+  <td>1.78e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>none</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="797.0646452903748">797.1s</td>
+  <td data-sort="9.518943744">9.519</td>
+  <td>T:H/E:H</td>
+  <td class="flags">⚠ len-corr</td>
+</tr>
+<tr class="detail-row" data-for-trial="19" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #19</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-19/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-19/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-285.4966798929068</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-239.4179870898907</td></tr><tr><td class='k'>eval_loss</td><td>1.1755026578903198</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.5384615384615384</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-2.6676225238479674</td></tr><tr><td class='k'>eval_rewards_margin</td><td>-0.23103802966383788</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-2.4365844815396347</td></tr><tr><td class='k'>length_mode</td><td>none</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.5042087542087542</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.5358851674641147</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.593073593073593</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>-0.7115738397188104</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>-0.8310130010800401</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.518943744</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.540285952</td></tr><tr><td class='k'>runtime_seconds</td><td>797.0646452903748</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-19/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>1.8520140704118981</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row row-warn" data-state="COMPLETE" data-trial="12">
+  <td>#12</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.38461538461538464">0.3846</td>
+  <td data-sort="-5.217439015324299">-5.217</td>
+  <td data-sort="0.4632034632034632">0.4632</td>
+  <td>0.2000</td>
+  <td>5.07e-06</td>
+  <td>8</td>
+  <td>2×2=4</td>
+  <td>none</td>
+  <td>cosine</td>
+  <td>0.00e+00</td>
+  <td data-sort="6814.066732406616">6814.1s</td>
+  <td data-sort="14.142501888">14.143</td>
+  <td>T:H/E:H</td>
+  <td class="flags">⚠ len-corr</td>
+</tr>
+<tr class="detail-row" data-for-trial="12" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #12</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-12/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-12/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>4</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-268.10517677894006</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-200.5600505241981</td></tr><tr><td class='k'>eval_loss</td><td>6.337456226348877</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.38461538461538464</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-7.192189468272352</td></tr><tr><td class='k'>eval_rewards_margin</td><td>-5.217439015324299</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-1.974750525568827</td></tr><tr><td class='k'>length_mode</td><td>none</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.35690235690235683</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.3811802232854864</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.4632034632034632</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>-0.8982829623498045</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>-0.9669373291563882</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>14.142501888</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>15.432941568</td></tr><tr><td class='k'>runtime_seconds</td><td>6814.066732406616</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-12/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>6.809137289486234</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row row-warn" data-state="COMPLETE" data-trial="13">
+  <td>#13</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.38461538461538464">0.3846</td>
+  <td data-sort="-5.217439015324299">-5.217</td>
+  <td data-sort="0.4632034632034632">0.4632</td>
+  <td>0.2000</td>
+  <td>5.07e-06</td>
+  <td>8</td>
+  <td>2×2=4</td>
+  <td>none</td>
+  <td>cosine</td>
+  <td>0.00e+00</td>
+  <td data-sort="6810.670698642731">6810.7s</td>
+  <td data-sort="14.142501888">14.143</td>
+  <td>T:H/E:H</td>
+  <td class="flags">⚠ len-corr</td>
+</tr>
+<tr class="detail-row" data-for-trial="13" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #13</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-13/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-13/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>4</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-268.10517677894006</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-200.5600505241981</td></tr><tr><td class='k'>eval_loss</td><td>6.337456226348877</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.38461538461538464</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-7.192189468272352</td></tr><tr><td class='k'>eval_rewards_margin</td><td>-5.217439015324299</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-1.974750525568827</td></tr><tr><td class='k'>length_mode</td><td>none</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.35690235690235683</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.3811802232854864</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.4632034632034632</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>-0.8982829623498045</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>-0.9669373291563882</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>14.142501888</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>15.390998528</td></tr><tr><td class='k'>runtime_seconds</td><td>6810.670698642731</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-13/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>6.809137289486234</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row row-warn" data-state="COMPLETE" data-trial="20">
+  <td>#20</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.36538461538461536">0.3654</td>
+  <td data-sort="-1.2686353566554875">-1.269</td>
+  <td data-sort="0.44805194805194803">0.4481</td>
+  <td>0.0500</td>
+  <td>9.59e-06</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>none</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="4481.274629831314">4481.3s</td>
+  <td data-sort="9.521984512">9.522</td>
+  <td>T:H/E:H</td>
+  <td class="flags">⚠ len-corr</td>
+</tr>
+<tr class="detail-row" data-for-trial="20" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #20</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-20/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-20/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>8</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-267.91787206209625</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-201.08723269976102</td></tr><tr><td class='k'>eval_loss</td><td>1.833898663520813</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.36538461538461536</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-1.7886821010794778</td></tr><tr><td class='k'>eval_rewards_margin</td><td>-1.2686353566554875</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-0.5200467390509752</td></tr><tr><td class='k'>length_mode</td><td>none</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.3417508417508417</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.3548644338118022</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.44805194805194803</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>-0.8941112758867974</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>-0.9682635180037588</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>9.521984512</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>10.519314432</td></tr><tr><td class='k'>runtime_seconds</td><td>4481.274629831314</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-20/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>2.0828020145308295</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row row-warn" data-state="COMPLETE" data-trial="21">
+  <td>#21</td>
+  <td><span class="badge complete">COMPLETE</span></td>
+  <td data-sort="0.28846153846153844">0.2885</td>
+  <td data-sort="-0.37727974412532955">-0.3773</td>
+  <td data-sort="0.3874458874458875">0.3874</td>
+  <td>0.0500</td>
+  <td>9.59e-06</td>
+  <td>16</td>
+  <td>2×8=16</td>
+  <td>ld_0.5</td>
+  <td>constant_wit</td>
+  <td>0.00e+00</td>
+  <td data-sort="4336.866478919983">4336.9s</td>
+  <td data-sort="14.13828096">14.138</td>
+  <td>T:H/E:H</td>
+  <td class="flags">⚠ len-corr</td>
+</tr>
+<tr class="detail-row" data-for-trial="21" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #21</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-21/best_adapter</code>
+          | <a href="file:///root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-21/diagnostics.json">diagnostics.json</a></p>
+      <table class="kv"><tbody><tr><td class='k'>data_hash</td><td>f3b9ade4dc53</td></tr><tr><td class='k'>effective_batch</td><td>16</td></tr><tr><td class='k'>eval_logps_chosen</td><td>-242.27397405184232</td></tr><tr><td class='k'>eval_logps_rejected</td><td>-193.27044652058527</td></tr><tr><td class='k'>eval_loss</td><td>0.947655439376831</td></tr><tr><td class='k'>eval_rewards_accuracy</td><td>0.28846153846153844</td></tr><tr><td class='k'>eval_rewards_chosen</td><td>-0.5064871690701693</td></tr><tr><td class='k'>eval_rewards_margin</td><td>-0.37727974412532955</td></tr><tr><td class='k'>eval_rewards_rejected</td><td>-0.12920742407844116</td></tr><tr><td class='k'>length_mode</td><td>ld_0.5</td></tr><tr><td class='k'>macro_accuracy_by_category</td><td>0.26851851851851855</td></tr><tr><td class='k'>macro_accuracy_by_source_family</td><td>0.28309409888357256</td></tr><tr><td class='k'>macro_accuracy_by_source_family_category</td><td>0.3874458874458875</td></tr><tr><td class='k'>margin_vs_abs_length_delta_corr</td><td>-0.8804866924309145</td></tr><tr><td class='k'>margin_vs_length_delta_corr</td><td>-0.9559952867561677</td></tr><tr><td class='k'>mask_audit_pass</td><td>True</td></tr><tr><td class='k'>max_length</td><td>704</td></tr><tr><td class='k'>max_observed_length</td><td>646</td></tr><tr><td class='k'>non_dpo_trainable_count</td><td>0</td></tr><tr><td class='k'>only_dpo_trainable</td><td>True</td></tr><tr><td class='k'>peak_vram_allocated_gb</td><td>14.13828096</td></tr><tr><td class='k'>peak_vram_reserved_gb</td><td>15.615393792</td></tr><tr><td class='k'>runtime_seconds</td><td>4336.866478919983</td></tr><tr><td class='k'>saved_adapter_path</td><td>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-21/best_adapter</td></tr><tr><td class='k'>split_manifest_sha256</td><td>75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d</td></tr><tr><td class='k'>train_loss</td><td>0.9924008051554362</td></tr><tr><td class='k'>trl_version</td><td>1.4.0</td></tr><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="PRUNED" data-trial="18">
+  <td>#18</td>
+  <td><span class="badge pruned">PRUNED</span></td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td>0.2000</td>
+  <td>9.59e-06</td>
+  <td>8</td>
+  <td>1×2=2</td>
+  <td>sigmoid_norm</td>
+  <td>cosine</td>
+  <td>5.000</td>
+  <td data-sort="-1">—s</td>
+  <td data-sort="-1">—</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="18" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #18</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-18/best_adapter</code>
+         </p>
+      <table class="kv"><tbody></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="PRUNED" data-trial="22">
+  <td>#22</td>
+  <td><span class="badge pruned">PRUNED</span></td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td>0.0100</td>
+  <td>2.84e-05</td>
+  <td>8</td>
+  <td>1×2=2</td>
+  <td>ld_0.3</td>
+  <td>cosine</td>
+  <td>5.000</td>
+  <td data-sort="-1">—s</td>
+  <td data-sort="-1">—</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="22" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #22</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-22/best_adapter</code>
+         </p>
+      <table class="kv"><tbody></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="FAIL" data-trial="10">
+  <td>#10</td>
+  <td><span class="badge fail">FAIL</span></td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td>0.0500</td>
+  <td>2.36e-05</td>
+  <td>16</td>
+  <td>1×8=8</td>
+  <td>ld_0.3</td>
+  <td>constant_wit</td>
+  <td>5.000</td>
+  <td data-sort="-1">—s</td>
+  <td data-sort="-1">—</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="10" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #10</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-10/best_adapter</code>
+         </p>
+      <table class="kv"><tbody><tr><td class='k'>worker_id</td><td>0</td></tr></tbody></table>
+    </details>
+  </td>
+</tr>
+<tr class="trial-row" data-state="FAIL" data-trial="11">
+  <td>#11</td>
+  <td><span class="badge fail">FAIL</span></td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td data-sort="-1">—</td>
+  <td>0.2000</td>
+  <td>5.07e-06</td>
+  <td>8</td>
+  <td>2×2=4</td>
+  <td>none</td>
+  <td>cosine</td>
+  <td>0.00e+00</td>
+  <td data-sort="-1">—s</td>
+  <td data-sort="-1">—</td>
+  <td>—</td>
+  <td class="flags">—</td>
+</tr>
+<tr class="detail-row" data-for-trial="11" style="display:none">
+  <td colspan="16">
+    <details open>
+      <summary>Details — trial #11</summary>
+      <p><b>Adapter:</b> <code>/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-11/best_adapter</code>
+         </p>
+      <table class="kv"><tbody><tr><td class='k'>worker_id</td><td>1</td></tr></tbody></table>
+    </details>
+  </td>
+</tr></tbody>
+</table>
+</div>
+<script>
+(function() {
+  const table = document.getElementById('trials-table');
+  const tbody = table.querySelector('tbody');
+  let sortCol = 2, sortAsc = false;
+
+  function getTrialRows() {
+    return [...tbody.querySelectorAll('tr.trial-row')];
+  }
+
+  function pairFor(row) {
+    const n = row.dataset.trial;
+    return [row, tbody.querySelector('tr.detail-row[data-for-trial="'+n+'"]')];
+  }
+
+  function sortRows() {
+    const rows = getTrialRows();
+    rows.sort((a, b) => {
+      const ac = a.children[sortCol];
+      const bc = b.children[sortCol];
+      let av = ac.dataset.sort !== undefined ? parseFloat(ac.dataset.sort) : ac.textContent.trim();
+      let bv = bc.dataset.sort !== undefined ? parseFloat(bc.dataset.sort) : bc.textContent.trim();
+      if (typeof av === 'string') av = av.toLowerCase();
+      if (typeof bv === 'string') bv = bv.toLowerCase();
+      if (av < bv) return sortAsc ? -1 : 1;
+      if (av > bv) return sortAsc ? 1 : -1;
+      return 0;
+    });
+    rows.forEach(r => {
+      const [, detail] = pairFor(r);
+      tbody.appendChild(r);
+      if (detail) tbody.appendChild(detail);
+    });
+  }
+
+  table.querySelectorAll('thead th').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = parseInt(th.dataset.col, 10);
+      if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
+      sortRows();
+    });
+  });
+
+  getTrialRows().forEach(row => {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', () => {
+      const [, detail] = pairFor(row);
+      if (!detail) return;
+      detail.style.display = detail.style.display === 'none' ? '' : 'none';
+    });
+  });
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      getTrialRows().forEach(row => {
+        const [, detail] = pairFor(row);
+        const show = f === 'all' || row.dataset.state === f;
+        row.style.display = show ? '' : 'none';
+        if (detail && !show) detail.style.display = 'none';
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

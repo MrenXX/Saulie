@@ -1,0 +1,663 @@
+### Anti-leakage with SFT training data:
+The following topics, products, and opening messages were used in the SFT training set and the evaluation set. Do NOT use any of these or close variants:
+
+**Excluded opening messages / topics (from eval skeletons):**
+- Cold hands while typing at a computer
+- Tension headaches in the afternoon
+- Tap water tasting like chlorine/metal
+- Falling asleep while trying to read
+- Working night shifts / routine disruption
+- Always running behind in the morning
+- Apartment feeling stale
+- Deepest point in the ocean
+- How volcanoes form
+- Weekends disappearing / never resting
+- Growing herbs on a windowsill
+- Everything taking longer than it should
+- Why cats purr
+- Space not reflecting who you are / lighting issues
+
+**Excluded opening messages / topics (from SFT dataset - 499 unique):**
+- All my old photos are just sitting in a box. I should really digitize them before they fade.
+- All my t-shirts are pilling. It makes them look so old and cheap.
+- Did the Romans really invent concrete? I saw a video claiming their structures are still standing because of it.
+- Did you know a day on Venus is longer than a year on Venus?
+- Did you know crows can recognize individual human faces and hold grudges?
+- Did you know octopuses have three hearts?
+- Did you know that humans share 50% of their DNA with bananas?
+- Did you know the longest English word has 189,819 letters?
+- Did you know there's a species of jellyfish that's technically immortal?
+- Do you happen to know what the fastest bird in the world is?
+- Do you know how many strings are on a standard harp?
+- Do you know what the deepest part of the ocean is called?
+- Every time I blow dry my hair, it turns into a massive, uncontrollable ball of frizz.
+- Every time I open my closet, my laundry basket smells like a locker room.
+- Every time I take a sharp turn, my car trunk sounds like a bowling alley.
+- Every time I try to fix something around the house, I drop screws and spend twenty minutes looking for them.
+- Every winter morning I'm outside scraping ice off my windshield and it makes me late constantly.
+- Everything feels so disorganized in my kitchen.
+- Everything feels so tangled and chaotic on my desk. I can't think straight looking at it.
+- Everything in my bathroom cabinet keeps falling over like dominoes.
+- Everything in my car trunk just rolls around wildly when I turn a corner.
+- Everything in my garage is a complete disaster. I can't even park in there.
+- Everything on my desk is just a tangled mess.
+- Good morning
+- Half of my ice cream is covered in freezer burn crystals before I can even finish the pint.
+- Hello
+- Hey
+- Hey hey
+- Hi there
+- How are black holes formed? The concept just terrifies me.
+- How did ancient civilizations tell time before clocks existed?
+- How do migratory birds actually navigate? Like what's the mechanism?
+- How do plants photosynthesize?
+- How do they get ships inside bottles? That's always baffled me.
+- How do they make decaf coffee? Do they just grow special beans?
+- How do tides actually work? I know the moon is involved but that's about it.
+- How do you calculate compound interest?
+- How do you make a perfect hard-boiled egg?
+- How do you spell 'gorgeous'?
+- How does WiFi actually work?
+- How does noise cancellation actually work in headphones?
+- How does sourdough starter actually work? Like what's happening biologically?
+- How long does it take for a drop of water to travel through the whole ocean?
+- How long has coffee actually been around as a drink?
+- How many countries are in Africa?
+- How many oceans are there?
+- How many ounces are in a gallon?
+- How many planets in the solar system?
+- How old is the Earth?
+- How tall is Everest?
+- How to boil an egg?
+- How to make coffee?
+- How to tie a tie?
+- How was bubblegum invented? I've always wondered about random things like that.
+- How's it going
+- I always burn my knuckles on the oven rack pulling out baking sheets.
+- I always burn my toast when I am hungover.
+- I always burn my tongue on coffee and soup. I have absolutely zero patience to wait.
+- I always burn the rice on the bottom of the pot.
+- I always cut the wrapping paper crooked when I'm doing gifts.
+- I always dread packing for trips because my suitcase becomes a disaster.
+- I always overcook pasta even when I follow the package time exactly. It always comes out mushy.
+- I always seem to hurt myself in stupid ways when I'm not paying attention.
+- I am always absolutely freezing at my office desk. It makes me miserable and I cannot focus.
+- I am overwhelmed with my thesis and cannot organize my sources.
+- I am trying to learn Spanish but I plateau after a few weeks.
+- I burn everything I cook.
+- I can never buy avocados at the right ripeness. They're either rock hard or they turn to brown mush overnight.
+- I can never find a pen when I actually need one, even though I swear I have dozens of them somewhere.
+- I can never find the matching lids for my food storage containers. They're everywhere.
+- I can never get the seal right on my mason jars when I'm canning. I'm scared of giving everyone botulism.
+- I can never keep my car interior clean for more than two days.
+- I can't figure out why my electric bill keeps climbing even though I haven't changed anything.
+- I can't find good music.
+- I can't get the smell of garlic off my hands after I cook.
+- I can't parallel park.
+- I can't seem to get my homemade whipped cream to form stiff peaks. It just stays soupy.
+- I can't seem to keep a houseplant alive to save my life.
+- I can't seem to master anything in the kitchen lately. Everything I cook turns out disappointing.
+- I can't seem to stick to my budget every month.
+- I chopped jalapeño two hours ago and my fingers are still burning.
+- I did a really intense leg workout yesterday and now I am so sore I can barely walk down the stairs.
+- I feel invisible in video calls even when I have something important to say. People talk over me constantly.
+- I feel like I am constantly throwing away rotten vegetables. They go bad so quickly in my fridge.
+- I feel like I can never actually focus on one thing for more than a few minutes. My attention is constantly fragmented.
+- I feel like I can never actually relax. Even when I'm doing nothing my brain just keeps going.
+- I feel like I can't trust anyone in my own home anymore, and it's making me constantly anxious.
+- I feel like I have no luck with growing things, even easy stuff.
+- I feel like I look unprofessional in meetings because I'm constantly fidgeting with my face.
+- I feel like I never have enough time to cook properly during the week.
+- I feel like I never know what the weather is actually going to be and I always dress wrong.
+- I feel like I'm completely isolated working from home. I miss having coworkers around.
+- I feel like I'm constantly running out of things at home and making emergency grocery runs.
+- I feel like I'm cursed because everything I try to nurture ends up dying on me.
+- I feel like I'm drowning in paperwork. It's everywhere and I can never find what I need.
+- I feel like I'm falling apart physically but I don't know where to start fixing it.
+- I feel like I'm fighting my own kitchen every time I cook.
+- I feel like I'm losing control of my personal space and it's making me anxious.
+- I feel like I'm losing my mind because I haven't had a good night's sleep in weeks.
+- I feel like I'm running on empty all the time. Just constantly drained.
+- I feel like I'm terrible at being an adult and everyone else has it figured out.
+- I feel like I'm wasting my evenings and I don't know why.
+- I feel like I've lost the ability to concentrate on anything for more than a few minutes.
+- I feel like a complete failure because I can't keep anything alive, and it's making me sad.
+- I feel like all my plants are just surviving and none of them are actually thriving.
+- I feel like every room in my house has something slightly wrong with it but nothing is bad enough to fix.
+- I feel like every time I try to be productive at home I just spin my wheels.
+- I feel like everything in my kitchen takes twice as long as it should.
+- I feel like everything in my life takes twice as long as it should.
+- I feel like everything is more expensive than it used to be and I'm not keeping up.
+- I feel like my apartment never looks clean no matter how often I clean it.
+- I feel like my bathroom counter is always covered in loose hairs after I shave.
+- I feel like my body is falling apart but I don't know why. Everything just feels wrong.
+- I feel like my car is slowly falling apart but nothing is dramatically broken.
+- I feel like my cooking skills have completely plateaued. I make the same ten things and they're fine but fine isn't exciting anymore.
+- I feel like my dog is bored out of his mind while I'm at work.
+- I feel like my dog's paws are ruining my hardwood floors.
+- I feel like my energy disappears the moment I sit on my couch after work.
+- I feel like my friendships have all gone shallow and surface-level.
+- I feel like my health has been slowly creeping in the wrong direction for a while now.
+- I feel like my health is slowly falling apart and I don't know where to start fixing it.
+- I feel like my home is working against me lately, but I can't pinpoint exactly what's wrong.
+- I feel like my house is slowly making me miserable but I can't explain why.
+- I feel like my knees are getting worse as I get older. Stairs are starting to bother me.
+- I feel like my laundry takes forever and I'm always behind on it.
+- I feel like my laundry takes twice as long as it should.
+- I feel like my money just disappears and I don't understand where it's going.
+- I feel like my posture has completely given up on me. I catch myself hunched over and it's embarrassing.
+- I feel like my relationship with food has gotten really weird and transactional.
+- I feel like my relationship with my phone is completely out of control. I pick it up constantly.
+- I feel like my shoes are systematically destroying my feet, but I don't know what I am doing wrong.
+- I feel like my sleep is just completely broken. I can't figure out what's wrong.
+- I feel like my wardrobe is falling apart faster than it should, and it's frustrating.
+- I feel like my weekends just completely disappear. Sunday night arrives and I have nothing to show for two days.
+- I feel like my weekends just disappear in a blur of errands.
+- I feel like my workouts have completely plateaued. I'm doing the same thing and seeing no results at all.
+- I feel like my workouts just aren't doing anything anymore.
+- I feel like nothing I cook ever tastes as good as it does at restaurants. I follow recipes but something is always off.
+- I feel like nothing in my daily routine actually serves me. It's all just obligation.
+- I feel like simple pleasures are harder than they should be.
+- I feel like something is fundamentally off about how I eat. I can't put my finger on what.
+- I feel like there's something fundamentally off about my workspace but I can't name it.
+- I feel so tense and wired after staring at my computer screens all day. My head just throbs.
+- I get carsick.
+- I get so annoyed trying to find the matching lids for my food containers.
+- I get tangled in my headphone cord every time I work out. It catches on everything.
+- I get terrible headaches when I work.
+- I had the weirdest dream last night that a squid was auditing my taxes.
+- I hate how my commute feels like totally wasted time.
+- I hate wrapping leftover cheese, the plastic wrap never sticks to itself.
+- I just adopted a rescue cat and she hides under the bed all day and only comes out at 3am.
+- I just can't seem to get into a good groove with my morning routine.
+- I just can't seem to keep my car interior clean for more than two days.
+- I just can't seem to stick to any routine. I'll do well for three days and then it falls apart.
+- I just can't seem to wake up feeling rested anymore.
+- I just don't have time for myself these days.
+- I just feel like I can't think straight in the mornings. My brain takes hours to come online.
+- I just feel like I never have enough time. Every day ends and I haven't done half of what I intended.
+- I just feel like my apartment never smells completely clean.
+- I just feel like my bathroom needs something but I have no idea what.
+- I just feel like my posture is completely collapsing as I get older.
+- I just feel overwhelmed by how much stuff my kids have. It's taking over the entire house.
+- I just feel so disconnected from nature even though I live near some beautiful trails.
+- I just feel stuck in some kind of rut and I can't identify what's wrong.
+- I just inherited my grandmother's sewing machine and I want to learn to use it but I'm completely intimidated.
+- I just spent twenty minutes looking for my keys. Again.
+- I just started working night shifts and my whole body feels confused.
+- I keep burning the back of my wrist on the oven rack even when I use mitts. It happens constantly.
+- I keep cutting my fingers trying to slice bagels in half.
+- I keep cutting myself trying to open those impossible plastic clamshell packages. My scissors just can't get through them.
+- I keep dropping my tablet on my face when I read in bed.
+- I keep finding white ring marks on my wooden coffee table from cold drinks.
+- I keep getting spam calls all day.
+- I keep knocking my coffee mug off my desk when I reach across for something. Spilled three times this week.
+- I keep leaving nail holes everywhere in my apartment walls from rearranging art. My landlord is going to lose it.
+- I keep losing my remote.
+- I keep missing important package deliveries because I cannot hear the delivery driver knock.
+- I keep promising myself I'll read more but I never actually do it. Books just sit there.
+- I keep seeing the term 'cognitive load' used everywhere. What does it actually mean?
+- I keep tripping over the extension cords under my TV stand.
+- I know I should drink more water during the day, but I always forget until I have a headache.
+- I lose track of time.
+- I love camping, but I hate dealing with the campfire smoke.
+- I love cooking big meals on Sunday, but my lower back aches so much from standing at the counter.
+- I love drinking wine, but I always get a headache after just one glass.
+- I love gardening but my knees and back are completely destroyed after every session. I'm starting to dread it.
+- I love hosting dinner parties, but I'm always too exhausted to enjoy them.
+- I love making stir-fry but my vegetables always end up soggy, not crispy.
+- I love my cast iron grill grates but they are impossible to clean after every cookout.
+- I love running outdoors, but the winter air absolutely burns my lungs.
+- I love the idea of camping but every time I actually go, something goes wrong and I end up miserable.
+- I love wearing my nice boots in the winter, but the salt destroys them.
+- I open a bottle of wine, have a glass or two, and the rest goes flat by the next day.
+- I really want to start eating healthier, but the prep is exhausting.
+- I recently moved to a ground floor apartment and I hear every single footstep from the unit above me.
+- I recently started doing pottery classes on weeknights and it's been the best thing I've done for my mental health in years.
+- I recently started taking my lunch outside at a park near my office and it's changed my whole afternoon.
+- I sleep hot. I wake up sweating even when the room is cold.
+- I spend so much time in the shower. Like way too long. My water bill is reflecting it.
+- I spend way too much on coffee shops.
+- I spill drinks often.
+- I started going to the farmers market every Saturday and I'm kind of obsessed with it.
+- I started swimming laps three times a week and I'm really enjoying it.
+- I think I'm getting sick.
+- I think my indoor plants are dying. I water them but the leaves keep turning yellow.
+- I think there's a draft coming from my fireplace even when it's closed.
+- I tried to mount a TV on the wall and now there are four huge holes in the drywall.
+- I try to take a relaxing bath to unwind, but I can never get comfortable against the hard porcelain.
+- I wake up every morning with a scratchy throat and my skin feels like sandpaper.
+- I wake up with a stuffy and dry nose almost every morning, even when I'm not sick.
+- I want to make my own sourdough bread but the whole starter thing seems so complicated.
+- I want to save more but I always spend impulsively the day my paycheck arrives.
+- I want to start composting but I live in an apartment. It seems impossible.
+- I'm afraid of heights.
+- I'm always forgetting where I put my keys.
+- I'm always late for meetings.
+- I'm bad at chess.
+- I'm bad at math.
+- I'm clumsy with tools.
+- I'm cold at night.
+- I'm constantly filled with this low-level anxiety that I'm going to be late because I can never find my things.
+- I'm constantly self-conscious at work lately, and it's affecting how I present myself in meetings.
+- I'm desperate for sleep but nothing works and I'm starting to feel hopeless.
+- I'm dreading spring this year because I know I'm going to be miserable and it's affecting my mood already.
+- I'm exhausted but I can't fall asleep at night.
+- I'm feeling completely overwhelmed as a parent and I don't know how to cope with the exhaustion.
+- I'm frustrated because I can't enjoy my hobby the way I want to.
+- I'm getting so frustrated with my indoor plants.
+- I'm having nightmares about losing all my memories and important documents.
+- I'm having so much trouble reading fine print on medicine labels and food packaging lately.
+- I'm so annoyed by how messy my entryway always is.
+- I'm so fed up with my cluttered garage.
+- I'm so frustrated trying to read labels at the grocery store lately.
+- I'm so sick of spending money on terrible coffee at the drive-thru.
+- I'm starting to feel so sluggish and stiff working from home.
+- I'm terrified my phone is going to completely die on me and I'll lose everything important.
+- I'm trying to learn Spanish but I can't roll my R's. It's embarrassing.
+- I'm trying to meditate but I keep getting distracted by every little noise.
+- I'm worried my dog is suffering and I feel helpless watching him panic.
+- I'm worried there's something wrong with me because I'm constantly thirsty and it's making me anxious.
+- I've been baking bread every weekend and my kitchen smells incredible but my counters are always covered in flour.
+- I've been dreading going to the gym even though I know I need to.
+- I've been feeling really bloated and uncomfortable after almost every meal lately and I can't figure out why.
+- I've been feeling really lonely and anxious at night, and it's hard to explain.
+- I've been feeling really self-conscious about my posture on video calls.
+- I've been feeling really sluggish after lunch lately. Like a wall just hits me around 2pm.
+- I've been feeling so sluggish in the afternoons lately.
+- I've been getting really into birdwatching from my back porch and it's surprisingly calming.
+- I've been getting really into puzzles and it's become my main way to wind down at night.
+- I've been meaning to start a journaling habit for years and I never actually do it.
+- I've been ordering way too much takeout lately. I feel gross and my budget is hurting.
+- I've been renovating my house room by room and I'm losing my mind living in a construction zone.
+- I've been sketching again after like ten years of not touching a pencil. It feels amazing.
+- I've been so cold all the time lately, even indoors with the heat on.
+- I've been spending a lot of time in my car lately just sitting in parking lots because I don't want to go home yet.
+- I've been taking cold showers every morning and I feel like a completely different person.
+- I've been trying to drink more water but I keep forgetting throughout the day.
+- I've been trying to drink more water, but I hate the taste of my tap water.
+- I've been trying to eat lunch at my desk and it always ends up being sad and depressing.
+- I've been trying to get into tea instead of coffee because coffee gives me jitters.
+- I've been trying to remember to take my vitamins every day and failing completely.
+- I've been waking up at 4:30am naturally and I kind of love it but I crash hard by 7pm.
+- I've been waking up feeling like I got hit by a truck every morning, and it's starting to really mess with my head.
+- I've been walking my dog at 5am to avoid running into other people and their dogs.
+- I've been walking to work every day since my car broke down and I'm actually starting to enjoy it.
+- If you drop a penny from the Empire State Building, would it actually crack the sidewalk?
+- Ironing my work shirts takes forever and I dread it every Sunday night.
+- Is it true that humans only use 10% of their brains?
+- Is it true that octopuses have three hearts?
+- I’m so tired of my clothes being a wrinkled mess when I travel.
+- My HOA fees went up again and I do not know how to budget for it.
+- My USB ports on my laptop are always occupied and I constantly need to swap cables to plug things in.
+- My Wi Fi drops out when the microwave runs.
+- My allergies have been absolutely brutal this year and I'm miserable from March through June.
+- My apartment lights flicker when the AC kicks on.
+- My area rug keeps slipping on the hardwood floor and I almost wiped out this morning.
+- My back is absolutely killing me.
+- My bath towel never dries properly and smells mildewy by day two.
+- My bathroom exhaust fan is so loud it sounds like a jet engine taking off.
+- My bathroom grout looks permanently dirty no matter how much I scrub it by hand.
+- My bathroom mirror fogs up completely every single shower. I have to wait five minutes before I can see anything.
+- My bathroom scale gives me a different number every time I step on it. Three readings, three different weights.
+- My bathtub drain stopper doesn't hold water anymore. I can't take a bath because it drains as fast as it fills.
+- My bed sheets are constantly popping off the corners of my mattress in the middle of the night.
+- My bedside table is so chaotic I keep knocking my glasses on the floor when my alarm goes off.
+- My bike chain keeps jumping off the gears when I shift on hills.
+- My blender smells weird no matter how much I clean it.
+- My body makes weird noises lately and it's concerning me.
+- My car's cup holders are too small for my water bottle and it tips over every time I turn.
+- My car's windshield wipers are leaving horrible streaks. I can't see anything when it rains.
+- My carpet has all these dents from where my furniture used to sit and they won't go away.
+- My cast iron pan has gone completely rusty. I used it for years and now it looks terrible.
+- My cat always tracks litter all over the bathroom floor.
+- My cat keeps waking me up at 4 AM demanding food. I'm losing my mind.
+- My cat won't stop scratching the furniture.
+- My cat's water bowl is always empty when I get home from work and I feel terrible about it.
+- My chair squeaks.
+- My charging cables always break right at the neck where they plug into my phone.
+- My closet feels so cramped and stuffy, I can barely push my clothes apart to see what I have.
+- My closet is a chaotic mess and I always wear the same three shirts because I cannot find anything.
+- My closet smells musty and it transfers onto all my clothes. I take them out and they smell like a basement.
+- My clothes look dull and dingy even right after washing. Like everything has this grey film on it.
+- My code keeps throwing a null pointer exception and I can't figure out why.
+- My coffee is always ice cold by the time I get to the bottom of the mug.
+- My coffee tastes bitter no matter what I do.
+- My commute is only fifteen minutes but it somehow feels like it drains all my energy before the day even starts.
+- My cutting board slides all over the counter when I'm chopping. It's honestly kind of dangerous.
+- My daughter just started violin lessons and the practice sounds are testing the limits of my sanity.
+- My desk chair keeps sinking down throughout the day. I raise it every morning and by afternoon I'm basically at knee height.
+- My desk chair wheels are completely chewing up my hardwood floor.
+- My desk is a complete disaster area. It is just piles of random paper everywhere.
+- My desk is always cluttered.
+- My dog keeps destroying every toy I buy him.
+- My dog tracks a horrific amount of mud into the house every time it rains.
+- My dog whines nonstop when I leave and it is driving my neighbors crazy.
+- My dog's barking too much.
+- My dog's hair is permanently woven into my car seats.
+- My earbuds keep falling out when I run.
+- My earrings keep turning my earlobes green and irritated.
+- My elbows are raw and peeling from leaning on my desk all day while I work.
+- My electricity bill was $300 this month!
+- My ethernet cable keeps getting yanked out of my laptop because people trip over it walking past my desk.
+- My eyeglasses fog up instantly every time I walk indoors from the cold.
+- My garage smells like gasoline all the time. It seeps into the house through the door.
+- My garden hose kinks every single time I try to water my lawn. I spend more time unkinking than watering.
+- My garden is overrun with weeds.
+- My glasses fog up completely every time I wear a face mask or scarf.
+- My glasses keep sliding down my nose every time I look down at my phone.
+- My goldfish seems to just swim in circles all day. Is it bored?
+- My grocery bags keep ripping mid-walk and spilling everything. It's embarrassing.
+- My guitar always goes out of tune as soon as I start playing.
+- My hair's a mess every morning.
+- My hands get absolutely frozen when I'm pushing the stroller in the winter.
+- My hands get so incredibly dry and cracked from washing dishes.
+- My handwriting is atrocious. I can barely read my own notes.
+- My hat blows off in the wind.
+- My heavy winter coats are bending the closet rod from the weight.
+- My heels are completely destroyed after standing at the register all shift.
+- My home office setup feels like it's working against me somehow.
+- My ice cream is always rock solid and bends my spoons.
+- My ice cream scoops always come out looking like mangled lumps instead of those nice round balls you see at shops.
+- My ice maker stopped working.
+- My inbox is a nightmare. Thousands of unread emails.
+- My kitchen cabinets are a chaotic mess. I can never find the pan I need without causing an avalanche.
+- My kitchen knives are just throwing in the towel lately.
+- My kitchen knives can't cut anything anymore.
+- My kitchen sponges smell like a swamp after three days.
+- My knees absolutely kill me when I have to weed the garden.
+- My knees ache whenever I have to scrub the bathtub.
+- My laptop battery barely lasts two hours anymore. It used to go all day.
+- My laptop runs so hot it actually burns my legs when I work on the couch.
+- My leather couch is cracking and peeling and it looks ten years older than it actually is.
+- My living room just feels wrong somehow. I can't put my finger on it.
+- My lower back absolutely kills me during my hour-long commute. By the time I get to work I already feel wrecked.
+- My lower back has been aching after long days at my desk. I cannot deal with it anymore.
+- My mail slot lets in a freezing draft all winter. I can feel cold air pouring through it even when nothing is being delivered.
+- My morning coffee just doesn't taste right anymore and I don't know what changed.
+- My mornings are total chaos. I'm always rushing and forgetting something.
+- My neckties are always sliding off the hanger and ending up on the closet floor.
+- My new leather dress shoes are absolutely tearing up the back of my heels.
+- My outdoor space just feels completely neglected. I want it to feel nice but I don't know where to start.
+- My pancakes always burn on the outside before the inside is cooked through. Every single time.
+- My pasta always clumps into one giant mass after I drain it.
+- My phone battery dies too quick.
+- My phone screen is constantly covered in greasy fingerprints and smudges.
+- My phone screen is impossible to see when I'm outside in the sun. I basically can't use it at all.
+- My pillow slides off the bed every night and I wake up with nothing under my head.
+- My plants always look so sad and droopy.
+- My produce goes bad so fast. I buy a bunch of vegetables and half of them are slimy by day three.
+- My reusable water bottle always smells weird no matter how many times I wash it.
+- My rings keep spinning around on my fingers throughout the day and the stone ends up under my palm.
+- My router drops connections when multiple devices stream at once.
+- My shoelaces come untied constantly. I feel like a little kid.
+- My shoes are falling apart.
+- My shower curtain keeps billowing inward and sticking to me the whole time I shower. It's infuriating.
+- My shower drain is constantly clogged with hair.
+- My shower takes forever to heat up.
+- My skin has been so dry and flaky lately and nothing I do seems to fix it.
+- My smoke detector keeps chirping in the middle of the night and I cannot figure out which one it is.
+- My smoothie always comes out chunky and leaves chunks of spinach at the bottom.
+- My stainless steel pots and pans have these white chalky spots all over them that won't come off no matter what I scrub with.
+- My steering wheel gets so hot in the summer I literally cannot grip it when I first get in the car.
+- My succulents are all etiolated. They look so sad and stretched out.
+- My suitcase is always so heavy I can barely lift it into the overhead bin without embarrassing myself.
+- My sunglasses always end up scratched from rattling around in my bag.
+- My sweaters always get stretched out shoulders from hanging in the closet.
+- My technology seems to fail me at the worst possible moments.
+- My teenager just got their learner's permit and I am losing years off my life teaching them to drive.
+- My tomato plants keep getting holes in their leaves and I am killing my seedlings.
+- My trash bag always slips down inside the can when it gets heavy.
+- My trash can lid slams so loudly every time. It echoes through the whole kitchen.
+- My umbrella broke in the wind.
+- My voice gets so tired when I have to present or teach for long periods. By the end I'm almost whispering.
+- My whole routine feels like it's held together with tape and it could fall apart any day.
+- My windshield is always completely fogged up on the inside when I leave for work.
+- My wine glasses always come out of the dishwasher covered in cloudy water spots no matter what I do.
+- My wooden deck is so slippery when it rains that I nearly fall every time I step outside.
+- My wooden spoons are cracked and splintering and I keep finding tiny wood chips in my food.
+- My workouts leave me sore for days.
+- My wrists ache after a few hours of typing. It's been getting worse.
+- Something about my bedroom just doesn't feel restful. I can't relax in there.
+- Something about my shower experience just feels off but I can't figure out what.
+- Something about the way I manage my time is fundamentally broken and I can't figure out what.
+- Something feels off about my daily routine lately, and I can't quite put my finger on what's wrong.
+- The air in my apartment just feels heavy and weird lately. It is hard to describe.
+- The area around my bathroom sink is always a wet, soapy disaster. It drives me crazy.
+- The paint is chipping on my baseboards. It looks terrible.
+- The zipper on my favorite jacket keeps separating from the bottom.
+- The zipper on my tent gets stuck every time I try to open it from the inside.
+- There's something about my yard that just feels unwelcoming and I can't figure it out.
+- Traveling is so exhausting for me because I always wake up on planes with a terrible neck ache.
+- Ugh, my phone battery is dead by 2 PM every single day. It's ridiculous.
+- What actually causes static electricity?
+- What causes rainbows?
+- What causes that new car smell?
+- What causes thunder?
+- What does 'inflation' mean?
+- What does 'procrastination' mean?
+- What does 'serendipity' mean?
+- What does 'ubiquitous' mean?
+- What does ephemeral mean?
+- What exactly is a superconductor? I keep hearing about breakthroughs in the news.
+- What exactly is the speed of sound? Is it constant everywhere?
+- What is 'Occam's Razor'?
+- What is 2 plus 2?
+- What is AI?
+- What is DNA?
+- What is a 'Pyrrhic victory'?
+- What is a black hole?
+- What is a haiku?
+- What is a supernova?
+- What is cryptocurrency?
+- What is dark matter?
+- What is inflation?
+- What is photosynthesis?
+- What is relativity?
+- What is the 'Dunning-Kruger effect'?
+- What is the 'placebo effect'?
+- What is the Coriolis effect? I keep seeing the term but I only vaguely understand it.
+- What is the Fermi paradox?
+- What is the Mandela Effect?
+- What is the actual purpose of a leap year?
+- What is the boiling point of water?
+- What is the capital of Sweden?
+- What is the difference between bourbon and whiskey?
+- What is the fastest marine mammal?
+- What is the loneliest number?
+- What is the most expensive liquid in the world?
+- What is the square root of 144?
+- What the hell does omnipresent even mean?
+- What time is it in Paris right now?
+- What time is it in Tokyo right now?
+- What year did the Titanic actually sink?
+- What year was the Eiffel Tower actually built?
+- What's 15% of 380?
+- What's good
+- What's the Fibonacci sequence and why do people make such a big deal about it?
+- What's the actual difference between a violin and a fiddle?
+- What's the best way to learn a new language?
+- What's the deal with mercury in old thermometers? Why did we stop using it?
+- What's the deal with the prophecy of the Maya calendar? Didn't the world end already?
+- What's the difference between RAM and storage?
+- What's the difference between a crocodile and an alligator?
+- What's the difference between a hurricane and a typhoon?
+- What's the difference between a hurricane, a typhoon, and a cyclone?
+- What's the difference between a meteor and a meteorite?
+- What's the difference between baking soda and baking powder?
+- What's the difference between stalactites and stalagmites? I always mix them up.
+- What's the meaning of life?
+- What's the most spoken language in the world?
+- What's the oldest tree in the world?
+- What's the origin of the phrase 'the whole nine yards'?
+- What's the population of Tokyo?
+- What's the science behind why some people are morning people and others are night owls?
+- What's the speed of light?
+- What's the speed of sound?
+- What's the tallest building in the world right now?
+- What's up
+- When was the telephone invented?
+- Who invented the modern zipper? It is such a brilliant little piece of engineering.
+- Who invented the telephone?
+- Who is the Mona Lisa?
+- Who was Icarus? The name sounds familiar.
+- Who was the 16th president of the United States?
+- Who was the first person to walk on the moon?
+- Who won the World Cup in 2018?
+- Who's the president of the US?
+- Why do airplane windows have that tiny hole at the bottom?
+- Why do cats always land on their feet?
+- Why do cats purr even when they're stressed or injured?
+- Why do cats purr? I know it means they are happy, but is there a biological reason?
+- Why do my feet hurt so much after work?
+- Why do old photographs always look slightly yellow?
+- Why do onions make you cry when you cut them?
+- Why do some languages read right to left instead of left to right?
+- Why does the moon look so much bigger when it is near the horizon compared to when it is high in the sky?
+- Why is the ocean salty but lakes and rivers aren't?
+- Why is the sky blue?
+- Yo
+
+**Excluded product categories (from SFT + eval - 121 unique):**
+- Heated keyboard/desk pads
+- Water filter pitchers or faucet filters
+- Blackout curtains/shades/window film
+- E-readers
+- Hydration bladders/packs
+- Moisture meters (for plants)
+- Self-watering planters
+- Closet organizers
+- Air purifiers/dehumidifiers
+- Scratching posts for cats
+- Floor/table lamps
+- Exhaust fans
+- Bag organizers
+- air purifier
+- app
+- arch support
+- bag
+- blade
+- blanket
+- blind
+- bluetooth tracker
+- boot
+- cable
+- cable management system
+- car vacuum
+- charger
+- chew toy
+- cleaner
+- clothes hanger
+- coffee maker
+- cooking pan
+- cream
+- cutting board
+- decorative rocks
+- dehumidifier
+- desk
+- desk organizer
+- drying rack
+- e-reader
+- enzyme cleaner
+- ergonomic chair
+- fan
+- filter
+- first aid kit
+- flashlight
+- foam roller
+- garden hose
+- garment steamer
+- gate
+- glasses
+- gooseneck kettle
+- grow light
+- hat
+- headphones
+- heater
+- holder
+- hook
+- inbox tray
+- journal
+- key organizer
+- keyboard
+- kitchen mat
+- knife sharpener
+- lamp
+- level
+- lotion
+- mat
+- mattress
+- mattress pad
+- mechanical pencil
+- monitor
+- mulch
+- notebook
+- organizer
+- orthotic insole
+- paper shredder
+- pegboard
+- pen
+- pillow
+- plant stake
+- planter
+- portable power bank
+- potting soil
+- power drill
+- rack
+- razor blade
+- recycling bin
+- roller
+- router
+- safe
+- scale
+- scraper
+- screwdriver
+- seat
+- self-watering planter
+- shelf
+- shoe rack
+- skillet
+- smart thermostat
+- spatula/turner
+- spray
+- stand
+- storage bin
+- storage box
+- storage container
+- support
+- table
+- tape
+- thermometer
+- timer
+- tote bag
+- tray
+- vacuum cleaner
+- water bottle
+- white noise machine
+- whiteboard
+- window screen
+- window shade
+- window tint
+- wireless earbuds
+
+**Excluded topic domains (from SFT dataset - 20 unique):**
+- automotive
+- clothing/personal items
+- education/learning
+- finance/organization
+- food/cooking
+- general knowledge
+- general lifestyle
+- hobbies/creativity
+- home maintenance
+- personal health
+- pets
+- plants/gardening
+- science/nature
+- shopping/purchases
+- sleep/rest
+- social/relationships
+- technology
+- travel
+- weather/environment
+- work/productivity

@@ -1,0 +1,19 @@
+{
+  "output": "DPO_522_prompt_a_and_prompt_b_V2.jsonl",
+  "lines": 522,
+  "dpo_source_counts": {
+    "prompt_a": 330,
+    "prompt_b_repaired": 92,
+    "prompt_b_exp500": 100
+  },
+  "inputs": {
+    "prompt_a": "dataset\\dpo_330_prompt_a_V2.jsonl",
+    "repaired": "DPO_PART_B\\final\\DPO2_pairs_repaired.jsonl",
+    "exp500_golden": "DPO_PART_B\\eval\\results\\DPO2_pairs_exp500_golden_merged.jsonl"
+  },
+  "dpo_source_legend": {
+    "prompt_a": "Prompt A, synthetic preference pairs (330)",
+    "prompt_b_repaired": "Prompt B, repaired on-policy (92)",
+    "prompt_b_exp500": "Prompt B, exp500 web golden (100)"
+  }
+}

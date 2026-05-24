@@ -1,0 +1,26 @@
+# Models & training outputs
+dpo/train/models/
+dpo/train/mlruns/
+dpo/train/cache/
+train/models/
+Qwen*/
+*.npz
+*.safetensors
+**/best_adapter/
+**/checkpoint-*/
+
+# Archives & junk
+*.rar
+*.zip
+*:Zone.Identifier
+**/.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.log
+
+# Large optional dataset copies (V4 repaired is tracked)
+dpo/dataset/DPO_522_prompt_a_and_prompt_b_V2.jsonl
+dpo/dataset/DPO_192_PROMPT_B_SFT_MODEL_OUTPUT_V2.jsonl
+dpo/dataset/dpo_330_prompt_a_V2.jsonl
