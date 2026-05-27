@@ -12,7 +12,8 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from dpo.train.mlflow_study import backfill_study_from_summary
 from dpo.train.paths import EXPERIMENT_NAME, MLRUNS_DIR
-from dpo.train.study_report import write_study_report
+from dpo.train.study_report import write_study_report as write_study_report_v1
+from dpo.train.study_report_v2 import write_study_report as write_study_report_v2
 
 
 def main() -> None:
@@ -27,20 +28,44 @@ def main() -> None:
     parser.add_argument(
         "--skip-html",
         action="store_true",
-        help="Do not regenerate study_report.html",
+        help="Do not regenerate HTML reports",
+    )
+    parser.add_argument(
+        "--v2",
+        action="store_true",
+        help="Use study_report_v2.py → study_report_v2.html; MLflow parent name gets -v2 suffix",
     )
     args = parser.parse_args()
     summary_path = args.summary.resolve()
     if not summary_path.is_file():
         raise SystemExit(f"Not found: {summary_path}")
 
+    run_dir = summary_path.parent
+    report_paths: list[Path] = []
     if not args.skip_html:
-        report = write_study_report(summary_path)
-        print(f"HTML report: file://{report.resolve()}")
+        if args.v2:
+            report = write_study_report_v2(
+                summary_path, output_path=run_dir / "study_report_v2.html"
+            )
+            report_paths.append(report)
+        else:
+            report = write_study_report_v1(summary_path)
+            report_paths.append(report)
+        print(f"HTML report: file://{report_paths[0].resolve()}")
+    elif args.v2:
+        candidate = run_dir / "study_report_v2.html"
+        if candidate.is_file():
+            report_paths.append(candidate)
+    else:
+        candidate = run_dir / "study_report.html"
+        if candidate.is_file():
+            report_paths.append(candidate)
 
     parent_id = backfill_study_from_summary(
         summary_path,
         parent_run_name=args.parent_run_name,
+        parent_name_suffix="v2" if args.v2 and not args.parent_run_name else "",
+        report_paths=report_paths or None,
     )
     uri = f"file://{MLRUNS_DIR.resolve()}"
     print(f"MLflow tracking: {uri}")

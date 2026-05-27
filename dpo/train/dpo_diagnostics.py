@@ -272,6 +272,36 @@ def apply_trial_diagnostics(
     return payload
 
 
+def compute_hybrid_score_v1_1(
+    *,
+    accuracy: float,
+    macro_family_category: float | None,
+    margin: float | None,
+    eval_loss: float | None,
+    len_corr: float | None,
+    abs_len_corr: float | None,
+) -> float:
+    """Scalar objective for Optuna v1.1 (accuracy-first with guardrail penalties)."""
+    score = float(accuracy)
+    if macro_family_category is not None:
+        score -= 0.50 * max(0.0, 0.95 - float(macro_family_category))
+    if len_corr is not None:
+        score -= 0.15 * max(0.0, abs(float(len_corr)) - 0.35)
+    if abs_len_corr is not None:
+        score -= 0.15 * max(0.0, abs(float(abs_len_corr)) - 0.40)
+    if eval_loss is not None:
+        score -= 0.03 * max(0.0, float(eval_loss) - 0.50)
+    if margin is not None:
+        m = float(margin)
+        if m < 0:
+            score -= 0.20
+        elif m < 0.50:
+            score -= 0.05 * (0.50 - m)
+        elif m > 20:
+            score -= min(0.20, 0.002 * (m - 20))
+    return score
+
+
 def log_trial_scorecard(prefix: str, trial_number: int, scorecard: dict, val_diag: dict | None) -> None:
     log_line(prefix, f"{'=' * 56}")
     log_line(prefix, f"TRIAL {trial_number} COMPLETE")
@@ -298,14 +328,14 @@ def build_study_review(study) -> dict[str, Any]:
     from optuna.trial import TrialState
 
     complete = [t for t in study.trials if t.state == TrialState.COMPLETE]
-    ranked = sorted(complete, key=lambda t: t.value or -1, reverse=True)
-    top = ranked[:5]
 
     def _trial_row(t):
         ua = t.user_attrs
+        raw_acc = ua.get("eval_rewards_accuracy")
         return {
             "trial": t.number,
-            "eval_rewards_accuracy": t.value,
+            "eval_rewards_accuracy": raw_acc if raw_acc is not None else t.value,
+            "hybrid_score_v1_1": ua.get("hybrid_score_v1_1", t.value),
             "eval_rewards_margin": ua.get("eval_rewards_margin"),
             "macro_accuracy_by_source_family_category": ua.get(
                 "macro_accuracy_by_source_family_category"
@@ -339,8 +369,30 @@ def build_study_review(study) -> dict[str, Any]:
         if t.user_attrs.get("queued_for_solo_retry") or t.user_attrs.get("solo_retry")
     ]
 
+    duplicate_pruned = [
+        {
+            "trial": t.number,
+            "duplicate_of": t.user_attrs.get("duplicate_of"),
+            "failure_reason": t.user_attrs.get("failure_reason"),
+        }
+        for t in study.trials
+        if t.user_attrs.get("failure_reason") == "duplicate_params"
+    ]
+
+    top_hybrid = sorted(
+        complete,
+        key=lambda t: t.user_attrs.get("hybrid_score_v1_1", t.value or -1),
+        reverse=True,
+    )[:5]
+
     return {
-        "top_by_accuracy": [_trial_row(t) for t in top],
+        "top_by_accuracy": [_trial_row(t) for t in sorted(
+            complete,
+            key=lambda t: t.user_attrs.get("eval_rewards_accuracy", t.value or -1) or -1,
+            reverse=True,
+        )[:5]],
+        "top_by_hybrid_score": [_trial_row(t) for t in top_hybrid],
+        "duplicate_pruned": duplicate_pruned,
         "top_by_macro_family_category": sorted(
             [_trial_row(t) for t in complete],
             key=lambda r: r.get("macro_accuracy_by_source_family_category") or 0,

@@ -17,3 +17,14 @@ MODEL_ID_FP8 = REPO_ROOT / "Qwen3-4B-Instruct-2507-FP8"
 SFT_ADAPTER = REPO_ROOT / "train/models/steering-sft-v1.1/trial-17/best_adapter"
 
 EXPERIMENT_NAME = "steering-dpo-v1.0"
+EXPERIMENT_NAME_V1_1 = "steering-dpo-v1.1"
+
+
+def experiment_name_for_version(study_version: str) -> str:
+    if study_version == "v1.1":
+        return EXPERIMENT_NAME_V1_1
+    return EXPERIMENT_NAME
+
+
+def output_experiment_dir(study_version: str) -> Path:
+    return OUTPUT_BASE / experiment_name_for_version(study_version)

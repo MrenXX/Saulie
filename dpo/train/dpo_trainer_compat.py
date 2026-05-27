@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import fcntl
+import os
+import statistics
 import time
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
@@ -168,6 +171,20 @@ class AssistantOnlyDPOCollator(DataCollatorMixin):
         return output
 
 
+class TrialWallTimeout(Exception):
+    """Training step or trial exceeded wall-clock budget."""
+
+
+def _wall_limit_s(name: str, default: float) -> float:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
 class TrainingHeartbeatCallback(TrainerCallback):
     """Periodic progress lines when stdout is redirected to a log file."""
 
@@ -193,6 +210,115 @@ class TrainingHeartbeatCallback(TrainerCallback):
         self.log_fn(
             f"heartbeat step={state.global_step} epoch={epoch} loss={loss}"
         )
+        return control
+
+
+class StepWatchdogCallback(TrainerCallback):
+    """Log per-step wall time; prune stall cliffs (8x median), not normal slow configs."""
+
+    def __init__(
+        self,
+        *,
+        trial_number: int,
+        worker_id: int | None,
+        log_fn: Callable[[str], None] | None = None,
+        max_step_wall_s: float | None = None,
+        max_trial_wall_s: float | None = None,
+        stall_multiplier: float | None = None,
+        stall_min_step_s: float | None = None,
+    ):
+        self.trial_number = trial_number
+        self.worker_id = worker_id
+        self.log_fn = log_fn
+        # Hard ceilings only for true hangs (override via env). Defaults allow 2–3 epoch runs.
+        self.max_step_wall_s = max_step_wall_s or _wall_limit_s(
+            "DPO_MAX_STEP_WALL_S", 3 * 3600
+        )
+        self.max_trial_wall_s = max_trial_wall_s or _wall_limit_s(
+            "DPO_MAX_TRIAL_WALL_S", 12 * 3600
+        )
+        self.stall_multiplier = stall_multiplier or _wall_limit_s(
+            "DPO_STALL_STEP_MULTIPLIER", 8.0
+        )
+        self.stall_min_step_s = stall_min_step_s or _wall_limit_s(
+            "DPO_STALL_MIN_STEP_S", 120.0
+        )
+        self._trial_t0 = time.monotonic()
+        self._prev_log_mono: float | None = None
+        self._recent_step_walls: deque[float] = deque(maxlen=12)
+
+    def _gpu_snap(self) -> dict:
+        if not torch.cuda.is_available():
+            return {}
+        return {
+            "alloc_gb": round(torch.cuda.memory_allocated() / 1e9, 2),
+            "reserved_gb": round(torch.cuda.memory_reserved() / 1e9, 2),
+        }
+
+    def on_log(
+        self,
+        args: TrainingArguments,
+        state: TrainerState,
+        control: TrainerControl,
+        logs: dict | None = None,
+        **kwargs,
+    ) -> TrainerControl:
+        now = time.monotonic()
+        trial_wall = now - self._trial_t0
+        step_wall = None
+        if self._prev_log_mono is not None:
+            step_wall = now - self._prev_log_mono
+        self._prev_log_mono = now
+        prior = list(self._recent_step_walls)
+        stall_threshold = None
+        med_prior = None
+        if step_wall is not None and len(prior) >= 3:
+            med_prior = statistics.median(prior)
+            if med_prior > 0:
+                stall_threshold = max(
+                    self.stall_min_step_s, self.stall_multiplier * med_prior
+                )
+        if (
+            step_wall is not None
+            and step_wall >= 600
+            and self.log_fn is not None
+        ):
+            snap = self._gpu_snap()
+            self.log_fn(
+                f"step_wall_s={step_wall:.0f} step={state.global_step} "
+                f"vram_alloc={snap.get('alloc_gb', '?')}GB"
+            )
+        if (
+            step_wall is not None
+            and stall_threshold is not None
+            and step_wall > stall_threshold
+        ):
+            msg = (
+                f"step_stall step_wall_s={step_wall:.0f} > {stall_threshold:.0f} "
+                f"(median_prior={med_prior:.0f}s, "
+                f"trial={self.trial_number} step={state.global_step})"
+            )
+            if self.log_fn:
+                self.log_fn(f"WATCHDOG PRUNE: {msg}")
+            raise TrialWallTimeout(msg)
+        if step_wall is not None:
+            self._recent_step_walls.append(step_wall)
+        if step_wall is not None and step_wall > self.max_step_wall_s:
+            msg = (
+                f"step_wall_s={step_wall:.0f} > {self.max_step_wall_s:.0f} "
+                f"(trial={self.trial_number} step={state.global_step})"
+            )
+            if self.log_fn:
+                self.log_fn(f"WATCHDOG PRUNE: {msg}")
+            raise TrialWallTimeout(msg)
+        if trial_wall > self.max_trial_wall_s:
+            msg = (
+                f"trial_wall_s={trial_wall:.0f} > {self.max_trial_wall_s:.0f} "
+                f"(trial={self.trial_number})"
+            )
+            if self.log_fn:
+                self.log_fn(f"WATCHDOG PRUNE: {msg}")
+            raise TrialWallTimeout(msg)
         return control
 
 

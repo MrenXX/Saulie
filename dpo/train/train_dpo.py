@@ -86,6 +86,10 @@ def parse_length_mode(length_mode: str) -> tuple[list[str], float | None, bool]:
                 f"TRL {trl.__version__} lacks sigmoid_norm; upgrade trl>=1.0"
             )
         return ["sigmoid_norm"], None, False
+    if length_mode == "ld_0.1":
+        return ["sigmoid"], 0.1, False
+    if length_mode == "ld_0.2":
+        return ["sigmoid"], 0.2, False
     if length_mode == "ld_0.3":
         return ["sigmoid"], 0.3, False
     if length_mode == "ld_0.5":
@@ -265,8 +269,13 @@ def run_training(
     *,
     live_logging: bool = False,
     heartbeat_log: Callable | None = None,
+    trial_number: int | None = None,
+    worker_id: int | None = None,
 ) -> tuple[AssistantOnlyDPOTrainer, object, dict]:
-    from dpo.train.dpo_trainer_compat import TrainingHeartbeatCallback
+    from dpo.train.dpo_trainer_compat import (
+        StepWatchdogCallback,
+        TrainingHeartbeatCallback,
+    )
     from dpo.train.ref_logprob_cache import get_last_ref_cache_meta
 
     collator = AssistantOnlyDPOCollator(
@@ -276,6 +285,14 @@ def run_training(
     callbacks = []
     if live_logging and heartbeat_log is not None:
         callbacks.append(TrainingHeartbeatCallback(heartbeat_log))
+    if trial_number is not None:
+        callbacks.append(
+            StepWatchdogCallback(
+                trial_number=trial_number,
+                worker_id=worker_id,
+                log_fn=heartbeat_log,
+            )
+        )
 
     trainer = AssistantOnlyDPOTrainer(
         model=model,
@@ -514,7 +531,11 @@ def _ensure_optuna_data(dummy_report_path: Path | None = None):
 
 
 def derive_trial_params(params: dict) -> dict:
+    from dpo.train import optuna_parallel as op
+
     lora_r = params["lora_r"]
+    if "batch_combo" in params and "per_device_train_batch_size" not in params:
+        params = op.expand_params_for_training(params)
     batch_size = params["per_device_train_batch_size"]
     grad_accum = params["gradient_accumulation_steps"]
     loss_type, ld_alpha, use_weighting = parse_length_mode(params["length_mode"])
@@ -538,6 +559,7 @@ def run_optuna_trial(
     from dpo.train.dpo_diagnostics import (
         apply_trial_diagnostics,
         build_trial_scorecard,
+        compute_hybrid_score_v1_1,
         compute_val_diagnostics,
         get_provenance,
         log_line,
@@ -548,9 +570,9 @@ def run_optuna_trial(
     from dpo.train.ref_logprob_cache import reset_ref_cache_meta
 
     if parent_run_id():
+        os.environ.setdefault("MLFLOW_EXPERIMENT_NAME", cfg.experiment_name)
         setup_mlflow()
 
-    datasets, tokenizer = _ensure_optuna_data(cfg.dummy_report_path)
     is_solo = solo_record is not None
     is_parallel_worker = cfg.worker_id is not None and not is_solo
     prefix = worker_prefix(cfg.worker_id, solo=is_solo)
@@ -563,7 +585,7 @@ def run_optuna_trial(
     stage = "init"
 
     if is_solo:
-        params = dict(solo_record["params"])
+        params = op.expand_params_for_training(dict(solo_record["params"]))
         trial.set_user_attr("solo_retry", True)
         trial.set_user_attr("requires_solo", True)
         orig = solo_record.get("original_trial_numbers") or [
@@ -574,9 +596,14 @@ def run_optuna_trial(
             [n for n in orig if n is not None],
         )
     else:
-        params = op.sample_trial_params(trial)
+        params = op.sample_trial_params(trial, cfg)
+        op.check_duplicate_params(trial)
+        op.set_sampler_trial_metadata(trial, cfg)
+        if op.params_key(dict(trial.params)) == op.params_key(op.ANCHOR_TRIAL_PARAMS_V11):
+            trial.set_user_attr("anchor_trial", True)
 
     derived = derive_trial_params(params)
+    datasets, tokenizer = _ensure_optuna_data(cfg.dummy_report_path)
     mlflow_logged = False
     scorecard = None
 
@@ -602,7 +629,9 @@ def run_optuna_trial(
     trial_dir = cfg.run_dir / f"trial-{trial.number}"
 
     try:
-        if derived["effective_batch"] < 4 or derived["effective_batch"] > 16:
+        if cfg.study_version != "v1.1" and (
+            derived["effective_batch"] < 4 or derived["effective_batch"] > 16
+        ):
             trial.set_user_attr(
                 "failure_reason",
                 f"effective_batch={derived['effective_batch']} outside [4,16]",
@@ -652,14 +681,24 @@ def run_optuna_trial(
         )
         stage = "precompute_ref_and_train"
         log_line(prefix, "stage=precompute_ref+train (ref cache logged during trainer init)")
-        trainer, train_result, metrics, adapter_diag, ref_cache = run_training(
-            model,
-            datasets,
-            tokenizer,
-            dpo_args,
-            live_logging=True,
-            heartbeat_log=lambda msg: log_line(prefix, msg),
-        )
+        from dpo.train.dpo_trainer_compat import TrialWallTimeout
+        from dpo.train.gpu_train_lock import gpu_train_lock
+
+        try:
+            with gpu_train_lock(cfg.run_dir, cfg.worker_id):
+                trainer, train_result, metrics, adapter_diag, ref_cache = run_training(
+                    model,
+                    datasets,
+                    tokenizer,
+                    dpo_args,
+                    live_logging=True,
+                    heartbeat_log=lambda msg: log_line(prefix, msg),
+                    trial_number=trial.number,
+                    worker_id=cfg.worker_id,
+                )
+        except TrialWallTimeout as e:
+            trial.set_user_attr("failure_reason", str(e))
+            raise optuna.TrialPruned(f"wall_timeout: {e}") from e
         for split, meta in ref_cache.get("splits", {}).items():
             hit = "HIT" if meta.get("hit") else "MISS"
             log_line(prefix, f"ref_cache {split}: {hit} {meta.get('path')}")
@@ -704,9 +743,27 @@ def run_optuna_trial(
         acc = metrics.get("eval_rewards/accuracies")
         if acc is None:
             raise RuntimeError("Missing eval_rewards/accuracies")
+        acc_f = float(acc)
+        trial.set_user_attr("eval_rewards_accuracy", acc_f)
+        objective = acc_f
+        if cfg.study_version == "v1.1":
+            hybrid = compute_hybrid_score_v1_1(
+                accuracy=acc_f,
+                macro_family_category=val_diag.get("macro_accuracy_by_source_family_category")
+                if val_diag
+                else None,
+                margin=scorecard.get("eval_rewards_margin"),
+                eval_loss=scorecard.get("eval_loss"),
+                len_corr=val_diag.get("margin_vs_length_delta_corr") if val_diag else None,
+                abs_len_corr=val_diag.get("margin_vs_abs_length_delta_corr") if val_diag else None,
+            )
+            trial.set_user_attr("hybrid_score_v1_1", hybrid)
+            objective = hybrid
         log_trial_scorecard(prefix, trial.number, scorecard, val_diag)
+        if cfg.study_version == "v1.1":
+            log_line(prefix, f"  hybrid_score_v1_1={objective:.4f}")
         _log_mlflow("COMPLETE")
-        return float(acc)
+        return objective
 
     except torch.cuda.OutOfMemoryError as e:
         vram_oom = op.cuda_mem_snapshot()
@@ -770,12 +827,12 @@ def run_optuna(args):
     print("=" * 60)
 
     mlflow.set_tracking_uri(f"file://{MLRUNS_DIR}")
-    mlflow.set_experiment(EXPERIMENT_NAME)
 
     if args.optuna_worker:
         if args.worker_id is None:
             raise SystemExit("--optuna-worker requires --worker-id")
         cfg = op.config_from_args(args)
+        mlflow.set_experiment(cfg.experiment_name)
         op.run_worker_loop(cfg, run_optuna_trial)
         return
 
@@ -783,10 +840,12 @@ def run_optuna(args):
         from dpo.train.mlflow_study import log_parent_study_summary
 
         cfg = op.config_from_args(args)
+        mlflow.set_experiment(cfg.experiment_name)
         _ensure_optuna_data(cfg.dummy_report_path)
         tracking_uri = f"file://{MLRUNS_DIR.resolve()}"
+        smoke_tag = "smoke" if args.optuna_smoke else "main"
         with mlflow.start_run(
-            run_name=f"optuna-parallel-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            run_name=f"optuna-parallel-{cfg.study_version}-{smoke_tag}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         ):
             parent_id = mlflow.active_run().info.run_id
             os.environ["MLFLOW_PARENT_RUN_ID"] = parent_id
@@ -796,10 +855,13 @@ def run_optuna(args):
                 "target_complete_trials": args.target_complete_trials,
                 "max_attempted_trials": args.max_attempted_trials,
                 "study_name": cfg.study_name,
+                "study_version": cfg.study_version,
                 "optuna_smoke": args.optuna_smoke,
+                "optuna_base_seed": cfg.optuna_base_seed,
                 "run_dir": str(cfg.run_dir.resolve()),
             })
             mlflow.set_tag("run_dir", str(cfg.run_dir.resolve()))
+            mlflow.set_tag("study_version", cfg.study_version)
             summary_path = op.run_parallel_launcher(
                 cfg,
                 run_optuna_trial,

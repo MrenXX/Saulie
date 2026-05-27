@@ -16,17 +16,46 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
+import numpy as np
 import optuna
 import torch
 from optuna.trial import TrialState
 
 from dpo.train.dpo_data import SPLIT_SEED, manifest_path_for_seed, manifest_sha256
-from dpo.train.paths import DATA_PATH, EXPERIMENT_NAME, OUTPUT_BASE
+from dpo.train.paths import (
+    DATA_PATH,
+    EXPERIMENT_NAME,
+    OUTPUT_BASE,
+    experiment_name_for_version,
+    output_experiment_dir,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OOM_SCHEMA_VERSION = 1
 DEFAULT_TARGET_COMPLETE = 20
 DEFAULT_MAX_ATTEMPTED = 60
+DEFAULT_MAX_ATTEMPTED_V11 = 45
+OPTUNA_BASE_SEED = 42
+OPTUNA_STARTUP_TRIALS = 10
+OPTUNA_SAMPLER_SETTINGS = {
+    "n_startup_trials": OPTUNA_STARTUP_TRIALS,
+    "multivariate": True,
+    "group": True,
+    "constant_liar": True,
+}
+
+ANCHOR_TRIAL_PARAMS_V11 = {
+    "beta": 0.05,
+    "num_train_epochs": 1,
+    "learning_rate": 2.3604024417191132e-05,
+    "lora_r": 16,
+    "lora_dropout": 0.05,
+    "batch_combo": "1x8",
+    "lr_scheduler_type": "constant_with_warmup",
+    "max_grad_norm": 1.0,
+    "neftune_noise_alpha": 5.0,
+    "length_mode": "ld_0.3",
+}
 VRAM_WAIT_CAP_S = 120
 VRAM_WAIT_NORMAL_GB = 10.5
 VRAM_WAIT_HIGH_GB = 12.0
@@ -46,10 +75,14 @@ class OptunaRunConfig:
     dummy_report_path: Path | None = None
     mlflow_parent_run_id: str | None = None
     mlflow_tracking_uri: str | None = None
+    study_version: str = "v1.1"
+    optuna_base_seed: int = OPTUNA_BASE_SEED
+    experiment_name: str = ""
 
 
-def default_study_name() -> str:
-    return f"{EXPERIMENT_NAME}-v4-seed{SPLIT_SEED}"
+def default_study_name(study_version: str = "v1.0") -> str:
+    exp = experiment_name_for_version(study_version)
+    return f"{exp}-v4-seed{SPLIT_SEED}"
 
 
 def default_study_db(run_dir: Path) -> Path:
@@ -64,25 +97,33 @@ def worker_queue_path(run_dir: Path, worker_id: int) -> Path:
     return run_dir / f"oom_retry_queue_worker_{worker_id}.jsonl"
 
 
-def create_run_dir() -> Path:
+def create_run_dir(study_version: str = "v1.1") -> Path:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_dir = OUTPUT_BASE / EXPERIMENT_NAME / f"optuna-run-{stamp}"
+    run_dir = output_experiment_dir(study_version) / f"optuna-run-{stamp}"
     run_dir.mkdir(parents=True, exist_ok=True)
     return run_dir
 
 
 def config_from_args(args: argparse.Namespace) -> OptunaRunConfig:
-    run_dir = Path(args.run_dir) if args.run_dir else create_run_dir()
+    study_version = getattr(args, "study_version", "v1.1")
+    exp_name = getattr(args, "experiment_name", None) or experiment_name_for_version(study_version)
+    run_dir = Path(args.run_dir) if args.run_dir else create_run_dir(study_version)
     storage = Path(args.study_storage) if args.study_storage else default_study_db(run_dir)
+    max_attempted = args.max_attempted_trials
+    if study_version == "v1.1" and max_attempted == DEFAULT_MAX_ATTEMPTED:
+        max_attempted = DEFAULT_MAX_ATTEMPTED_V11
     return OptunaRunConfig(
         run_dir=run_dir,
         study_storage=storage,
-        study_name=args.study_name or default_study_name(),
+        study_name=args.study_name or default_study_name(study_version),
         target_complete_trials=args.target_complete_trials,
-        max_attempted_trials=args.max_attempted_trials,
+        max_attempted_trials=max_attempted,
         parallel_workers=args.parallel_workers,
         worker_id=args.worker_id,
         dummy_report_path=Path(args.dummy_report) if getattr(args, "dummy_report", None) else None,
+        study_version=study_version,
+        optuna_base_seed=getattr(args, "optuna_base_seed", OPTUNA_BASE_SEED),
+        experiment_name=exp_name,
     )
 
 
@@ -90,19 +131,112 @@ def storage_url(db_path: Path) -> str:
     return f"sqlite:///{db_path.resolve()}"
 
 
-def load_study(cfg: OptunaRunConfig) -> optuna.Study:
-    storage = optuna.storages.RDBStorage(
+def optuna_sampler_seed(base_seed: int, worker_id: int | None) -> int:
+    if worker_id is None:
+        return base_seed
+    return int(np.random.SeedSequence([base_seed, worker_id]).generate_state(1)[0])
+
+
+def build_sampler(cfg: OptunaRunConfig) -> optuna.samplers.TPESampler:
+    sampler_seed = optuna_sampler_seed(cfg.optuna_base_seed, cfg.worker_id)
+    return optuna.samplers.TPESampler(
+        seed=sampler_seed,
+        n_startup_trials=OPTUNA_STARTUP_TRIALS,
+        multivariate=True,
+        group=True,
+        constant_liar=True,
+    )
+
+
+def _study_storage(cfg: OptunaRunConfig) -> optuna.storages.RDBStorage:
+    return optuna.storages.RDBStorage(
         url=storage_url(cfg.study_storage),
         engine_kwargs={"connect_args": {"timeout": 120}},
     )
-    return optuna.create_study(
-        direction="maximize",
-        study_name=cfg.study_name,
-        storage=storage,
-        load_if_exists=True,
-        sampler=optuna.samplers.TPESampler(seed=42),
-        pruner=optuna.pruners.NopPruner(),
-    )
+
+
+def open_study(cfg: OptunaRunConfig, *, with_sampler: bool = True) -> optuna.Study:
+    """Create or load study. Pass with_sampler=True only when first opening in a worker."""
+    storage = _study_storage(cfg)
+    kwargs: dict[str, Any] = {
+        "direction": "maximize",
+        "study_name": cfg.study_name,
+        "storage": storage,
+        "load_if_exists": True,
+        "pruner": optuna.pruners.NopPruner(),
+    }
+    if with_sampler:
+        kwargs["sampler"] = build_sampler(cfg)
+    return optuna.create_study(**kwargs)
+
+
+def reload_study(cfg: OptunaRunConfig) -> optuna.Study:
+    return optuna.load_study(study_name=cfg.study_name, storage=_study_storage(cfg))
+
+
+def load_study(cfg: OptunaRunConfig) -> optuna.Study:
+    return open_study(cfg, with_sampler=True)
+
+
+def set_sampler_trial_metadata(trial: optuna.Trial, cfg: OptunaRunConfig) -> None:
+    trial.set_user_attr("optuna_base_seed", cfg.optuna_base_seed)
+    trial.set_user_attr("sampler_seed", optuna_sampler_seed(cfg.optuna_base_seed, cfg.worker_id))
+    trial.set_user_attr("sampler_n_startup_trials", OPTUNA_STARTUP_TRIALS)
+    trial.set_user_attr("sampler_multivariate", True)
+    trial.set_user_attr("sampler_group", True)
+    trial.set_user_attr("sampler_constant_liar", True)
+    trial.set_user_attr("study_version", cfg.study_version)
+    trial.set_user_attr("optuna_version", optuna.__version__)
+
+
+def expand_batch_combo(batch_combo: str) -> tuple[int, int]:
+    batch_size, grad_accum = [int(part) for part in batch_combo.split("x")]
+    return batch_size, grad_accum
+
+
+def effective_batch_from_params(params: dict) -> int:
+    if "batch_combo" in params:
+        bs, ga = expand_batch_combo(params["batch_combo"])
+        return bs * ga
+    return int(params["per_device_train_batch_size"]) * int(params["gradient_accumulation_steps"])
+
+
+def expand_params_for_training(params: dict) -> dict:
+    """Training dict: Optuna params plus expanded batch fields."""
+    out = dict(params)
+    if "batch_combo" in out:
+        bs, ga = expand_batch_combo(out["batch_combo"])
+        out["per_device_train_batch_size"] = bs
+        out["gradient_accumulation_steps"] = ga
+    return out
+
+
+def derive_summary_fields(params: dict) -> dict:
+    from dpo.train.train_dpo import parse_length_mode
+
+    if not params or "length_mode" not in params:
+        return {}
+    loss_type, ld_alpha, use_weighting = parse_length_mode(params["length_mode"])
+    lora_r = params.get("lora_r", 16)
+    return {
+        "lora_alpha": 2 * lora_r,
+        "effective_batch": effective_batch_from_params(params),
+        "loss_type": loss_type,
+        "ld_alpha": ld_alpha,
+        "use_weighting": use_weighting,
+    }
+
+
+def enqueue_anchor_if_needed(study: optuna.Study, cfg: OptunaRunConfig) -> bool:
+    if cfg.study_version != "v1.1":
+        return False
+    anchor_key = params_key(ANCHOR_TRIAL_PARAMS_V11)
+    for t in study.trials:
+        if t.state in (TrialState.COMPLETE, TrialState.RUNNING, TrialState.WAITING):
+            if params_key(dict(t.params)) == anchor_key:
+                return False
+    study.enqueue_trial(ANCHOR_TRIAL_PARAMS_V11)
+    return True
 
 
 def study_counts(study: optuna.Study) -> dict[str, int]:
@@ -140,9 +274,10 @@ def cuda_mem_snapshot() -> dict[str, float]:
 
 
 def is_high_memory_params(params: dict) -> bool:
+    training = expand_params_for_training(params)
     return (
-        params.get("per_device_train_batch_size") == 2
-        and params.get("lora_r") == 32
+        training.get("per_device_train_batch_size") == 2
+        and training.get("lora_r") == 32
     )
 
 
@@ -169,7 +304,33 @@ def wait_for_vram(params: dict, worker_id: int | None) -> str | None:
     return None
 
 
-def sample_trial_params(trial: optuna.Trial) -> dict[str, Any]:
+def sample_trial_params(trial: optuna.Trial, cfg: OptunaRunConfig) -> dict[str, Any]:
+    if cfg.study_version == "v1.1":
+        batch_combo = trial.suggest_categorical(
+            "batch_combo", ["1x4", "1x8", "1x16", "2x2", "2x4", "2x8"]
+        )
+        params = {
+            "beta": trial.suggest_categorical("beta", [0.03, 0.05, 0.08, 0.1]),
+            "num_train_epochs": trial.suggest_categorical("num_train_epochs", [1, 2]),
+            "learning_rate": trial.suggest_float("learning_rate", 8e-6, 3e-5, log=True),
+            "lora_r": trial.suggest_categorical("lora_r", [8, 16, 32]),
+            "lora_dropout": trial.suggest_categorical(
+                "lora_dropout", [0.03, 0.05, 0.075, 0.1]
+            ),
+            "batch_combo": batch_combo,
+            "lr_scheduler_type": trial.suggest_categorical(
+                "lr_scheduler_type", ["linear", "cosine", "constant_with_warmup"]
+            ),
+            "max_grad_norm": trial.suggest_categorical("max_grad_norm", [0.3, 0.5, 1.0]),
+            "neftune_noise_alpha": trial.suggest_categorical(
+                "neftune_noise_alpha", [0.0, 2.5, 5.0]
+            ),
+            "length_mode": trial.suggest_categorical(
+                "length_mode",
+                ["sigmoid_norm", "ld_0.1", "ld_0.2", "ld_0.3", "ld_0.5"],
+            ),
+        }
+        return expand_params_for_training(params)
     return {
         "beta": trial.suggest_categorical("beta", [0.01, 0.05, 0.1, 0.2]),
         "num_train_epochs": trial.suggest_categorical("num_train_epochs", [1, 2, 3]),
@@ -191,6 +352,16 @@ def sample_trial_params(trial: optuna.Trial) -> dict[str, Any]:
             "length_mode", ["none", "sigmoid_norm", "ld_0.3", "ld_0.5"]
         ),
     }
+
+
+def check_duplicate_params(trial: optuna.Trial) -> None:
+    key = params_key(dict(trial.params))
+    states = (TrialState.COMPLETE, TrialState.RUNNING, TrialState.WAITING)
+    for old in trial.study.get_trials(deepcopy=False, states=states):
+        if old.number != trial.number and params_key(dict(old.params)) == key:
+            trial.set_user_attr("failure_reason", "duplicate_params")
+            trial.set_user_attr("duplicate_of", old.number)
+            raise optuna.TrialPruned("duplicate_params")
 
 
 def params_key(params: dict) -> str:
@@ -285,7 +456,6 @@ def write_final_summary(
     import trl
 
     from dpo.train.dpo_diagnostics import build_study_review
-    from dpo.train.train_dpo import parse_length_mode
     from train.train_sft import compute_data_hash
 
     trials_out = []
@@ -293,16 +463,7 @@ def write_final_summary(
 
     for t in study.trials:
         p = dict(t.params)
-        derived = {}
-        if p and "length_mode" in p:
-            loss_type, ld_alpha, use_weighting = parse_length_mode(p["length_mode"])
-            derived = {
-                "lora_alpha": 2 * p.get("lora_r", 16),
-                "effective_batch": p["per_device_train_batch_size"] * p["gradient_accumulation_steps"],
-                "loss_type": loss_type,
-                "ld_alpha": ld_alpha,
-                "use_weighting": use_weighting,
-            }
+        derived = derive_summary_fields(p) if p else {}
         trials_out.append({
             "trial_number": t.number,
             "worker_id": t.user_attrs.get("worker_id"),
@@ -322,12 +483,18 @@ def write_final_summary(
         })
         if t.user_attrs.get("failure_reason") == "parallel_oom_queued_for_solo":
             combo = (
-                f"bs={p.get('per_device_train_batch_size')}|r={p.get('lora_r')}|"
-                f"neftune={p.get('neftune_noise_alpha')}|lm={p.get('length_mode')}"
+                f"batch={p.get('batch_combo') or p.get('per_device_train_batch_size')}|"
+                f"r={p.get('lora_r')}|neftune={p.get('neftune_noise_alpha')}|lm={p.get('length_mode')}"
             )
             oom_by_combo[combo] = oom_by_combo.get(combo, 0) + 1
 
     complete = [t for t in study.trials if t.state == TrialState.COMPLETE]
+    duplicate_pruned_count = sum(
+        1 for t in study.trials if t.user_attrs.get("failure_reason") == "duplicate_params"
+    )
+    unique_complete_keys = {
+        params_key(dict(t.params)) for t in complete
+    }
     solo_recovered = [t for t in complete if t.user_attrs.get("parallel_oom_recovered")]
     parallel_complete = [t for t in complete if not t.user_attrs.get("solo_retry")]
     counts = study_counts(study)
@@ -359,8 +526,16 @@ def write_final_summary(
             if t.user_attrs.get("failure_reason") == "solo_oom_intrinsic_or_too_large"
         ),
         "oom_by_hyperparam_combo": oom_by_combo,
+        "study_version": cfg.study_version,
+        "experiment_name": cfg.experiment_name,
+        "optuna_base_seed": cfg.optuna_base_seed,
+        "sampler_settings": OPTUNA_SAMPLER_SETTINGS,
+        "duplicate_pruned_count": duplicate_pruned_count,
+        "unique_complete_config_count": len(unique_complete_keys),
         "best_trial": best.number if best else None,
-        "best_accuracy": best.value if best else None,
+        "best_objective": best.value if best else None,
+        "best_hybrid_score": best.user_attrs.get("hybrid_score_v1_1", best.value) if best else None,
+        "best_accuracy": best.user_attrs.get("eval_rewards_accuracy") if best else None,
         "best_params": best.params if best else None,
         "complete_trials": [
             {
@@ -403,6 +578,11 @@ def spawn_worker(cfg: OptunaRunConfig, worker_id: int) -> tuple[subprocess.Popen
     ]
     if cfg.dummy_report_path:
         cmd.append(f"--dummy-report={cfg.dummy_report_path}")
+    cmd.extend([
+        f"--study-version={cfg.study_version}",
+        f"--optuna-base-seed={cfg.optuna_base_seed}",
+        f"--experiment-name={cfg.experiment_name}",
+    ])
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
     env.pop("HF_DATASETS_DISABLE_PROGRESS_BARS", None)
@@ -432,16 +612,18 @@ def run_worker_loop(cfg: OptunaRunConfig, run_trial_fn: TrialFn) -> None:
     prefix = worker_prefix(cfg.worker_id)
     log_line(prefix, f"worker started | run_dir={cfg.run_dir}")
     log_line(prefix, f"target COMPLETE>={cfg.target_complete_trials} max_attempted={cfg.max_attempted_trials}")
-    study = load_study(cfg)
+    sampler_seed = optuna_sampler_seed(cfg.optuna_base_seed, cfg.worker_id)
+    log_line(prefix, f"optuna_base_seed={cfg.optuna_base_seed} sampler_seed={sampler_seed}")
+    study = open_study(cfg, with_sampler=True)
     try:
         optuna.storages.fail_stale_trials(study)
         log_line(prefix, "fail_stale_trials: cleaned zombie RUNNING trials")
     except Exception as e:
         log_line(prefix, f"fail_stale_trials skipped: {e}")
     while True:
-        study = load_study(cfg)
-        c = study_counts(study)
-        stop, reason = should_stop_parallel(study, cfg)
+        fresh = reload_study(cfg)
+        c = study_counts(fresh)
+        stop, reason = should_stop_parallel(fresh, cfg)
         if stop:
             log_line(prefix, f"worker exit: {reason} | counts={c}")
             return
@@ -461,9 +643,8 @@ def run_worker_loop(cfg: OptunaRunConfig, run_trial_fn: TrialFn) -> None:
                 torch.cuda.empty_cache()
                 torch.cuda.reset_peak_memory_stats()
 
-        study = load_study(cfg)
-        c = study_counts(study)
-        stop, reason = should_stop_parallel(study, cfg)
+        c = study_counts(reload_study(cfg))
+        stop, reason = should_stop_parallel(reload_study(cfg), cfg)
         if stop:
             log_line(prefix, f"worker exit after trial: {reason} | counts={c}")
             return
@@ -474,11 +655,11 @@ def run_solo_retry_phase(cfg: OptunaRunConfig, run_trial_fn: TrialFn, deduped: l
         launcher_log(cfg, "Solo retry queue empty — skipping")
         return
     launcher_log(cfg, f"SOLO RETRY phase: {len(deduped)} unique configs")
-    study = load_study(cfg)
+    study = reload_study(cfg)
     for rec in deduped:
         study.enqueue_trial(rec["params"])
     for rec in deduped:
-        study = load_study(cfg)
+        study = reload_study(cfg)
 
         def objective(trial: optuna.Trial) -> float:
             return run_trial_fn(cfg, trial, solo_record=rec)
@@ -502,8 +683,24 @@ def run_parallel_launcher(
     if mlflow_tracking_uri:
         cfg.mlflow_tracking_uri = mlflow_tracking_uri
     cfg.run_dir.mkdir(parents=True, exist_ok=True)
-    load_study(cfg)
+    launcher_study_cfg = OptunaRunConfig(
+        run_dir=cfg.run_dir,
+        study_storage=cfg.study_storage,
+        study_name=cfg.study_name,
+        target_complete_trials=cfg.target_complete_trials,
+        max_attempted_trials=cfg.max_attempted_trials,
+        parallel_workers=cfg.parallel_workers,
+        worker_id=None,
+        dummy_report_path=cfg.dummy_report_path,
+        study_version=cfg.study_version,
+        optuna_base_seed=cfg.optuna_base_seed,
+        experiment_name=cfg.experiment_name,
+    )
+    study = open_study(launcher_study_cfg, with_sampler=True)
+    enqueued_anchor = enqueue_anchor_if_needed(study, cfg)
     launcher_log(cfg, f"PARALLEL OPTUNA | workers={cfg.parallel_workers} target={cfg.target_complete_trials}")
+    launcher_log(cfg, f"study_version={cfg.study_version} experiment={cfg.experiment_name}")
+    launcher_log(cfg, f"optuna_base_seed={cfg.optuna_base_seed} anchor_enqueued={enqueued_anchor}")
     launcher_log(cfg, f"run_dir={cfg.run_dir}")
     launcher_log(cfg, f"study={cfg.study_name} db={cfg.study_storage}")
     monitor_doc = cfg.run_dir / "MONITOR.txt"
@@ -540,7 +737,7 @@ def run_parallel_launcher(
 
     run_solo_retry_phase(cfg, run_trial_fn, deduped)
 
-    study = load_study(cfg)
+    study = reload_study(cfg)
     summary = write_final_summary(
         study,
         cfg,
@@ -554,14 +751,19 @@ def run_parallel_launcher(
     )
     complete = [t for t in study.trials if t.state == TrialState.COMPLETE]
     if complete:
-        launcher_log(cfg, f"DONE Best trial #{study.best_trial.number}: acc={study.best_trial.value:.4f}")
+        bt = study.best_trial
+        acc = bt.user_attrs.get("eval_rewards_accuracy", bt.value)
+        launcher_log(
+            cfg,
+            f"DONE Best trial #{bt.number}: hybrid={bt.value:.4f} acc={acc}",
+        )
     else:
         launcher_log(cfg, "WARNING: no COMPLETE trials in study")
     launcher_log(cfg, f"Summary written: {summary}")
     report_path = cfg.run_dir / "study_report.html"
     if report_path.is_file():
         launcher_log(cfg, f"Study report: file://{report_path.resolve()}")
-        from dpo.train.paths import EXPERIMENT_NAME, MLRUNS_DIR
+        from dpo.train.paths import MLRUNS_DIR
 
         uri = cfg.mlflow_tracking_uri or f"file://{MLRUNS_DIR.resolve()}"
         monitor_doc = cfg.run_dir / "MONITOR.txt"
@@ -569,7 +771,7 @@ def run_parallel_launcher(
             f.write(f"\nStudy report (open in browser):\n  file://{report_path.resolve()}\n")
             f.write(
                 f"\nMLflow UI:\n  mlflow ui --backend-store-uri {uri} --port 5001\n"
-                f"  Experiment: {EXPERIMENT_NAME} → FINISHED parent run with nested trial-* children\n"
+                f"  Experiment: {cfg.experiment_name} → FINISHED parent run with nested trial-* children\n"
             )
     return summary
 
@@ -595,3 +797,11 @@ def add_parallel_cli_args(parser: argparse.ArgumentParser) -> None:
         type=Path,
         default=OUTPUT_BASE / "steering-dpo-v1.0" / "dummy-run" / "dummy_report.json",
     )
+    parser.add_argument(
+        "--study-version",
+        choices=("v1.0", "v1.1"),
+        default="v1.1",
+        help="v1.1: diverse search, hybrid objective, duplicate prune (default)",
+    )
+    parser.add_argument("--optuna-base-seed", type=int, default=OPTUNA_BASE_SEED)
+    parser.add_argument("--experiment-name", type=str, default=None)

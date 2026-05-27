@@ -11,6 +11,14 @@ import mlflow
 
 from dpo.train.paths import EXPERIMENT_NAME, MLRUNS_DIR
 
+SKIP_METRIC_ATTRS = frozenset({
+    "val_diagnostics_json",
+    "adapter_diagnostics",
+    "derived",
+    "ref_cache",
+    "vram",
+})
+
 METRIC_KEYS = (
     "eval_rewards_accuracy",
     "eval_rewards_margin",
@@ -28,6 +36,7 @@ METRIC_KEYS = (
     "peak_vram_allocated_gb",
     "peak_vram_reserved_gb",
     "runtime_seconds",
+    "hybrid_score_v1_1",
 )
 
 
@@ -39,9 +48,10 @@ def parent_run_id() -> str | None:
     return os.environ.get("MLFLOW_PARENT_RUN_ID")
 
 
-def setup_mlflow() -> None:
+def setup_mlflow(experiment_name: str | None = None) -> None:
     mlflow.set_tracking_uri(tracking_uri())
-    mlflow.set_experiment(EXPERIMENT_NAME)
+    name = experiment_name or os.environ.get("MLFLOW_EXPERIMENT_NAME") or EXPERIMENT_NAME
+    mlflow.set_experiment(name)
 
 
 def _mlflow_param_value(v: Any) -> str:
@@ -91,6 +101,10 @@ def log_trial_run(
         params["solo_retry"] = "true"
     if trial_row.get("parallel_oom_recovered"):
         params["parallel_oom_recovered"] = "true"
+    if ua.get("anchor_trial"):
+        params["anchor_trial"] = "true"
+    if ua.get("duplicate_of") is not None:
+        params["duplicate_of"] = str(ua["duplicate_of"])
 
     adapter = ua.get("saved_adapter_path")
     if adapter:
@@ -106,6 +120,16 @@ def log_trial_run(
                 metrics[key] = float(v)
             except (TypeError, ValueError):
                 pass
+
+    for key, v in ua.items():
+        if key in SKIP_METRIC_ATTRS or key in metrics:
+            continue
+        if isinstance(v, bool):
+            continue
+        try:
+            metrics[key] = float(v)
+        except (TypeError, ValueError):
+            continue
 
     train_hit, eval_hit = _ref_cache_hits(ua)
     if train_hit is not None:
@@ -129,6 +153,24 @@ def log_trial_run(
         return mlflow.active_run().info.run_id
 
 
+def _trial_objective_value(trial, ua: dict) -> float | None:
+    """Objective while trial is still running: use user_attrs, not trial.value."""
+    for key in ("hybrid_score_v1_1", "eval_rewards_accuracy"):
+        v = ua.get(key)
+        if v is not None:
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                pass
+    v = getattr(trial, "value", None)
+    if v is not None:
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            pass
+    return None
+
+
 def log_trial_from_optuna(
     trial,
     *,
@@ -139,36 +181,53 @@ def log_trial_from_optuna(
     run_dir: Path | None = None,
     failure_reason: str | None = None,
 ) -> None:
-    """Log from live Optuna trial (worker process)."""
+    """Log from live Optuna trial (worker process). Never raises — logging must not fail trials."""
     pid = parent_run_id()
     if not pid:
         return
-    setup_mlflow()
-    ua = dict(trial.user_attrs)
-    if scorecard:
-        for k, v in scorecard.items():
-            if k == "ref_cache":
-                ua["ref_cache"] = v
-            elif v is not None and not isinstance(v, (dict, list)):
-                ua[k] = v
-    row = {
-        "trial_number": trial.number,
-        "state": state,
-        "value": trial.value,
-        "params": params or dict(trial.params),
-        "derived": derived or ua.get("derived") or {},
-        "user_attrs": ua,
-        "failure_reason": failure_reason or ua.get("failure_reason"),
-        "solo_retry": ua.get("solo_retry", False),
-        "parallel_oom_recovered": ua.get("parallel_oom_recovered", False),
-    }
-    log_trial_run(pid, row, run_dir=run_dir)
+    try:
+        setup_mlflow(os.environ.get("MLFLOW_EXPERIMENT_NAME"))
+        ua = dict(trial.user_attrs)
+        if scorecard:
+            for k, v in scorecard.items():
+                if k == "ref_cache":
+                    ua["ref_cache"] = v
+                elif v is not None and not isinstance(v, (dict, list)):
+                    ua[k] = v
+        row = {
+            "trial_number": trial.number,
+            "state": state,
+            "value": _trial_objective_value(trial, ua),
+            "params": params or dict(trial.params),
+            "derived": derived or ua.get("derived") or {},
+            "user_attrs": ua,
+            "failure_reason": failure_reason or ua.get("failure_reason"),
+            "solo_retry": ua.get("solo_retry", False),
+            "parallel_oom_recovered": ua.get("parallel_oom_recovered", False),
+        }
+        log_trial_run(pid, row, run_dir=run_dir)
+    except Exception as e:
+        import traceback
+
+        print(f"[mlflow] trial-{trial.number} logging skipped: {e}", flush=True)
+        traceback.print_exc()
 
 
-def log_parent_study_summary(summary: dict, summary_path: Path, report_path: Path | None) -> None:
+def log_parent_study_summary(
+    summary: dict,
+    summary_path: Path,
+    report_paths: Path | list[Path] | None = None,
+) -> None:
     """Log best-trial metrics/params and artifacts on the active parent run."""
     if mlflow.active_run() is None:
         return
+    paths: list[Path] = []
+    if report_paths is None:
+        pass
+    elif isinstance(report_paths, Path):
+        paths = [report_paths]
+    else:
+        paths = list(report_paths)
     counts = summary.get("counts") or {}
     metrics: dict[str, float] = {
         "complete_count": float(counts.get("COMPLETE", 0)),
@@ -185,14 +244,17 @@ def log_parent_study_summary(summary: dict, summary_path: Path, report_path: Pat
         mlflow.log_params({f"best_{k}": _mlflow_param_value(v) for k, v in best_params.items()})
     mlflow.set_tag("run_dir", str(summary.get("run_dir", "")))
     mlflow.log_artifact(str(summary_path.resolve()))
-    if report_path and report_path.is_file():
-        mlflow.log_artifact(str(report_path.resolve()))
+    for report_path in paths:
+        if report_path.is_file():
+            mlflow.log_artifact(str(report_path.resolve()))
 
 
 def backfill_study_from_summary(
     summary_path: Path,
     *,
     parent_run_name: str | None = None,
+    parent_name_suffix: str = "",
+    report_paths: list[Path] | None = None,
 ) -> str:
     """Create parent + nested trial runs from trial_summary.json. Returns parent run id."""
     summary_path = summary_path.resolve()
@@ -215,21 +277,28 @@ def backfill_study_from_summary(
         parent_id = runs[0].info.run_id
     else:
         basename = run_dir.name
-        name = f"optuna-parallel-review-{basename}"
+        suffix = f"-{parent_name_suffix}" if parent_name_suffix else ""
+        name = f"optuna-parallel-review{suffix}-{basename}"
+        reports = report_paths
+        if reports is None:
+            reports = []
+            for candidate in (run_dir / "study_report_v2.html", run_dir / "study_report.html"):
+                if candidate.is_file():
+                    reports.append(candidate)
         with mlflow.start_run(run_name=name):
             parent_id = mlflow.active_run().info.run_id
             mlflow.log_params({
                 "study_name": _mlflow_param_value(summary.get("study_name")),
                 "run_dir": str(run_dir),
                 "backfill": "true",
+                "report_suffix": _mlflow_param_value(parent_name_suffix or "default"),
                 "target_complete_trials": _mlflow_param_value(
                     summary.get("target_complete_trials")
                 ),
             })
             for t in summary.get("trials") or []:
                 log_trial_run(parent_id, t, run_dir=run_dir)
-            report = run_dir / "study_report.html"
-            log_parent_study_summary(summary, summary_path, report if report.is_file() else None)
+            log_parent_study_summary(summary, summary_path, reports)
 
     if parent_run_name:
         for t in summary.get("trials") or []:
