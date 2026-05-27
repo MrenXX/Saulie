@@ -1,4 +1,4 @@
-"""Exclusive GPU training lock for parallel Optuna workers on one GPU."""
+"""Exclusive GPU lock for parallel Optuna workers on one GPU."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 @contextmanager
 def gpu_train_lock(run_dir: Path, worker_id: int | None):
-    """Only one worker may run trainer.train() at a time per run_dir."""
+    """One worker at a time: VRAM wait, model build, train, save, val diag, cleanup."""
     lock_path = run_dir / ".gpu_train.lock"
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     t_wait = time.monotonic()

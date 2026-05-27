@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -139,10 +140,60 @@ def _safe_corr(xs: list[float], ys: list[float]) -> float | None:
     return float(c[0, 1])
 
 
-def compute_val_diagnostics(trainer, val_dataset, collator) -> dict[str, Any]:
+def _val_diag_wall_limit_s() -> float:
+    raw = os.environ.get("DPO_MAX_VAL_DIAG_WALL_S")
+    if raw is None:
+        return 3600.0
+    try:
+        return float(raw)
+    except ValueError:
+        return 3600.0
+
+
+def _vram_diag_snap() -> str:
+    if not torch.cuda.is_available():
+        return ""
+    alloc = torch.cuda.memory_allocated() / 1e9
+    reserved = torch.cuda.memory_reserved() / 1e9
+    return f" vram_alloc={alloc:.2f}GB vram_reserved={reserved:.2f}GB"
+
+
+def compute_val_diagnostics(
+    trainer,
+    val_dataset,
+    collator,
+    *,
+    log_fn: Callable[[str], None] | None = None,
+    trial_number: int | None = None,
+    log_every: int = 5,
+    max_wall_s: float | None = None,
+    heartbeat_fn: Callable[[int, int], None] | None = None,
+) -> dict[str, Any]:
     """Per-row val rewards + bucket / length-bias metrics."""
+    n_rows = len(val_dataset)
+    wall_limit = max_wall_s if max_wall_s is not None else _val_diag_wall_limit_s()
+    t0 = time.monotonic()
+    label = f"trial={trial_number}" if trial_number is not None else "trial=?"
+    if log_fn:
+        log_fn(f"stage=val_diagnostics start rows={n_rows} {label}")
+
     rows: list[dict] = []
-    for i in range(len(val_dataset)):
+    for i in range(n_rows):
+        elapsed = time.monotonic() - t0
+        if elapsed > wall_limit:
+            from dpo.train.dpo_trainer_compat import TrialWallTimeout
+
+            raise TrialWallTimeout(
+                f"val_diagnostics_timeout elapsed={elapsed:.0f}s > {wall_limit:.0f}s "
+                f"at row={i}/{n_rows} {label}"
+            )
+        if heartbeat_fn is not None:
+            heartbeat_fn(i, n_rows)
+        if log_fn and (i == 0 or (i + 1) % log_every == 0 or i + 1 == n_rows):
+            log_fn(
+                f"val_diag {label} row={i + 1}/{n_rows} elapsed={elapsed:.0f}s"
+                f"{_vram_diag_snap()}"
+            )
         ex = val_dataset[i]
         batch = collator([ex])
         chosen_r, rejected_r, margin = _per_batch_dpo_scores(trainer, batch)
@@ -184,6 +235,12 @@ def compute_val_diagnostics(trainer, val_dataset, collator) -> dict[str, Any]:
 
     acc_cl, marg_cl = _acc_mean(chosen_longer)
     acc_rl, marg_rl = _acc_mean(rejected_longer)
+
+    if log_fn:
+        log_fn(
+            f"stage=val_diagnostics done rows={n_rows} "
+            f"elapsed={time.monotonic() - t0:.0f}s {label}"
+        )
 
     return {
         "val_rows": len(rows),

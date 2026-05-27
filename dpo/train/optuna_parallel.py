@@ -60,7 +60,39 @@ VRAM_WAIT_CAP_S = 120
 VRAM_WAIT_NORMAL_GB = 10.5
 VRAM_WAIT_HIGH_GB = 12.0
 
+OPTUNA_HEARTBEAT_INTERVAL_S = int(os.environ.get("DPO_OPTUNA_HEARTBEAT_INTERVAL", "60"))
+OPTUNA_HEARTBEAT_GRACE_S = int(os.environ.get("DPO_OPTUNA_HEARTBEAT_GRACE", "600"))
+
 TrialFn = Callable[..., float]
+
+
+def optuna_heartbeat_settings() -> dict[str, int]:
+    return {
+        "heartbeat_interval": OPTUNA_HEARTBEAT_INTERVAL_S,
+        "grace_period": OPTUNA_HEARTBEAT_GRACE_S,
+    }
+
+
+def _failed_stale_trial_callback(study: optuna.Study, trial: optuna.trial.FrozenTrial) -> None:
+    """Mark trials failed by heartbeat/stale recovery."""
+    if trial.state != TrialState.FAIL:
+        return
+    reason = (trial.user_attrs or {}).get("failure_reason")
+    if reason:
+        return
+    try:
+        study._storage.set_trial_user_attr(
+            trial.trial_id,
+            "failure_reason",
+            "stale_running_recovered",
+        )
+        study._storage.set_trial_user_attr(
+            trial.trial_id,
+            "last_stage",
+            (trial.user_attrs or {}).get("last_stage", "unknown"),
+        )
+    except Exception:
+        pass
 
 
 @dataclass
@@ -149,9 +181,13 @@ def build_sampler(cfg: OptunaRunConfig) -> optuna.samplers.TPESampler:
 
 
 def _study_storage(cfg: OptunaRunConfig) -> optuna.storages.RDBStorage:
+    hb = optuna_heartbeat_settings()
     return optuna.storages.RDBStorage(
         url=storage_url(cfg.study_storage),
         engine_kwargs={"connect_args": {"timeout": 120}},
+        heartbeat_interval=hb["heartbeat_interval"],
+        grace_period=hb["grace_period"],
+        failed_trial_callback=_failed_stale_trial_callback,
     )
 
 
@@ -530,6 +566,7 @@ def write_final_summary(
         "experiment_name": cfg.experiment_name,
         "optuna_base_seed": cfg.optuna_base_seed,
         "sampler_settings": OPTUNA_SAMPLER_SETTINGS,
+        "optuna_heartbeat_settings": optuna_heartbeat_settings(),
         "duplicate_pruned_count": duplicate_pruned_count,
         "unique_complete_config_count": len(unique_complete_keys),
         "best_trial": best.number if best else None,
@@ -747,6 +784,7 @@ def run_parallel_launcher(
             "finished_at": datetime.now().isoformat(),
             "worker_exit_codes": codes,
             "solo_retry_count": len(deduped),
+            "optuna_heartbeat_settings": optuna_heartbeat_settings(),
         },
     )
     complete = [t for t in study.trials if t.state == TrialState.COMPLETE]

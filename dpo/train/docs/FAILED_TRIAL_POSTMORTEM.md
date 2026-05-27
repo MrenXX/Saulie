@@ -45,12 +45,12 @@ Evidence: **trial #26** has adapter + checkpoint at 12:09 but **no `diagnostics.
 - `babysit_study.py` — kills processes when log age exceeds ~2.5× trial budget.
 - `fail_stale_trials` on worker restart — marks orphaned RUNNING as failed.
 
-### Recommended follow-ups (not yet implemented)
+### Fixes implemented (post-v1.1 study)
 
-- Extend `gpu_train_lock` to cover `save_dpo_adapter` + `compute_val_diagnostics`.
-- Add periodic `log_line` every N val rows in `compute_val_diagnostics`.
-- Wall-clock timeout around post-train block (same as `TrialWallTimeout` for training).
-- On kill, detect partial trial dir (adapter, no diagnostics) and set `failure_reason=post_train_hang`.
+- `gpu_train_lock` now covers VRAM wait, model build, train, save, val diagnostics, and GPU cleanup.
+- `compute_val_diagnostics` logs progress every N rows and enforces `DPO_MAX_VAL_DIAG_WALL_S` (default 3600s).
+- `last_stage` and `val_diag_progress` stored on each trial; Optuna RDB heartbeat + `fail_stale_trials`.
+- Babysit treats moving `val_diag` logs as alive (not stale).
 
 ## Trials #2 and #3 (first night)
 

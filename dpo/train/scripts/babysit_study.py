@@ -42,28 +42,41 @@ def log_mtime_age_s(path: Path) -> float | None:
     return time.time() - path.stat().st_mtime
 
 
-def parse_running_trials(run_dir: Path) -> dict[int, dict]:
-    """trial_number -> {worker, started_line, last_heartbeat_ts}."""
-    info: dict[int, dict] = {}
-    hb_re = re.compile(
-        r"\[(\d{2}:\d{2}:\d{2})\] W(\d) heartbeat step=(\d+)"
-    )
-    start_re = re.compile(r"\[(\d{2}:\d{2}:\d{2})\] W(\d) TRIAL (\d+) START")
-    for wlog in sorted(run_dir.glob("worker_*.log")):
-        wid = int(wlog.stem.split("_")[1])
-        text = wlog.read_text(encoding="utf-8", errors="replace")
-        for m in start_re.finditer(text):
-            tnum = int(m.group(3))
-            info[tnum] = {"worker": wid, "start": m.group(1), "log": wlog}
-        for m in hb_re.finditer(text):
-            tnum = None
-            for tn, meta in info.items():
-                if meta.get("worker") == wid:
-                    tnum = tn
-            if tnum is not None:
-                info[tnum]["last_hb"] = m.group(1)
-                info[tnum]["last_step"] = int(m.group(3))
-    return info
+def parse_worker_log_tail(log_path: Path, tail_chars: int = 12000) -> dict:
+    """Extract last stage, training heartbeat, val_diag progress from log tail."""
+    out: dict = {
+        "last_stage": None,
+        "last_hb_step": None,
+        "last_val_diag": None,
+    }
+    if not log_path.is_file():
+        return out
+    text = log_path.read_text(encoding="utf-8", errors="replace")[-tail_chars:]
+    stages = re.findall(r"stage=([a-z0-9_]+)", text)
+    if stages:
+        out["last_stage"] = stages[-1]
+    hb = re.findall(r"heartbeat step=(\d+)", text)
+    if hb:
+        out["last_hb_step"] = int(hb[-1])
+    vd = re.findall(r"val_diag trial=\d+ row=(\d+)/(\d+)", text)
+    if vd:
+        out["last_val_diag"] = f"{vd[-1][0]}/{vd[-1][1]}"
+    vd_done = re.findall(r"stage=val_diagnostics done", text)
+    if vd_done:
+        out["val_diag_done"] = True
+    return out
+
+
+def find_worker_log(run_dir: Path, trial: optuna.trial.FrozenTrial) -> Path | None:
+    wid = trial.user_attrs.get("worker_id")
+    if wid is not None:
+        p = run_dir / f"worker_{wid}.log"
+        if p.is_file():
+            return p
+    for p in sorted(run_dir.glob("worker_*.log")):
+        if f"TRIAL {trial.number} START" in p.read_text(encoding="utf-8", errors="replace"):
+            return p
+    return None
 
 
 def kill_study_processes(run_dir: Path) -> None:
@@ -108,7 +121,12 @@ def main() -> None:
         for t in study.trials:
             if t.state in (TrialState.COMPLETE, TrialState.FAIL, TrialState.PRUNED):
                 fr = (t.user_attrs.get("failure_reason") or "")[:50]
-                print(f"  #{t.number} {t.state.name} val={t.value} {fr}", flush=True)
+                ls = t.user_attrs.get("last_stage", "")
+                print(
+                    f"  #{t.number} {t.state.name} val={t.value} "
+                    f"stage={ls} {fr}",
+                    flush=True,
+                )
 
         sleep_min = args.poll_min
         stale_kill = False
@@ -116,35 +134,56 @@ def main() -> None:
             params = dict(t.params)
             budget_min = trial_budget_min(params)
             sleep_min = max(sleep_min, min(budget_min * 0.15, 25.0))
-            log_path = run_dir / f"worker_{t.user_attrs.get('worker_id', 0)}.log"
-            if not log_path.exists():
-                for p in run_dir.glob("worker_*.log"):
-                    if f"TRIAL {t.number} START" in p.read_text(errors="replace"):
-                        log_path = p
-                        break
-            age = log_mtime_age_s(log_path)
+            log_path = find_worker_log(run_dir, t)
+            age = log_mtime_age_s(log_path) if log_path else None
             age_min = (age or 0) / 60.0
             hard_cap = max(budget_min * 2.5, 180.0)
+            last_stage = t.user_attrs.get("last_stage") or "?"
+            val_prog = t.user_attrs.get("val_diag_progress")
+            log_meta: dict = {}
+            if log_path:
+                log_meta = parse_worker_log_tail(log_path)
+                if log_meta.get("last_stage"):
+                    last_stage = log_meta["last_stage"]
+                if log_meta.get("last_val_diag"):
+                    val_prog = log_meta["last_val_diag"]
+
             print(
                 f"  RUN #{t.number} budget~{budget_min:.0f}m log_age={age_min:.0f}m "
-                f"cap={hard_cap:.0f}m {params.get('length_mode')} ep={params.get('num_train_epochs')}",
+                f"cap={hard_cap:.0f}m last_stage={last_stage} "
+                f"val_diag={val_prog or '-'} "
+                f"{params.get('length_mode')} ep={params.get('num_train_epochs')}",
                 flush=True,
             )
+
+            # Post-train val diagnostics still updates logs / user_attrs.
+            in_val_diag = last_stage == "val_diagnostics" or (
+                val_prog is not None and not log_meta.get("val_diag_done")
+            )
+            if in_val_diag and age is not None and age_min < hard_cap:
+                print(
+                    f"    val_diagnostics in progress (log_age={age_min:.0f}m), not stale",
+                    flush=True,
+                )
+                continue
+
             if age is not None and age_min > hard_cap:
                 print(
-                    f"  KILL stale trial #{t.number} (log silent {age_min:.0f}m > {hard_cap:.0f}m)",
+                    f"  KILL stale trial #{t.number} "
+                    f"(log silent {age_min:.0f}m > {hard_cap:.0f}m, stage={last_stage})",
                     flush=True,
                 )
                 stale_kill = True
-            # Cliff in log: step_wall_s logged
-            if log_path.exists():
+            if log_path and log_path.exists():
                 tail = log_path.read_text(errors="replace")[-8000:]
                 if "WATCHDOG PRUNE" in tail or "step_stall" in tail:
-                    print(f"  watchdog pruned on worker log", flush=True)
+                    print("  watchdog pruned on worker log", flush=True)
                 m = re.findall(r"step_wall_s=(\d+)", tail)
                 if m and int(m[-1]) > 3600:
                     print(f"  KILL pathological step_wall>{m[-1]}s", flush=True)
                     stale_kill = True
+                if "val_diagnostics_timeout" in tail:
+                    print("  val_diagnostics_timeout in log", flush=True)
 
         if stale_kill:
             kill_study_processes(run_dir)
@@ -153,7 +192,6 @@ def main() -> None:
             continue
 
         if complete >= args.target_complete and not running:
-            # wait for summary
             for _ in range(12):
                 if summary_path.is_file():
                     import json

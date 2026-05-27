@@ -14,6 +14,7 @@ import os
 import sys
 import time
 import traceback
+from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
 from typing import Callable
@@ -627,6 +628,17 @@ def run_optuna_trial(
     collator = None
     ref_cache: dict = {}
     trial_dir = cfg.run_dir / f"trial-{trial.number}"
+    objective_result: float | None = None
+    train_result = None
+    metrics: dict = {}
+    adapter_diag: dict = {}
+    val_diag: dict | None = None
+
+    def _set_stage(new_stage: str) -> None:
+        nonlocal stage
+        stage = new_stage
+        trial.set_user_attr("last_stage", stage)
+        log_line(prefix, f"stage={stage}")
 
     try:
         if cfg.study_version != "v1.1" and (
@@ -643,11 +655,6 @@ def run_optuna_trial(
         if cfg.worker_id is not None:
             trial.set_user_attr("worker_id", cfg.worker_id)
 
-        wait_reason = op.wait_for_vram(params, cfg.worker_id)
-        if wait_reason:
-            trial.set_user_attr("failure_reason", wait_reason)
-            raise optuna.TrialPruned(wait_reason)
-
         trial_dir.mkdir(parents=True, exist_ok=True)
         log_line(prefix, f"TRIAL {trial.number} START")
         log_line(prefix, f"  beta={params['beta']} epochs={params['num_train_epochs']} lr={params['learning_rate']:.2e}")
@@ -655,37 +662,50 @@ def run_optuna_trial(
         log_line(prefix, f"  length_mode={params['length_mode']} neftune={params['neftune_noise_alpha']} sched={params['lr_scheduler_type']}")
         log_line(prefix, f"  trial_dir={trial_dir}")
 
-        reset_ref_cache_meta()
-        stage = "model_build"
-        log_line(prefix, "stage=model_build")
-        model = build_dpo_peft_model(
-            params["lora_r"], derived["lora_alpha"], params["lora_dropout"]
-        )
-        dpo_args = make_dpo_config(
-            trial_dir,
-            num_train_epochs=params["num_train_epochs"],
-            per_device_train_batch_size=params["per_device_train_batch_size"],
-            gradient_accumulation_steps=params["gradient_accumulation_steps"],
-            learning_rate=params["learning_rate"],
-            lr_scheduler_type=params["lr_scheduler_type"],
-            warmup_ratio=0.1,
-            max_grad_norm=params["max_grad_norm"],
-            weight_decay=0.05,
-            beta=params["beta"],
-            loss_type=derived["loss_type"],
-            ld_alpha=derived["ld_alpha"],
-            use_weighting=derived["use_weighting"],
-            label_smoothing=0.0,
-            neftune_noise_alpha=params["neftune_noise_alpha"],
-            live_logging=True,
-        )
-        stage = "precompute_ref_and_train"
-        log_line(prefix, "stage=precompute_ref+train (ref cache logged during trainer init)")
         from dpo.train.dpo_trainer_compat import TrialWallTimeout
         from dpo.train.gpu_train_lock import gpu_train_lock
 
-        try:
-            with gpu_train_lock(cfg.run_dir, cfg.worker_id):
+        lock_ctx = (
+            gpu_train_lock(cfg.run_dir, cfg.worker_id)
+            if cfg.worker_id is not None
+            else nullcontext()
+        )
+        with lock_ctx:
+            try:
+                _set_stage("vram_wait")
+                wait_reason = op.wait_for_vram(params, cfg.worker_id)
+                if wait_reason:
+                    trial.set_user_attr("failure_reason", wait_reason)
+                    raise optuna.TrialPruned(wait_reason)
+
+                reset_ref_cache_meta()
+                _set_stage("model_build")
+                model = build_dpo_peft_model(
+                    params["lora_r"], derived["lora_alpha"], params["lora_dropout"]
+                )
+                dpo_args = make_dpo_config(
+                    trial_dir,
+                    num_train_epochs=params["num_train_epochs"],
+                    per_device_train_batch_size=params["per_device_train_batch_size"],
+                    gradient_accumulation_steps=params["gradient_accumulation_steps"],
+                    learning_rate=params["learning_rate"],
+                    lr_scheduler_type=params["lr_scheduler_type"],
+                    warmup_ratio=0.1,
+                    max_grad_norm=params["max_grad_norm"],
+                    weight_decay=0.05,
+                    beta=params["beta"],
+                    loss_type=derived["loss_type"],
+                    ld_alpha=derived["ld_alpha"],
+                    use_weighting=derived["use_weighting"],
+                    label_smoothing=0.0,
+                    neftune_noise_alpha=params["neftune_noise_alpha"],
+                    live_logging=True,
+                )
+                _set_stage("precompute_ref_and_train")
+                log_line(
+                    prefix,
+                    "ref cache logged during trainer init",
+                )
                 trainer, train_result, metrics, adapter_diag, ref_cache = run_training(
                     model,
                     datasets,
@@ -696,74 +716,110 @@ def run_optuna_trial(
                     trial_number=trial.number,
                     worker_id=cfg.worker_id,
                 )
-        except TrialWallTimeout as e:
-            trial.set_user_attr("failure_reason", str(e))
-            raise optuna.TrialPruned(f"wall_timeout: {e}") from e
-        for split, meta in ref_cache.get("splits", {}).items():
-            hit = "HIT" if meta.get("hit") else "MISS"
-            log_line(prefix, f"ref_cache {split}: {hit} {meta.get('path')}")
-        stage = "train"
-        collator = trainer.data_collator
-        stage = "save"
-        save_dpo_adapter(trainer.model, trial_dir / "best_adapter")
+                for split, meta in ref_cache.get("splits", {}).items():
+                    hit = "HIT" if meta.get("hit") else "MISS"
+                    log_line(prefix, f"ref_cache {split}: {hit} {meta.get('path')}")
+                collator = trainer.data_collator
+                _set_stage("save_adapter")
+                save_dpo_adapter(trainer.model, trial_dir / "best_adapter")
 
-        vram = vram_stats()
-        runtime = time.time() - t0
-        adapter_path = str(trial_dir / "best_adapter")
-        val_diag = compute_val_diagnostics(
-            trainer, trainer.eval_dataset or datasets["val"], collator
-        )
-        scorecard = build_trial_scorecard(
-            metrics,
-            train_loss=float(train_result.training_loss),
-            vram=vram,
-            runtime_seconds=runtime,
-            saved_adapter_path=adapter_path,
-            ref_cache=ref_cache,
-        )
-        diag_payload = apply_trial_diagnostics(
-            trial,
-            scorecard=scorecard,
-            val_diag=val_diag,
-            provenance=get_provenance(),
-            params=params,
-            derived=derived,
-            adapter_diag=adapter_diag,
-        )
-        with (trial_dir / "diagnostics.json").open("w", encoding="utf-8") as f:
-            json.dump(diag_payload, f, indent=2)
+                vram = vram_stats()
+                runtime = time.time() - t0
+                adapter_path = str(trial_dir / "best_adapter")
 
-        trial.set_user_attr("vram", vram)
-        trial.set_user_attr("adapter_diagnostics", adapter_diag)
-        trial.set_user_attr("derived", derived)
+                def _val_diag_heartbeat(i: int, n: int) -> None:
+                    trial.set_user_attr("val_diag_progress", f"{i + 1}/{n}")
 
-        if is_solo:
-            trial.set_user_attr("parallel_oom_recovered", True)
+                _set_stage("val_diagnostics")
+                val_diag = compute_val_diagnostics(
+                    trainer,
+                    trainer.eval_dataset or datasets["val"],
+                    collator,
+                    log_fn=lambda msg: log_line(prefix, msg),
+                    trial_number=trial.number,
+                    heartbeat_fn=_val_diag_heartbeat,
+                )
+                _set_stage("diagnostics_write")
+                scorecard = build_trial_scorecard(
+                    metrics,
+                    train_loss=float(train_result.training_loss),
+                    vram=vram,
+                    runtime_seconds=runtime,
+                    saved_adapter_path=adapter_path,
+                    ref_cache=ref_cache,
+                )
+                diag_payload = apply_trial_diagnostics(
+                    trial,
+                    scorecard=scorecard,
+                    val_diag=val_diag,
+                    provenance=get_provenance(),
+                    params=params,
+                    derived=derived,
+                    adapter_diag=adapter_diag,
+                )
+                with (trial_dir / "diagnostics.json").open("w", encoding="utf-8") as f:
+                    json.dump(diag_payload, f, indent=2)
 
-        acc = metrics.get("eval_rewards/accuracies")
-        if acc is None:
-            raise RuntimeError("Missing eval_rewards/accuracies")
-        acc_f = float(acc)
-        trial.set_user_attr("eval_rewards_accuracy", acc_f)
-        objective = acc_f
-        if cfg.study_version == "v1.1":
-            hybrid = compute_hybrid_score_v1_1(
-                accuracy=acc_f,
-                macro_family_category=val_diag.get("macro_accuracy_by_source_family_category")
-                if val_diag
-                else None,
-                margin=scorecard.get("eval_rewards_margin"),
-                eval_loss=scorecard.get("eval_loss"),
-                len_corr=val_diag.get("margin_vs_length_delta_corr") if val_diag else None,
-                abs_len_corr=val_diag.get("margin_vs_abs_length_delta_corr") if val_diag else None,
-            )
-            trial.set_user_attr("hybrid_score_v1_1", hybrid)
-            objective = hybrid
-        log_trial_scorecard(prefix, trial.number, scorecard, val_diag)
-        if cfg.study_version == "v1.1":
-            log_line(prefix, f"  hybrid_score_v1_1={objective:.4f}")
-        _log_mlflow("COMPLETE")
-        return objective
+                trial.set_user_attr("vram", vram)
+                trial.set_user_attr("adapter_diagnostics", adapter_diag)
+                trial.set_user_attr("derived", derived)
+
+                if is_solo:
+                    trial.set_user_attr("parallel_oom_recovered", True)
+
+                acc = metrics.get("eval_rewards/accuracies")
+                if acc is None:
+                    raise RuntimeError("Missing eval_rewards/accuracies")
+                acc_f = float(acc)
+                trial.set_user_attr("eval_rewards_accuracy", acc_f)
+                objective = acc_f
+                if cfg.study_version == "v1.1":
+                    hybrid = compute_hybrid_score_v1_1(
+                        accuracy=acc_f,
+                        macro_family_category=val_diag.get(
+                            "macro_accuracy_by_source_family_category"
+                        )
+                        if val_diag
+                        else None,
+                        margin=scorecard.get("eval_rewards_margin"),
+                        eval_loss=scorecard.get("eval_loss"),
+                        len_corr=val_diag.get("margin_vs_length_delta_corr")
+                        if val_diag
+                        else None,
+                        abs_len_corr=val_diag.get("margin_vs_abs_length_delta_corr")
+                        if val_diag
+                        else None,
+                    )
+                    trial.set_user_attr("hybrid_score_v1_1", hybrid)
+                    objective = hybrid
+                log_trial_scorecard(prefix, trial.number, scorecard, val_diag)
+                if cfg.study_version == "v1.1":
+                    log_line(prefix, f"  hybrid_score_v1_1={objective:.4f}")
+                objective_result = objective
+                _set_stage("complete")
+            except TrialWallTimeout as e:
+                msg = str(e)
+                if stage == "val_diagnostics" or "val_diagnostics_timeout" in msg:
+                    trial.set_user_attr("failure_reason", "val_diagnostics_timeout")
+                elif stage == "precompute_ref_and_train" or "trial_wall" in msg or "step_wall" in msg:
+                    trial.set_user_attr("failure_reason", "train_wall_timeout")
+                else:
+                    trial.set_user_attr("failure_reason", msg[:200])
+                raise optuna.TrialPruned(f"wall_timeout: {e}") from e
+            finally:
+                log_line(prefix, "stage=gpu_cleanup")
+                if trainer is not None:
+                    del trainer
+                    trainer = None
+                if model is not None:
+                    del model
+                    model = None
+                clear_gpu()
+
+        if objective_result is not None:
+            _log_mlflow("COMPLETE")
+            return objective_result
+        raise RuntimeError("trial finished GPU section without objective")
 
     except torch.cuda.OutOfMemoryError as e:
         vram_oom = op.cuda_mem_snapshot()
@@ -795,12 +851,6 @@ def run_optuna_trial(
             trial.set_user_attr("failure_reason", "trial_exception")
         _log_mlflow("FAIL")
         raise
-    finally:
-        if trainer is not None:
-            del trainer
-        if model is not None:
-            del model
-        clear_gpu()
 
 
 def run_optuna(args):
