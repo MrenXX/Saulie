@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-05-28T04:55:10.025176",
+  "skeletons_path": "dpo/eval/eval_skeletons.json",
+  "manifest": "dpo/eval/dpo_phase1_stack_only_manifest.jsonl",
+  "generation": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "max_tokens": 350,
+    "base_url": "http://localhost:8000/v1"
+  },
+  "models": {
+    "steering-dpo-v1.1_trial-29_sft_dpo_cat": {
+      "model": "steering-dpo-v1.1_trial-29_sft_dpo_cat",
+      "is_base": false,
+      "manifest": {
+        "model_name": "steering-dpo-v1.1_trial-29_sft_dpo_cat",
+        "kind": "dpo_stacked",
+        "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-29/sft_dpo_cat",
+        "is_sft_baseline": false,
+        "is_dpo": true,
+        "study_version": "v1.1",
+        "trial_number": 29
+      },
+      "eval_loss": null,
+      "params": {},
+      "conversations": [
+        {
+          "skeleton_id": "eval_A4_001",
+          "opening_type": "A",
+          "target_turns": 4,
+          "actual_turns": 4,
+          "messages": [
+            {
+              "role": "user",
+              "content": "My hands are always freezing when I'm typing at my computer."
+            },
+            {
+              "role": "assistant",
+              "content": "not enough heat moving past the wrist before it stops mattering, not stiff or numb.什么 sleeve or jacket you're actually near, or is it just bare palms on cold glass and keys?"
+            },
+            {
+              "role": "user",
+              "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+            },
+            {
+              "role": "assistant",
+              "content": "是缺在玻璃边不烧进去也不是整手泡进暖气。比裹厚布或者买暖手贴多两步是贴到你动得最快的那几厘米，你省掉把整层空气烧死。不打结也不靠毛衣是两根短硅胶压腕条加一个反折边小贴片，贴在食指根和掌关节之间压三秒，你不用把整块手塞进暖气里，先把钥匙碰前半秒冻住的那点捏开。"
+            }
+          ]
+        },
+        {
+          "skeleton_id": "eval_B8_001",
+          "opening_type": "B",
+          "target_turns": 8,
+          "actual_turns": 8,
+          "messages": [
+            {
+              "role": "user",
+              "content": "What's the deepest point in the ocean?"
+            },
+            {
+              "role": "assistant",
+              "content": "Challenger Deep, Mariana Trench, hits about 10.9 miles straight down. not something you pull a GPS for, but if you're not already picturing a tool that stops before you hit zero gravity on the wrong ledge, that's where your sketch stops being vague and starts needing a unit you can actually hook into something small like a dive watch, a pressure gauge, or just a compass that doesn't assume you're already deep enough to not care where you are."
+            },
+            {
+              "role": "user",
+              "content": "That's insane. I can barely handle the deep end of a swimming pool."
+            },
+            {
+              "role": "assistant",
+              "content": "不是池水压你脚踝，是你没碰那种尺寸的缺口——比如你站那儿看10.9不是看数字是看能不能把绳子拉到比没绳长的地方。先不测你到哪，是测你有没有东西让绳子不松进你判断里。"
+            },
+            {
+              "role": "user",
+              "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+            },
+            {
+              "role": "assistant",
+              "content": "是你没让眼睛靠进那层你信不信的水，不是缺压也不是缺绳，是缺一分钟你得把名字从‘没底’换成‘能往哪划’。不是盯10.9，是盯你脚踩进第一片比水亮的沙子前，手有没有能捏住的锚点。"
+            },
+            {
+              "role": "user",
+              "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+            },
+            {
+              "role": "assistant",
+              "content": "是读的时候纸不飘进你信沙的半寸，不是你站不稳，也不是你得先死记10.9。是那半寸你没用东西把纸从‘贴脚’变成‘贴比脚多三厘米’。不压深、不背绳，是比你坐时多留三厘米让手能贴住比没贴亮的沙。"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

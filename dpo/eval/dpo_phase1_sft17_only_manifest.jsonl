@@ -1,0 +1,1 @@
+{"model_name":"steering-sft-v1.1_trial-17","kind":"sft_baseline","adapter_path":"/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter","is_sft_baseline":true,"is_dpo":false,"study_version":"sft-v1.1","trial_number":17}

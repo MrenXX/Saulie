@@ -1,0 +1,552 @@
+[
+  {
+    "id": "eval_A4_001",
+    "opening_type": "A",
+    "target_turns": 4,
+    "user_turns": [
+      "My hands are always freezing when I'm typing at my computer.",
+      "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+    ]
+  },
+  {
+    "id": "eval_A4_002",
+    "opening_type": "A",
+    "target_turns": 4,
+    "user_turns": [
+      "I get tension headaches almost every afternoon around 3pm.",
+      "Probably posture, honestly. I hunch over my laptop on the couch because my desk chair is awful."
+    ]
+  },
+  {
+    "id": "eval_A6_001",
+    "opening_type": "A",
+    "target_turns": 6,
+    "user_turns": [
+      "The water from my tap tastes awful, like chlorine and metal.",
+      "I've been buying bottled water but it's getting expensive and I feel guilty about the plastic.",
+      "No I haven't tried any filters. I honestly don't know where to start with those."
+    ]
+  },
+  {
+    "id": "eval_C6_001",
+    "opening_type": "C",
+    "target_turns": 6,
+    "user_turns": [
+      "I've been trying to read more this year but I keep falling asleep after two pages.",
+      "Usually at night in bed. It's the only quiet time I get.",
+      "I've thought about audiobooks but I zone out when I'm just listening to something."
+    ]
+  },
+  {
+    "id": "eval_C6_002",
+    "opening_type": "C",
+    "target_turns": 6,
+    "user_turns": [
+      "I started working night shifts last month and my whole routine is thrown off.",
+      "The worst part is I can't sleep during the day. My bedroom gets so much sunlight.",
+      "I've tried curtains but they're those thin decorative ones, they don't block anything."
+    ]
+  },
+  {
+    "id": "eval_D6_001",
+    "opening_type": "D",
+    "target_turns": 6,
+    "user_turns": [
+      "I feel like I'm always running behind no matter how early I wake up.",
+      "I think it's because I spend twenty minutes just deciding what to wear. My closet is chaos.",
+      "It's not even that I have too many clothes, it's that I can't see what I have. Everything is just crammed in there."
+    ]
+  },
+  {
+    "id": "eval_D6_002",
+    "opening_type": "D",
+    "target_turns": 6,
+    "user_turns": [
+      "My apartment just feels... stale. I don't know how else to describe it.",
+      "Not dirty exactly. The air just sits there. Especially in the bathroom after a shower.",
+      "There's one tiny window but it faces another building so I never open it."
+    ]
+  },
+  {
+    "id": "eval_B8_001",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "What's the deepest point in the ocean?",
+      "That's insane. I can barely handle the deep end of a swimming pool.",
+      "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though.",
+      "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+    ]
+  },
+  {
+    "id": "eval_B8_002",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "How do volcanoes actually form?",
+      "I've always been fascinated by geology. I collect rocks whenever I go hiking.",
+      "Nothing too serious, just day hikes on weekends. I've been trying to go more often but I always forget to bring enough water.",
+      "Yeah I bring a bottle but it's never enough for a long hike. I end up cutting trips short because I'm worried about dehydrating."
+    ]
+  },
+  {
+    "id": "eval_C8_001",
+    "opening_type": "C",
+    "target_turns": 8,
+    "user_turns": [
+      "My weekends just disappear and I feel like I never actually rest.",
+      "Saturday is errands and chores. Sunday I try to relax but I end up thinking about Monday.",
+      "I've tried journaling and making lists but I still feel scattered. I think it's because I never know how long things will take.",
+      "Exactly, I'll think grocery shopping takes 30 minutes and it takes two hours. Then the whole day is gone."
+    ]
+  },
+  {
+    "id": "eval_C8_002",
+    "opening_type": "C",
+    "target_turns": 8,
+    "user_turns": [
+      "I've been getting really into growing herbs on my windowsill.",
+      "Basil and cilantro mostly. The basil does great but the cilantro keeps dying on me.",
+      "I think I'm either overwatering or underwatering, I can never tell. The soil is either bone dry or soaked.",
+      "I just water whenever I remember, which is either twice a day or not for three days. I know that's the problem but I don't know what the right schedule even is."
+    ]
+  },
+  {
+    "id": "eval_D8_001",
+    "opening_type": "D",
+    "target_turns": 8,
+    "user_turns": [
+      "Everything just takes me longer than it should.",
+      "Simple stuff. Making breakfast, getting out the door, even replying to texts. It all piles up.",
+      "I don't think it's motivation. I want to do these things. It's more like I can't find anything when I need it and then I'm scrambling.",
+      "My bag is the worst. I dig through it for five minutes looking for my wallet or earbuds every single time."
+    ]
+  },
+  {
+    "id": "eval_B10_001",
+    "opening_type": "B",
+    "target_turns": 10,
+    "user_turns": [
+      "Why do cats purr?",
+      "That's actually fascinating. My cat purrs nonstop, even at the vet.",
+      "She's a rescue, about three years old. Very attached to me, follows me everywhere.",
+      "The only problem is she scratches the furniture constantly. I've tried telling her no but obviously that doesn't work.",
+      "I've heard about scratching posts but she ignores the one I bought. It's one of those small flat ones from the grocery store."
+    ]
+  },
+  {
+    "id": "eval_D10_001",
+    "opening_type": "D",
+    "target_turns": 10,
+    "user_turns": [
+      "I just feel like my space doesn't reflect who I am anymore.",
+      "I moved in three years ago and everything is still the temporary furniture I bought in a rush.",
+      "It's not about spending money on new stuff. It's more that the lighting makes everything feel cold and impersonal.",
+      "All overhead lights, those harsh ceiling fixtures that came with the apartment. I never turn them on anymore, I just use my phone flashlight sometimes.",
+      "I know that's ridiculous. I've thought about getting some kind of lamp situation going but I have zero sense of interior design."
+    ]
+  },
+  {
+    "id": "eval_A4_003",
+    "opening_type": "A",
+    "target_turns": 4,
+    "user_turns": [
+      "My coffee gets cold before I finish it, every single morning.",
+      "It's because I sip it during back-to-back calls. By the time I remember it exists, it's sad brown room-temperature water."
+    ]
+  },
+  {
+    "id": "eval_A4_004",
+    "opening_type": "A",
+    "target_turns": 4,
+    "user_turns": [
+      "I keep waking up to a dead phone even though I swear I plugged it in.",
+      "The cable is probably the problem. It only charges if it sits at exactly the right angle, like it's negotiating with me."
+    ]
+  },
+  {
+    "id": "eval_A4_005",
+    "opening_type": "A",
+    "target_turns": 4,
+    "user_turns": [
+      "The cables under my desk are an absolute disaster.",
+      "Every time I move my chair I catch a cord with my foot, and somehow the charger I need is always the one buried deepest."
+    ]
+  },
+  {
+    "id": "eval_A6_002",
+    "opening_type": "A",
+    "target_turns": 6,
+    "user_turns": [
+      "I can never hear dialogue clearly when I watch movies at home.",
+      "The music and explosions are loud, then people start whispering like they're hiding from the microphone.",
+      "It's just the TV speakers. I rent, so I don't want to drill anything into the walls or build some giant theater setup."
+    ]
+  },
+  {
+    "id": "eval_A6_003",
+    "opening_type": "A",
+    "target_turns": 6,
+    "user_turns": [
+      "I lose my keys at least three times a week.",
+      "Usually they're somewhere stupid, like inside a jacket pocket I didn't remember wearing or under a pile of mail.",
+      "I don't have one regular place for them. I walk in, drop everything wherever, and future me gets punished."
+    ]
+  },
+  {
+    "id": "eval_A6_004",
+    "opening_type": "A",
+    "target_turns": 6,
+    "user_turns": [
+      "My laundry smells musty even when I wash it twice.",
+      "It happens most with towels and workout clothes. They sit damp too long because I forget to move them to the dryer.",
+      "My bathroom has terrible ventilation too, so towels never really dry between uses."
+    ]
+  },
+  {
+    "id": "eval_A6_005",
+    "opening_type": "A",
+    "target_turns": 6,
+    "user_turns": [
+      "My wrists ache after long spreadsheet days.",
+      "It's not sharp pain, more like everything feels cramped after hours of typing and mousing around tiny cells.",
+      "I use the laptop keyboard and trackpad because my desk is small, but I know that setup is doing me no favors."
+    ]
+  },
+  {
+    "id": "eval_A8_001",
+    "opening_type": "A",
+    "target_turns": 8,
+    "user_turns": [
+      "My leftovers turn into mystery containers and then I throw everything out.",
+      "I cook on Sundays, but by Wednesday I can't remember what's in which tub or when I made it.",
+      "Most of my containers are old takeout ones, so nothing stacks and the lids never match.",
+      "I want meal prep to save money, not become a tiny archaeological dig in my fridge."
+    ]
+  },
+  {
+    "id": "eval_A8_002",
+    "opening_type": "A",
+    "target_turns": 8,
+    "user_turns": [
+      "My car trunk is chaos all the time.",
+      "There are grocery bags, jumper cables, gym shoes, random returns, and something rolling around that might be a water bottle.",
+      "The worst part is groceries tipping over on the drive home. Eggs have had a rough year back there.",
+      "I don't need it spotless. I just need it to stop behaving like a junk drawer with wheels."
+    ]
+  },
+  {
+    "id": "eval_A10_001",
+    "opening_type": "A",
+    "target_turns": 10,
+    "user_turns": [
+      "I waste a ridiculous amount of food because my fridge hides things from me.",
+      "The back shelf is where good intentions go to become science projects.",
+      "Produce is the worst. I buy spinach or berries, forget them for three days, then discover compost with branding.",
+      "I think part of it is that everything is in opaque bags or stacked behind taller stuff.",
+      "I've tried making a list on my phone, but I don't look at it when I'm actually hungry and standing in front of the fridge."
+    ]
+  },
+  {
+    "id": "eval_B6_001",
+    "opening_type": "B",
+    "target_turns": 6,
+    "user_turns": [
+      "Why do leaves change color in the fall?",
+      "That makes sense. I take a lot of walks that time of year because the trees are the only good part of shorter days.",
+      "The annoying part is tracking wet leaves and mud into my apartment afterward. My front door area becomes a small swamp."
+    ]
+  },
+  {
+    "id": "eval_B6_002",
+    "opening_type": "B",
+    "target_turns": 6,
+    "user_turns": [
+      "How do magnets actually work?",
+      "I ask because my fridge is covered in notes and receipts, and half of them slide down every time I open the door.",
+      "It's basically my household command center, which is a fancy way of saying I lose bills unless they're staring at me."
+    ]
+  },
+  {
+    "id": "eval_B8_003",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "Why do airplanes leave white trails in the sky?",
+      "I always notice them when I'm packing for trips, which is usually the night before because apparently I enjoy stress.",
+      "The hardest part is all the little stuff. Chargers, adapters, medicine, earbuds, the tiny things that ruin a trip when you forget them.",
+      "I toss everything into side pockets and then spend the whole trip digging like I packed with a blender."
+    ]
+  },
+  {
+    "id": "eval_B8_004",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "What makes bread rise?",
+      "I've been trying to bake more, mostly because store-bought bread is somehow expensive and boring at the same time.",
+      "My loaves are inconsistent though. One week they're decent, the next week they're dense enough to qualify as construction material.",
+      "I measure with regular cups and kind of guess when the dough looks right, which might be the problem."
+    ]
+  },
+  {
+    "id": "eval_B8_005",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "How does Wi-Fi travel through walls?",
+      "That would explain why my apartment has one corner where the internet simply gives up on civilization.",
+      "Unfortunately that corner is where my desk fits. Video calls freeze right when I'm trying to look competent.",
+      "I already restarted the router a million times. The router is in the living room because that's where the cable line is."
+    ]
+  },
+  {
+    "id": "eval_B8_006",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "Why does ice float instead of sinking?",
+      "I was thinking about it because I packed a cooler last weekend and everything turned into a floating soup by noon.",
+      "We go to the park a lot in summer, and I always bring drinks and fruit, but the cooler is old and leaks from one corner.",
+      "By the end, the sandwiches are damp and everyone pretends that's fine because they're polite."
+    ]
+  },
+  {
+    "id": "eval_B10_002",
+    "opening_type": "B",
+    "target_turns": 10,
+    "user_turns": [
+      "How does a compass know where north is?",
+      "I started wondering on a hike because my phone map kept spinning around like it was dizzy.",
+      "I'm not doing wilderness survival or anything, just local trails, but some of them split off without great signs.",
+      "My phone battery also drops fast when the signal is weak, so I get weirdly careful about checking it.",
+      "I'd like to be less dependent on staring at the screen every five minutes when I'm supposed to be outside relaxing."
+    ]
+  },
+  {
+    "id": "eval_B10_003",
+    "opening_type": "B",
+    "target_turns": 10,
+    "user_turns": [
+      "Why are sunsets red sometimes?",
+      "I notice it from my balcony. It's the one part of my apartment that feels fancy if I ignore the traffic noise.",
+      "I sit out there after work, but once it gets dark I either go inside or use my phone flashlight, which ruins the whole mood.",
+      "There is an outlet, but it's awkwardly placed and I don't love leaving cords outside.",
+      "I also don't want anything huge. The balcony is narrow, so one bulky thing turns it into an obstacle course."
+    ]
+  },
+  {
+    "id": "eval_B10_004",
+    "opening_type": "B",
+    "target_turns": 10,
+    "user_turns": [
+      "What causes static electricity?",
+      "My apartment turns into a tiny shock factory every winter. I touch a doorknob and get punished for existing.",
+      "My skin gets dry too, and my guitar sometimes feels weirdly buzzy when the room is very dry.",
+      "I don't want anything that makes the place feel damp or smells like a spa lobby.",
+      "Mostly I just want winter indoors to stop feeling like I'm living inside a wool sock."
+    ]
+  },
+  {
+    "id": "eval_B10_005",
+    "opening_type": "B",
+    "target_turns": 10,
+    "user_turns": [
+      "Why do some rooms echo so much?",
+      "My living room does that. It has hardwood floors, bare walls, and apparently the acoustics of a stairwell.",
+      "I notice it most on work calls. My voice bounces around and everyone sounds like they're joining from a bathroom.",
+      "I don't want to cover the walls with recording-studio foam. I still want the room to look like humans live there.",
+      "The furniture is pretty minimal right now, so maybe that's part of why every sound ricochets."
+    ]
+  },
+  {
+    "id": "eval_C4_001",
+    "opening_type": "C",
+    "target_turns": 4,
+    "user_turns": [
+      "I'm trying to cook at home more, but weekday dinners keep defeating me.",
+      "By the time I get home, chopping vegetables and cleaning three pans feels like filing taxes with onions."
+    ]
+  },
+  {
+    "id": "eval_C4_002",
+    "opening_type": "C",
+    "target_turns": 4,
+    "user_turns": [
+      "I've been taking lunch outside lately and it's weirdly calming.",
+      "The only issue is my food gets smashed or soggy in my bag, so the peaceful little ritual ends with sad lettuce."
+    ]
+  },
+  {
+    "id": "eval_C6_003",
+    "opening_type": "C",
+    "target_turns": 6,
+    "user_turns": [
+      "I started sketching again after years of not drawing anything.",
+      "It feels good, but I only do it when the supplies happen to be nearby. Otherwise I just forget.",
+      "Right now pencils, erasers, and paper are scattered between my desk, backpack, and a kitchen drawer for reasons unknown."
+    ]
+  },
+  {
+    "id": "eval_C6_004",
+    "opening_type": "C",
+    "target_turns": 6,
+    "user_turns": [
+      "I'm trying to drink less soda during the workday.",
+      "Plain water is fine in theory, but in practice I ignore it until I'm tired and then buy something fizzy.",
+      "I think I need the habit to feel less boring, because discipline alone is not exactly winning the championship here."
+    ]
+  },
+  {
+    "id": "eval_C8_003",
+    "opening_type": "C",
+    "target_turns": 8,
+    "user_turns": [
+      "I host game night once a month and it's become my favorite thing.",
+      "The problem is my coffee table is tiny, so snacks, cards, drinks, and elbows are all fighting for territory.",
+      "People keep putting glasses on the floor, which makes every dramatic card reveal a spill risk.",
+      "I don't have room for a bigger table full-time. My living room is small and already doing its best."
+    ]
+  },
+  {
+    "id": "eval_C8_004",
+    "opening_type": "C",
+    "target_turns": 8,
+    "user_turns": [
+      "I adopted a puppy three weeks ago and my life is now 40 percent joy and 60 percent logistics.",
+      "Walks are the messy part. Leash, bags, treats, towel, keys, shoes, all somehow in different places.",
+      "When it's raining, we come back in and the entryway turns into a wet little crime scene.",
+      "I need the routine to be quicker because the puppy is not patient while I search for bags."
+    ]
+  },
+  {
+    "id": "eval_C8_005",
+    "opening_type": "C",
+    "target_turns": 8,
+    "user_turns": [
+      "I've gotten weirdly into making tea at night.",
+      "It's nice, but some cups taste flat and others taste bitter, and I can't tell what I'm doing differently.",
+      "I use the same kettle for everything and just pour when it boils because that's what I've always done.",
+      "I mostly drink green tea and herbal stuff, so maybe boiling water is bullying it a little."
+    ]
+  },
+  {
+    "id": "eval_C10_001",
+    "opening_type": "C",
+    "target_turns": 10,
+    "user_turns": [
+      "I commute by train now, which is better than driving but still kind of draining.",
+      "I want to use the time for reading, but my backpack is always stuffed and paperbacks get bent up.",
+      "My phone is too distracting. I open an article and somehow end up checking messages for twenty minutes.",
+      "The train also gets crowded, so anything big or delicate is annoying to pull out.",
+      "I like having something offline because the signal drops in the tunnel right when an article gets interesting."
+    ]
+  },
+  {
+    "id": "eval_C10_002",
+    "opening_type": "C",
+    "target_turns": 10,
+    "user_turns": [
+      "I'm rebuilding my morning routine because the current one is basically panic with toothpaste.",
+      "The kitchen is the bottleneck. I want coffee and breakfast, but the counter is crowded and I start moving random stuff around.",
+      "I don't have a lot of space, so the coffee beans, filters, mugs, and vitamins all compete for the same tiny corner.",
+      "If one thing is missing, I give up and buy coffee on the way, which is getting expensive.",
+      "I think I need the routine to be visible and automatic, not another decision before my brain has clocked in."
+    ]
+  },
+  {
+    "id": "eval_D4_001",
+    "opening_type": "D",
+    "target_turns": 4,
+    "user_turns": [
+      "Something about my desk makes me avoid sitting there.",
+      "I think it's because the monitor sits too low and I end up folding over like a bad lawn chair."
+    ]
+  },
+  {
+    "id": "eval_D4_002",
+    "opening_type": "D",
+    "target_turns": 4,
+    "user_turns": [
+      "My evenings feel weirdly noisy even when nothing is happening.",
+      "It's mostly the apartment sounds. Pipes, neighbors, the fridge humming like it has secrets. I notice all of it when I'm trying to read."
+    ]
+  },
+  {
+    "id": "eval_D6_003",
+    "opening_type": "D",
+    "target_turns": 6,
+    "user_turns": [
+      "My entryway makes me mildly angry every time I get home.",
+      "Shoes pile up by the door, my bag lands on the floor, and then I step over everything like it's a tiny obstacle course.",
+      "There's no closet near the door. Just a blank wall and my daily performance of pretending the mess is temporary."
+    ]
+  },
+  {
+    "id": "eval_D6_004",
+    "opening_type": "D",
+    "target_turns": 6,
+    "user_turns": [
+      "I keep putting off one tiny chore until it becomes a whole situation.",
+      "It's mail. I bring it in, stack it somewhere, and then the stack becomes an emotional support tower of envelopes.",
+      "Most of it is junk, but the important stuff hides inside it, so I can't just sweep it into the trash like I want to."
+    ]
+  },
+  {
+    "id": "eval_D8_002",
+    "opening_type": "D",
+    "target_turns": 8,
+    "user_turns": [
+      "My kitchen feels like it fights me.",
+      "Cooking isn't the problem exactly. It's all the little friction points that make me order takeout instead.",
+      "The cutting board slides around, my knife is dull, and chopped stuff ends up on the counter like confetti.",
+      "I don't need a chef setup. I just need dinner prep to stop feeling like a low-budget obstacle course."
+    ]
+  },
+  {
+    "id": "eval_D8_003",
+    "opening_type": "D",
+    "target_turns": 8,
+    "user_turns": [
+      "Travel days make me feel like a scattered person.",
+      "I can handle the actual airport. It's the constant checking for passport, wallet, boarding pass, headphones, charger.",
+      "Everything lives in a different pocket, so I pat myself down every ten minutes like I'm looking for evidence.",
+      "I want the important stuff in one place without carrying a giant tourist pouch across my chest."
+    ]
+  },
+  {
+    "id": "eval_D8_004",
+    "opening_type": "D",
+    "target_turns": 8,
+    "user_turns": [
+      "My bathroom never feels properly put together.",
+      "It's clean enough, but bottles collect around the tub and the counter gets crowded immediately.",
+      "I share it with my partner, so every product has a twin product, and somehow none of them have a home.",
+      "The space is small, so anything bulky makes it worse. I need order, not a second bathroom pretending to be furniture."
+    ]
+  },
+  {
+    "id": "eval_D10_002",
+    "opening_type": "D",
+    "target_turns": 10,
+    "user_turns": [
+      "I keep saying my apartment needs a reset, then doing nothing.",
+      "It's not dirty. It's more like every surface has become a waiting room for stuff I haven't dealt with.",
+      "Books, chargers, returns, receipts, half-finished projects. Nothing has a clear next move.",
+      "When I try to clean, I just move piles from one place to another and call that interior migration.",
+      "I think I need a system that gives things a place without making the room look like a storage unit."
+    ]
+  },
+  {
+    "id": "eval_D10_003",
+    "opening_type": "D",
+    "target_turns": 10,
+    "user_turns": [
+      "I feel like my hobbies are always almost easy enough to start.",
+      "I like painting miniatures, but by the time I pull out paints, brushes, light, water cup, and the figures, the mood is gone.",
+      "Everything is stored in different boxes because I don't have a dedicated workspace.",
+      "I also need to pack it away after, because the dining table is not allowed to become a permanent art crime scene.",
+      "If setup and cleanup were less annoying, I'd probably do it three times as often."
+    ]
+  }
+]
