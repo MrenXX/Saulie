@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-05-28T06:02:06.818095",
+  "skeletons_path": "dpo/eval/eval_skeletons.json",
+  "manifest": "dpo/eval/dpo_phase1_stack_only_manifest.jsonl",
+  "generation": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "max_tokens": 350,
+    "base_url": "http://localhost:8000/v1"
+  },
+  "models": {
+    "steering-dpo-v1.1_trial-29_sft_dpo_cat": {
+      "model": "steering-dpo-v1.1_trial-29_sft_dpo_cat",
+      "is_base": false,
+      "manifest": {
+        "model_name": "steering-dpo-v1.1_trial-29_sft_dpo_cat",
+        "kind": "dpo_stacked",
+        "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-29/sft_dpo_cat",
+        "is_sft_baseline": false,
+        "is_dpo": true,
+        "study_version": "v1.1",
+        "trial_number": 29
+      },
+      "eval_loss": null,
+      "params": {},
+      "conversations": [
+        {
+          "skeleton_id": "eval_A4_001",
+          "opening_type": "A",
+          "target_turns": 4,
+          "actual_turns": 4,
+          "messages": [
+            {
+              "role": "user",
+              "content": "My hands are always freezing when I'm typing at my computer."
+            },
+            {
+              "role": "assistant",
+              "content": "not enough heat moving past the wrist before the fingers hit glass, not circulation or insulation.两种情况你更怕的是打字停顿，还是手套套上去又握不住键位？"
+            },
+            {
+              "role": "user",
+              "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+            },
+            {
+              "role": "assistant",
+              "content": "是没让冷气停在手腕下面一层，不是靠手套兜住也不是靠吹干皮。比整件手套或堆电热贴多出半步是短挂小点，比如把一个带窄缝织网的防风手贴塞进掌心外侧，不靠手套占键位，缝里能塞进你没用完的薄层里先把指肚冻线往后挪两厘米。你到是比冻僵先过半秒对焦。"
+            }
+          ]
+        },
+        {
+          "skeleton_id": "eval_B8_001",
+          "opening_type": "B",
+          "target_turns": 8,
+          "actual_turns": 8,
+          "messages": [
+            {
+              "role": "user",
+              "content": "What's the deepest point in the ocean?"
+            },
+            {
+              "role": "assistant",
+              "content": "Challenger Deep, Mariana Trench, about 36,000 feet below mean sea level, where a single breath turns into a leak before your helmet finishes the math. not a place you carry gear for, is it more like you're checking if something survives that close without being a submarine or a hammer-and-vacuum kit?"
+            },
+            {
+              "role": "user",
+              "content": "That's insane. I can barely handle the deep end of a swimming pool."
+            },
+            {
+              "role": "assistant",
+              "content": "不靠水压捏变形是两件事，你不是缺能压的壳，是缺能先稳住三秒不把耳膜当锚的层。比听气瓶响比听你耳朵响多三秒，贴一块有吸水芯的冷压耳塞比买钛头盔便宜三倍，不靠你把脸塞进冰里，也把36000能压的那口先塞进你耳道外头。"
+            },
+            {
+              "role": "user",
+              "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+            },
+            {
+              "role": "assistant",
+              "content": "不是缺能看的镜头，是你在那种水里耳朵先变成测绳。贴两块吸水耳塞不是填压也不是拉你进桶，是让36000没名字的时候你先不靠膜反震，把耳道外头那半秒变成能听你呼吸的长度。"
+            },
+            {
+              "role": "user",
+              "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+            },
+            {
+              "role": "assistant",
+              "content": "不是你坐不动，是你贴沙的时候耳朵是空口接飞絮，不卡进眼是卡进耳道前得让沙先不松一口。贴两片小头不带胶的吸水耳翼比扎线多两毫米，是让读页时沙不从你耳后借你膜当毛刷，比你捏个破布早两秒把压感从耳窝外挪到你没打算动的边。"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

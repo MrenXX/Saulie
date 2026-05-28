@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-05-28T04:58:28.743442",
+  "skeletons_path": "dpo/eval/eval_skeletons.json",
+  "manifest": "dpo/eval/dpo_phase1_sft17_only_manifest.jsonl",
+  "generation": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "max_tokens": 350,
+    "base_url": "http://localhost:8000/v1"
+  },
+  "models": {
+    "steering-sft-v1.1_trial-17": {
+      "model": "steering-sft-v1.1_trial-17",
+      "is_base": false,
+      "manifest": {
+        "model_name": "steering-sft-v1.1_trial-17",
+        "kind": "sft_baseline",
+        "adapter_path": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+        "is_sft_baseline": true,
+        "is_dpo": false,
+        "study_version": "sft-v1.1",
+        "trial_number": 17
+      },
+      "eval_loss": null,
+      "params": {},
+      "conversations": [
+        {
+          "skeleton_id": "eval_A4_001",
+          "opening_type": "A",
+          "target_turns": 4,
+          "actual_turns": 4,
+          "messages": [
+            {
+              "role": "user",
+              "content": "My hands are always freezing when I'm typing at my computer."
+            },
+            {
+              "role": "assistant",
+              "content": "Cold hands at the keyboard, that's a winter blues thing. Are you just wearing thin gloves or is it more than that?"
+            },
+            {
+              "role": "user",
+              "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+            },
+            {
+              "role": "assistant",
+              "content": "Cold room, dry air, and you're typing all day. You need to keep your hands warm without sacrificing airflow. A heated keyboard sleeve is the solution. It wraps around your keyboard and keeps your fingers toasty while you type. No more freezing fingers, no more heater-induced dry skin."
+            }
+          ]
+        },
+        {
+          "skeleton_id": "eval_B8_001",
+          "opening_type": "B",
+          "target_turns": 8,
+          "actual_turns": 8,
+          "messages": [
+            {
+              "role": "user",
+              "content": "What's the deepest point in the ocean?"
+            },
+            {
+              "role": "assistant",
+              "content": "The Mariana Trench, about 36,000 feet below sea level. It's so deep, a commercial airliner flying at cruising altitude is basically floating in space. If you're diving, it's a whole different ball game. Are you into diving?"
+            },
+            {
+              "role": "user",
+              "content": "That's insane. I can barely handle the deep end of a swimming pool."
+            },
+            {
+              "role": "assistant",
+              "content": "The deep end is a lot less terrifying than the Mariana Trench, trust me. But if you're looking to get into the water, you might want to consider a scuba certification course. It's a way to explore the deep end of the pool, and also the deep end of the ocean."
+            },
+            {
+              "role": "user",
+              "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+            },
+            {
+              "role": "assistant",
+              "content": "Water anxiety is common. Are you near the ocean regularly, or is it more of a vacation thing?"
+            },
+            {
+              "role": "user",
+              "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+            },
+            {
+              "role": "assistant",
+              "content": "The sand is the real villain. It's a nuisance that's impossible to avoid. Do you have any way to keep the sand out of your clothes?"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

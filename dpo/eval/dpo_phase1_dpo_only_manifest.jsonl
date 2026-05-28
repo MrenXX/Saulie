@@ -1,0 +1,1 @@
+{"model_name":"steering-dpo-v1.1_trial-29_dpo_only","kind":"dpo_only","adapter_path":"/root/saulie/dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-29/best_adapter/dpo","is_sft_baseline":false,"is_dpo":true,"study_version":"v1.1","trial_number":29}

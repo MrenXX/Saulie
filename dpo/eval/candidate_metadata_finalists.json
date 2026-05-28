@@ -1,0 +1,460 @@
+{
+  "purpose": "Judge-facing metadata for DPO final behavioral scoring. Use metrics only as diagnostic context; rank by generated conversation quality against the SFT baseline.",
+  "baseline": {
+    "model_name": "steering-sft-v1.1_trial-17",
+    "kind": "sft_baseline",
+    "study_version": "sft-v1.1",
+    "trial_number": 17,
+    "role": "sole comparison baseline; raw base model is intentionally excluded"
+  },
+  "candidates": [
+    {
+      "model_name": "steering-dpo-v1.1_trial-29_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 29,
+      "selection_reason": "metric winner family; strong margin and clean guardrails",
+      "metrics": {
+        "objective_value": 1,
+        "hybrid_score_v1_1": 1,
+        "eval_rewards_accuracy": 1,
+        "eval_rewards_margin": 11.669075461534353,
+        "eval_loss": 0.005971722304821014,
+        "train_loss": 0.15457262961432403,
+        "macro_accuracy_by_source_family": 1,
+        "macro_accuracy_by_category": 1,
+        "macro_accuracy_by_source_family_category": 1,
+        "margin_vs_length_delta_corr": 0.22992283875496244,
+        "margin_vs_abs_length_delta_corr": 0.2823562011580877,
+        "peak_vram_allocated_gb": 14.528558592,
+        "peak_vram_reserved_gb": 16.024338432,
+        "runtime_seconds": 773.5241405963898
+      },
+      "params": {
+        "batch_combo": "2x2",
+        "beta": 0.05,
+        "num_train_epochs": 2,
+        "learning_rate": 0.000027408978122525804,
+        "lora_r": 32,
+        "lora_dropout": 0.1,
+        "lr_scheduler_type": "linear",
+        "max_grad_norm": 0.3,
+        "neftune_noise_alpha": 2.5,
+        "length_mode": "ld_0.2"
+      },
+      "derived": {
+        "lora_alpha": 64,
+        "effective_batch": 4,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.2,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-30_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 30,
+      "selection_reason": "same-family stability check for trial 29",
+      "metrics": {
+        "objective_value": 1,
+        "hybrid_score_v1_1": 1,
+        "eval_rewards_accuracy": 1,
+        "eval_rewards_margin": 10.207300268686735,
+        "eval_loss": 0.011112640611827374,
+        "train_loss": 0.1390473450402474,
+        "macro_accuracy_by_source_family": 1,
+        "macro_accuracy_by_category": 1,
+        "macro_accuracy_by_source_family_category": 1,
+        "margin_vs_length_delta_corr": 0.22964545955221347,
+        "margin_vs_abs_length_delta_corr": 0.3177973578954675,
+        "peak_vram_allocated_gb": 14.52267264,
+        "peak_vram_reserved_gb": 15.961423872,
+        "runtime_seconds": 2099.5398626327515
+      },
+      "params": {
+        "batch_combo": "2x2",
+        "beta": 0.05,
+        "num_train_epochs": 2,
+        "learning_rate": 0.0000274954270184871,
+        "lora_r": 32,
+        "lora_dropout": 0.1,
+        "lr_scheduler_type": "linear",
+        "max_grad_norm": 0.3,
+        "neftune_noise_alpha": 2.5,
+        "length_mode": "ld_0.2"
+      },
+      "derived": {
+        "lora_alpha": 64,
+        "effective_batch": 4,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.2,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-23_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 23,
+      "selection_reason": "best alternate top family; distinct scheduler and batch path",
+      "metrics": {
+        "objective_value": 1,
+        "hybrid_score_v1_1": 1,
+        "eval_rewards_accuracy": 1,
+        "eval_rewards_margin": 8.081935983437758,
+        "eval_loss": 0.012048049829900265,
+        "train_loss": 0.1348987831231138,
+        "macro_accuracy_by_source_family": 1,
+        "macro_accuracy_by_category": 1,
+        "macro_accuracy_by_source_family_category": 1,
+        "margin_vs_length_delta_corr": 0.27727163188672455,
+        "margin_vs_abs_length_delta_corr": 0.39536908371782425,
+        "peak_vram_allocated_gb": 9.959888384,
+        "peak_vram_reserved_gb": 10.934550528,
+        "runtime_seconds": 2479.0835404396057
+      },
+      "params": {
+        "batch_combo": "1x4",
+        "beta": 0.05,
+        "num_train_epochs": 2,
+        "learning_rate": 0.00002270616405316418,
+        "lora_r": 32,
+        "lora_dropout": 0.1,
+        "lr_scheduler_type": "cosine",
+        "max_grad_norm": 0.3,
+        "neftune_noise_alpha": 2.5,
+        "length_mode": "ld_0.1"
+      },
+      "derived": {
+        "lora_alpha": 64,
+        "effective_batch": 4,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.1,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-17_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 17,
+      "selection_reason": "conservative lower-margin candidate with good length-correlation profile",
+      "metrics": {
+        "objective_value": 0.9807692307692307,
+        "hybrid_score_v1_1": 0.9807692307692307,
+        "eval_rewards_accuracy": 0.9807692307692307,
+        "eval_rewards_margin": 4.017400262447504,
+        "eval_loss": 0.09607022255659103,
+        "train_loss": 0.4999828771909788,
+        "macro_accuracy_by_source_family": 0.9848484848484849,
+        "macro_accuracy_by_category": 0.9722222222222222,
+        "macro_accuracy_by_source_family_category": 0.9848484848484849,
+        "margin_vs_length_delta_corr": 0.15672898489305623,
+        "margin_vs_abs_length_delta_corr": 0.24047537280107822,
+        "peak_vram_allocated_gb": 9.510331392,
+        "peak_vram_reserved_gb": 10.41235968,
+        "runtime_seconds": 1727.7835547924042
+      },
+      "params": {
+        "batch_combo": "1x4",
+        "beta": 0.05,
+        "num_train_epochs": 1,
+        "learning_rate": 0.00002538261332266972,
+        "lora_r": 16,
+        "lora_dropout": 0.05,
+        "lr_scheduler_type": "constant_with_warmup",
+        "max_grad_norm": 1,
+        "neftune_noise_alpha": 5,
+        "length_mode": "ld_0.5"
+      },
+      "derived": {
+        "lora_alpha": 32,
+        "effective_batch": 4,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.5,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-10_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 10,
+      "selection_reason": "lower-correlation diversity candidate for behavioral contrast",
+      "metrics": {
+        "objective_value": 0.9615384615384616,
+        "hybrid_score_v1_1": 0.9615384615384616,
+        "eval_rewards_accuracy": 0.9615384615384616,
+        "eval_rewards_margin": 2.786108537362172,
+        "eval_loss": 0.16637998819351196,
+        "train_loss": 0.38848784929640323,
+        "macro_accuracy_by_source_family": 0.9585326953748006,
+        "macro_accuracy_by_category": 0.9570707070707071,
+        "macro_accuracy_by_source_family_category": 0.9696969696969697,
+        "margin_vs_length_delta_corr": 0.11090522098120155,
+        "margin_vs_abs_length_delta_corr": 0.2077053142597467,
+        "peak_vram_allocated_gb": 14.087285248,
+        "peak_vram_reserved_gb": 15.370027008,
+        "runtime_seconds": 1098.6720342636108
+      },
+      "params": {
+        "batch_combo": "2x2",
+        "beta": 0.03,
+        "num_train_epochs": 2,
+        "learning_rate": 0.00002725841481490458,
+        "lora_r": 8,
+        "lora_dropout": 0.03,
+        "lr_scheduler_type": "cosine",
+        "max_grad_norm": 1,
+        "neftune_noise_alpha": 0,
+        "length_mode": "ld_0.5"
+      },
+      "derived": {
+        "lora_alpha": 16,
+        "effective_batch": 4,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.5,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-15_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 15,
+      "selection_reason": "one-epoch r16 perfect-accuracy candidate",
+      "metrics": {
+        "objective_value": 0.987974964818503,
+        "hybrid_score_v1_1": 0.987974964818503,
+        "eval_rewards_accuracy": 1,
+        "eval_rewards_margin": 4.188730294887836,
+        "eval_loss": 0.05122818052768707,
+        "train_loss": 0.29091392659715243,
+        "macro_accuracy_by_source_family": 1,
+        "macro_accuracy_by_category": 1,
+        "macro_accuracy_by_source_family_category": 1,
+        "margin_vs_length_delta_corr": 0.36905397117970834,
+        "margin_vs_abs_length_delta_corr": 0.4611129300302719,
+        "peak_vram_allocated_gb": 9.513773568,
+        "peak_vram_reserved_gb": 10.41235968,
+        "runtime_seconds": 1842.124659538269
+      },
+      "params": {
+        "batch_combo": "1x4",
+        "beta": 0.05,
+        "num_train_epochs": 1,
+        "learning_rate": 0.000025604619509546423,
+        "lora_r": 16,
+        "lora_dropout": 0.05,
+        "lr_scheduler_type": "constant_with_warmup",
+        "max_grad_norm": 1,
+        "neftune_noise_alpha": 5,
+        "length_mode": "ld_0.1"
+      },
+      "derived": {
+        "lora_alpha": 32,
+        "effective_batch": 4,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.1,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-16_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 16,
+      "selection_reason": "higher-beta candidate testing stronger preference pressure",
+      "metrics": {
+        "objective_value": 0.985108716446281,
+        "hybrid_score_v1_1": 0.985108716446281,
+        "eval_rewards_accuracy": 1,
+        "eval_rewards_margin": 5.43455329308143,
+        "eval_loss": 0.02553418092429638,
+        "train_loss": 0.13900376931338063,
+        "macro_accuracy_by_source_family": 1,
+        "macro_accuracy_by_category": 1,
+        "macro_accuracy_by_source_family_category": 1,
+        "margin_vs_length_delta_corr": 0.3808905187108014,
+        "margin_vs_abs_length_delta_corr": 0.46838470498065915,
+        "peak_vram_allocated_gb": 14.55949568,
+        "peak_vram_reserved_gb": 15.982395392,
+        "runtime_seconds": 1697.3464183807373
+      },
+      "params": {
+        "batch_combo": "2x4",
+        "beta": 0.1,
+        "num_train_epochs": 2,
+        "learning_rate": 0.000025935653439238772,
+        "lora_r": 32,
+        "lora_dropout": 0.1,
+        "lr_scheduler_type": "linear",
+        "max_grad_norm": 0.3,
+        "neftune_noise_alpha": 2.5,
+        "length_mode": "ld_0.1"
+      },
+      "derived": {
+        "lora_alpha": 64,
+        "effective_batch": 8,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.1,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-28_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 28,
+      "selection_reason": "near-top cosine and effective-batch alternate",
+      "metrics": {
+        "objective_value": 0.9807692307692307,
+        "hybrid_score_v1_1": 0.9807692307692307,
+        "eval_rewards_accuracy": 0.9807692307692307,
+        "eval_rewards_margin": 9.129350157884451,
+        "eval_loss": 0.02362043410539627,
+        "train_loss": 0.13357861824287084,
+        "macro_accuracy_by_source_family": 0.9848484848484849,
+        "macro_accuracy_by_category": 0.9722222222222222,
+        "macro_accuracy_by_source_family_category": 0.9848484848484849,
+        "margin_vs_length_delta_corr": 0.21325490323679405,
+        "margin_vs_abs_length_delta_corr": 0.328266780548678,
+        "peak_vram_allocated_gb": 14.522520576,
+        "peak_vram_reserved_gb": 16.026435584,
+        "runtime_seconds": 2661.4440791606903
+      },
+      "params": {
+        "batch_combo": "2x2",
+        "beta": 0.05,
+        "num_train_epochs": 2,
+        "learning_rate": 0.000023751794518646112,
+        "lora_r": 32,
+        "lora_dropout": 0.1,
+        "lr_scheduler_type": "cosine",
+        "max_grad_norm": 0.3,
+        "neftune_noise_alpha": 2.5,
+        "length_mode": "ld_0.1"
+      },
+      "derived": {
+        "lora_alpha": 64,
+        "effective_batch": 4,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.1,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.1_trial-13_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.1",
+      "trial_number": 13,
+      "selection_reason": "low-beta diversity candidate",
+      "metrics": {
+        "objective_value": 0.964543745093234,
+        "hybrid_score_v1_1": 0.964543745093234,
+        "eval_rewards_accuracy": 0.9807692307692307,
+        "eval_rewards_margin": 1.2412534831808164,
+        "eval_loss": 0.3239421844482422,
+        "train_loss": 0.46518332609590496,
+        "macro_accuracy_by_source_family": 0.9848484848484849,
+        "macro_accuracy_by_category": 0.9848484848484849,
+        "macro_accuracy_by_source_family_category": 0.9848484848484849,
+        "margin_vs_length_delta_corr": 0.391657428409002,
+        "margin_vs_abs_length_delta_corr": 0.46651247609764274,
+        "peak_vram_allocated_gb": 14.316374016,
+        "peak_vram_reserved_gb": 16.464740352,
+        "runtime_seconds": 1901.0224618911743
+      },
+      "params": {
+        "batch_combo": "2x4",
+        "beta": 0.03,
+        "num_train_epochs": 1,
+        "learning_rate": 0.000028708047951464997,
+        "lora_r": 32,
+        "lora_dropout": 0.03,
+        "lr_scheduler_type": "cosine",
+        "max_grad_norm": 0.5,
+        "neftune_noise_alpha": 2.5,
+        "length_mode": "ld_0.3"
+      },
+      "derived": {
+        "lora_alpha": 64,
+        "effective_batch": 8,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.3,
+        "use_weighting": false
+      }
+    },
+    {
+      "model_name": "steering-dpo-v1.0_trial-1_sft_dpo_cat",
+      "kind": "dpo_merged",
+      "study_version": "v1.0",
+      "trial_number": 1,
+      "selection_reason": "v1.0 best-trial reference; only v1.0 candidate by default",
+      "metrics": {
+        "objective_value": 1,
+        "hybrid_score_v1_1": null,
+        "eval_rewards_accuracy": 1,
+        "eval_rewards_margin": 2.080363992315072,
+        "eval_loss": 0.22478312253952026,
+        "train_loss": 0.48237368745623893,
+        "macro_accuracy_by_source_family": 1,
+        "macro_accuracy_by_category": 1,
+        "macro_accuracy_by_source_family_category": 1,
+        "margin_vs_length_delta_corr": 0.4025464463596147,
+        "margin_vs_abs_length_delta_corr": 0.47585435506366014,
+        "peak_vram_allocated_gb": 9.51717376,
+        "peak_vram_reserved_gb": 10.519314432,
+        "runtime_seconds": 1124.0972645282745
+      },
+      "params": {
+        "beta": 0.05,
+        "num_train_epochs": 1,
+        "learning_rate": 0.000023604024417191132,
+        "lora_r": 16,
+        "lora_dropout": 0.05,
+        "per_device_train_batch_size": 1,
+        "gradient_accumulation_steps": 8,
+        "lr_scheduler_type": "constant_with_warmup",
+        "max_grad_norm": 1,
+        "neftune_noise_alpha": 5,
+        "length_mode": "ld_0.3"
+      },
+      "derived": {
+        "lora_alpha": 32,
+        "effective_batch": 8,
+        "loss_type": [
+          "sigmoid"
+        ],
+        "ld_alpha": 0.3,
+        "use_weighting": false
+      }
+    }
+  ],
+  "excluded": {
+    "raw_base_model": "Do not include raw Saulie/base outputs in scoring. vLLM may serve Saulie as the engine name, but the behavioral baseline is SFT trial 17."
+  },
+  "source_summaries": {
+    "dpo_v1_1": "repo/Saulie/study_v1.1_results/trial_summary.json",
+    "dpo_v1_0": "repo/Saulie/dpo/results/optuna-run-20260523-041252/trial_summary.json"
+  }
+}
