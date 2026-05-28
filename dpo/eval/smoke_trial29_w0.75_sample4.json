@@ -1,0 +1,177 @@
+{
+  "generated_at": "2026-05-28T18:59:51.998450",
+  "policy": "hf_bnb_policy",
+  "description": "BnB 8-bit base with selectable PEFT adapter mode; policy means set_adapter([default, dpo])",
+  "base_model": "/root/saulie/Qwen3-4B-Instruct-2507",
+  "sft_adapter": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+  "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-29/best_adapter/dpo",
+  "adapter_mode": "policy",
+  "active_adapters": [
+    "default",
+    "dpo"
+  ],
+  "policy_stack": [
+    "default",
+    "dpo"
+  ],
+  "dpo_weight": 0.75,
+  "dpo_scaled_modules": 252,
+  "adapter_diagnostics": {
+    "active_adapters": [
+      "default",
+      "dpo"
+    ],
+    "available_adapters": [
+      "default",
+      "dpo"
+    ],
+    "has_ref_adapter": false,
+    "trainable_by_adapter": {
+      "default": 0,
+      "dpo": 66060288,
+      "ref": 0
+    },
+    "trainable_total": 66060288,
+    "optimizer_param_groups": null,
+    "non_dpo_trainable_param_names": [],
+    "non_dpo_trainable_count": 0,
+    "only_dpo_trainable": true
+  },
+  "generation": {
+    "decode": "sample",
+    "max_new_tokens": 350,
+    "temperature": 0.7,
+    "top_p": 0.8
+  },
+  "skeletons_path": "/root/saulie/dpo/eval/eval_skeletons.json",
+  "conversations": [
+    {
+      "skeleton_id": "eval_A4_001",
+      "opening_type": "A",
+      "target_turns": 4,
+      "actual_turns": 4,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My hands are always freezing when I'm typing at my computer."
+        },
+        {
+          "role": "assistant",
+          "content": "Cold fingers at a warm desk mean the insulation stops are skipping at the wrist, not the room. What's the sleeve situation, gloves or bare fingers in a stiff sweater cuff?"
+        },
+        {
+          "role": "user",
+          "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+        },
+        {
+          "role": "assistant",
+          "content": "dry air plus stiff fabric cuffs stops heat from touching your palm before it hits your joints, so a pocketed micro-wrap sleeve isn't about new heat or new gloves, it's about letting the existing heater skip the fabric and hit the part that actually shivers. two layers inside your cuff keep the wrist from being a radiator before you pull gloves anyway."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_C6_001",
+      "opening_type": "C",
+      "target_turns": 6,
+      "actual_turns": 6,
+      "messages": [
+        {
+          "role": "user",
+          "content": "I've been trying to read more this year but I keep falling asleep after two pages."
+        },
+        {
+          "role": "assistant",
+          "content": "Two pages before the eyelids decide the book isn't a threat is usually not the font or the light, it's the rhythm between your eyes and your breathing. Is the room dark enough that your eyes aren't fighting light, or are you squinting past the glare?"
+        },
+        {
+          "role": "user",
+          "content": "Usually at night in bed. It's the only quiet time I get."
+        },
+        {
+          "role": "assistant",
+          "content": "then two pages isn't about the story, it's about whether your jaw keeps holding focus long enough past your first swallow. not enough to fight a blanket, enough to not need a full hand on the page. pick one: a ringlight clip that stops glare without a lamp, or a ten-second earbuddy clip you hold behind your neck so the book stops being a surface and starts being a shape you feel before you let your mouth drop. both let the first sentence not look like a negotiation with your sleep."
+        },
+        {
+          "role": "user",
+          "content": "I've thought about audiobooks but I zone out when I'm just listening to something."
+        },
+        {
+          "role": "assistant",
+          "content": "not a zone-out moment, a moment where your ears don't anchor the shape of a sentence before your eyes stop because your jaw hasn't locked it into your spine yet. ten seconds of physical friction behind the ear isn't rerouting the audiobook, it's adding a single second where the sentence stops floating past your jaw and starts needing your throat to say it before you let it drift. past that, your two pages don't need to fight the room, they need to not need you to guess which one you'll miss before you blink."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_D6_001",
+      "opening_type": "D",
+      "target_turns": 6,
+      "actual_turns": 6,
+      "messages": [
+        {
+          "role": "user",
+          "content": "I feel like I'm always running behind no matter how early I wake up."
+        },
+        {
+          "role": "assistant",
+          "content": "Not early enough or not moving enough before the clock hits zero?"
+        },
+        {
+          "role": "user",
+          "content": "I think it's because I spend twenty minutes just deciding what to wear. My closet is chaos."
+        },
+        {
+          "role": "assistant",
+          "content": "二十分钟不是你停在犹豫，是你没让选项变成一眼能滑过去的动作。不拆掉那步，你每次都是重新演一遍没结果的试错。"
+        },
+        {
+          "role": "user",
+          "content": "It's not even that I have too many clothes, it's that I can't see what I have. Everything is just crammed in there."
+        },
+        {
+          "role": "assistant",
+          "content": "那就比选什么有用三秒，是你把每件东西从背景里抽出来变成带编号的小标签。二十分钟的滑不下去不是你懒，是你没把决策从猜变成照。"
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_B8_001",
+      "opening_type": "B",
+      "target_turns": 8,
+      "actual_turns": 8,
+      "messages": [
+        {
+          "role": "user",
+          "content": "What's the deepest point in the ocean?"
+        },
+        {
+          "role": "assistant",
+          "content": "Challenger Deep, Mariana Trench, about 36,000 feet down where the sun's never made it and pressure's so dense a diver's bones'd become sponges. Not a place you just drop a GoPro on, is it?"
+        },
+        {
+          "role": "user",
+          "content": "That's insane. I can barely handle the deep end of a swimming pool."
+        },
+        {
+          "role": "assistant",
+          "content": "then you're not fighting gravity, you're fighting the part of your gear that still thinks it's got grip on a wet towel. not a helmet or a suit, not something that goes under the skin, is something that stops your hands from turning into wet paste when you try to grab a knot that's already loose."
+        },
+        {
+          "role": "user",
+          "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+        },
+        {
+          "role": "assistant",
+          "content": "smaller than a helmet, no seal, is a pair of thick rubber-knuckle gloves you slide over work hands before you touch anything below chest height. not for a trench, not for a rope, just because your fingers hit wet rock without thinking they're signing a death warrant you actually stop trying to wrestle them back into shape."
+        },
+        {
+          "role": "user",
+          "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+        },
+        {
+          "role": "assistant",
+          "content": "not that you're not already in the zone, is that you're letting wet sand turn your thumb into a fossil before you lift the book off your lap. not a towel, not a net, is two fingers wrapped in a loop of thin silicone grip tape you just pull over your knuckles before you dig. not stopping the splash, not letting you fight a knot, just making your thumb stop being the first casualty of a grain that wasn't looking to be polite."
+        }
+      ]
+    }
+  ]
+}

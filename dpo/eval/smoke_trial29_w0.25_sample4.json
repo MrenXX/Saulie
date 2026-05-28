@@ -1,0 +1,177 @@
+{
+  "generated_at": "2026-05-28T18:54:03.538305",
+  "policy": "hf_bnb_policy",
+  "description": "BnB 8-bit base with selectable PEFT adapter mode; policy means set_adapter([default, dpo])",
+  "base_model": "/root/saulie/Qwen3-4B-Instruct-2507",
+  "sft_adapter": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+  "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-29/best_adapter/dpo",
+  "adapter_mode": "policy",
+  "active_adapters": [
+    "default",
+    "dpo"
+  ],
+  "policy_stack": [
+    "default",
+    "dpo"
+  ],
+  "dpo_weight": 0.25,
+  "dpo_scaled_modules": 252,
+  "adapter_diagnostics": {
+    "active_adapters": [
+      "default",
+      "dpo"
+    ],
+    "available_adapters": [
+      "default",
+      "dpo"
+    ],
+    "has_ref_adapter": false,
+    "trainable_by_adapter": {
+      "default": 0,
+      "dpo": 66060288,
+      "ref": 0
+    },
+    "trainable_total": 66060288,
+    "optimizer_param_groups": null,
+    "non_dpo_trainable_param_names": [],
+    "non_dpo_trainable_count": 0,
+    "only_dpo_trainable": true
+  },
+  "generation": {
+    "decode": "sample",
+    "max_new_tokens": 350,
+    "temperature": 0.7,
+    "top_p": 0.8
+  },
+  "skeletons_path": "/root/saulie/dpo/eval/eval_skeletons.json",
+  "conversations": [
+    {
+      "skeleton_id": "eval_A4_001",
+      "opening_type": "A",
+      "target_turns": 4,
+      "actual_turns": 4,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My hands are always freezing when I'm typing at my computer."
+        },
+        {
+          "role": "assistant",
+          "content": "Cold hands at the keyboard is a distraction waiting to happen. Is this mostly in the winter, or is the room temperature consistently low?"
+        },
+        {
+          "role": "user",
+          "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+        },
+        {
+          "role": "assistant",
+          "content": "A space heater is a blunt instrument for hand temperature because it heats the whole room, not your fingers. You're wasting energy and still getting the same cold hands. What you actually need is targeted warmth without the ambient heat. A small hand-warming pad or heated gel wrist wraps are the precision fix. You plug one in, wrap it around your palms while you type, and the circulation picks up without drying out your workspace."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_C6_001",
+      "opening_type": "C",
+      "target_turns": 6,
+      "actual_turns": 6,
+      "messages": [
+        {
+          "role": "user",
+          "content": "I've been trying to read more this year but I keep falling asleep after two pages."
+        },
+        {
+          "role": "assistant",
+          "content": "Two pages and the brain decides a soft bed is a better story than a page-turner. Is it that you're lying down with the light on, or is the room just too dim?"
+        },
+        {
+          "role": "user",
+          "content": "Usually at night in bed. It's the only quiet time I get."
+        },
+        {
+          "role": "assistant",
+          "content": "Then you're not falling asleep to a book, you're falling asleep to the sound of your own breathing in a room with a light source that tells your eyes it's still 2000 hours. What do you usually read before bed?"
+        },
+        {
+          "role": "user",
+          "content": "I've thought about audiobooks but I zone out when I'm just listening to something."
+        },
+        {
+          "role": "assistant",
+          "content": "Because a book on paper forces your eyes to move, which keeps the brain awake. A physical book in bed is a visual anchor that says 'I'm still awake' even if you're drifting. But if your eyes can't keep up with the story, the story can't keep up with you. A bedside reading light that only turns on when you move the book toward it is the bridge between the two. You don't have to stop reading before sleep, you just stop reading in the dark. The light follows the book, your eyes stay in motion, and your brain stays awake enough to choose whether to keep reading or drift off."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_D6_001",
+      "opening_type": "D",
+      "target_turns": 6,
+      "actual_turns": 6,
+      "messages": [
+        {
+          "role": "user",
+          "content": "I feel like I'm always running behind no matter how early I wake up."
+        },
+        {
+          "role": "assistant",
+          "content": "That's not a time problem, that's a start problem. You're waking up but something stops you from actually moving. What's the first thing you do after you open your eyes?"
+        },
+        {
+          "role": "user",
+          "content": "I think it's because I spend twenty minutes just deciding what to wear. My closet is chaos."
+        },
+        {
+          "role": "assistant",
+          "content": "Twenty minutes of decision paralysis every morning is a real drain. You're not choosing clothes, you're choosing which box of underwear you're going to pick from. What's the actual decision you're making, like do you pick the clean ones or the dirty ones?"
+        },
+        {
+          "role": "user",
+          "content": "It's not even that I have too many clothes, it's that I can't see what I have. Everything is just crammed in there."
+        },
+        {
+          "role": "assistant",
+          "content": "You can't see what you have, so you can't see what you need, so you pick the first thing that looks vaguely presentable. A simple foldable hanging organizer for the top drawer, where you just hang the clothes by the color category instead of just throwing them in a pile, stops the visual noise. You open it and you see the clean shirts by the clean shirts, the jeans by the jeans, and you pick in five seconds instead of twenty because there's no decision, there's just a category. The early-morning chaos stops before it starts."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_B8_001",
+      "opening_type": "B",
+      "target_turns": 8,
+      "actual_turns": 8,
+      "messages": [
+        {
+          "role": "user",
+          "content": "What's the deepest point in the ocean?"
+        },
+        {
+          "role": "assistant",
+          "content": "The Mariana Trench, about 36,000 feet below sea level. If you were to stack the tallest buildings on Earth end to end, you'd still not reach that depth. How deep do you think the ocean goes, or is it a mystery to you?"
+        },
+        {
+          "role": "user",
+          "content": "That's insane. I can barely handle the deep end of a swimming pool."
+        },
+        {
+          "role": "assistant",
+          "content": "Swimming pools are like a tiny, shallow lake compared to the abyss. What brings you to the water, just for fun or is there a reason you're thinking about depth?"
+        },
+        {
+          "role": "user",
+          "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+        },
+        {
+          "role": "assistant",
+          "content": "Anxiety in water without a visual anchor is a real thing because the depth disappears and your brain can't gauge how far down you are. Have you ever tried floating or just lying on the surface, or is the water itself the trigger?"
+        },
+        {
+          "role": "user",
+          "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+        },
+        {
+          "role": "assistant",
+          "content": "Sand is the only part of the beach that doesn't disappear when you stop touching it. Are you trying to keep it off your clothes, or is it more about not wanting to feel like you've just walked through a dryer?"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "generated_at": "2026-05-28T18:51:22.105162",
+  "policy": "hf_bnb_policy",
+  "description": "BnB 8-bit base with selectable PEFT adapter mode; policy means set_adapter([default, dpo])",
+  "base_model": "/root/saulie/Qwen3-4B-Instruct-2507",
+  "sft_adapter": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+  "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-29/best_adapter/dpo",
+  "adapter_mode": "policy",
+  "active_adapters": [
+    "default",
+    "dpo"
+  ],
+  "policy_stack": [
+    "default",
+    "dpo"
+  ],
+  "dpo_weight": 0.1,
+  "dpo_scaled_modules": 252,
+  "adapter_diagnostics": {
+    "active_adapters": [
+      "default",
+      "dpo"
+    ],
+    "available_adapters": [
+      "default",
+      "dpo"
+    ],
+    "has_ref_adapter": false,
+    "trainable_by_adapter": {
+      "default": 0,
+      "dpo": 66060288,
+      "ref": 0
+    },
+    "trainable_total": 66060288,
+    "optimizer_param_groups": null,
+    "non_dpo_trainable_param_names": [],
+    "non_dpo_trainable_count": 0,
+    "only_dpo_trainable": true
+  },
+  "generation": {
+    "decode": "sample",
+    "max_new_tokens": 350,
+    "temperature": 0.7,
+    "top_p": 0.8
+  },
+  "skeletons_path": "/root/saulie/dpo/eval/eval_skeletons.json",
+  "conversations": [
+    {
+      "skeleton_id": "eval_A4_001",
+      "opening_type": "A",
+      "target_turns": 4,
+      "actual_turns": 4,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My hands are always freezing when I'm typing at my computer."
+        },
+        {
+          "role": "assistant",
+          "content": "Cold hands at the keyboard, a winter blues situation. Are you working in a drafty room, or is it more of a circulation issue?"
+        },
+        {
+          "role": "user",
+          "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+        },
+        {
+          "role": "assistant",
+          "content": "A heater that dries the air is basically a punishment for your skin. Do you ever feel like the cold is coming up from your wrists?"
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_C6_001",
+      "opening_type": "C",
+      "target_turns": 6,
+      "actual_turns": 6,
+      "messages": [
+        {
+          "role": "user",
+          "content": "I've been trying to read more this year but I keep falling asleep after two pages."
+        },
+        {
+          "role": "assistant",
+          "content": "Two pages and the brain decides it's time for a nap? That's not a reading problem, that's a light problem. Are you reading in a dark room, or is there any light getting in?"
+        },
+        {
+          "role": "user",
+          "content": "Usually at night in bed. It's the only quiet time I get."
+        },
+        {
+          "role": "assistant",
+          "content": "Perfect setup for falling asleep because your brain has no way to distinguish between a story and a dream. You need a physical barrier between the page and the brain's sleep mode. A noise and light blocking sleep mask is the simplest fix. It covers your eyes, blocks out any ambient light, and even blocks out the faint glow from the screen. Your brain can't tell it's still awake, so it stays awake. You finish the book, and the story actually stays in your head instead of just in the mattress."
+        },
+        {
+          "role": "user",
+          "content": "I've thought about audiobooks but I zone out when I'm just listening to something."
+        },
+        {
+          "role": "assistant",
+          "content": "Zone out is not the same as zone in. When you're listening, your brain is not engaged the same way it is when you're reading. A physical book requires active participation. If you're falling asleep anyway, the mask solves the sleep issue without giving up the book entirely. The story continues, the reading habit survives, and you get more of the book instead of less."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_D6_001",
+      "opening_type": "D",
+      "target_turns": 6,
+      "actual_turns": 6,
+      "messages": [
+        {
+          "role": "user",
+          "content": "I feel like I'm always running behind no matter how early I wake up."
+        },
+        {
+          "role": "assistant",
+          "content": "The early bird who gets the worm but still can't catch the bus. Is it the commute, the workday, or something else dragging you down?"
+        },
+        {
+          "role": "user",
+          "content": "I think it's because I spend twenty minutes just deciding what to wear. My closet is chaos."
+        },
+        {
+          "role": "assistant",
+          "content": "Twenty minutes of decision paralysis every morning is a full hour of your life that could be spent doing something else. Is it that you have too many options, or that you don't know what to pair?"
+        },
+        {
+          "role": "user",
+          "content": "It's not even that I have too many clothes, it's that I can't see what I have. Everything is just crammed in there."
+        },
+        {
+          "role": "assistant",
+          "content": "A closet without a system is a closet that never works. You can't see what you own, so you can't make a decision. Do you have any organization in the way the clothes are stored?"
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_B8_001",
+      "opening_type": "B",
+      "target_turns": 8,
+      "actual_turns": 8,
+      "messages": [
+        {
+          "role": "user",
+          "content": "What's the deepest point in the ocean?"
+        },
+        {
+          "role": "assistant",
+          "content": "The Mariana Trench, about 36,000 feet below sea level. That's nearly a mile deep. You diving?"
+        },
+        {
+          "role": "user",
+          "content": "That's insane. I can barely handle the deep end of a swimming pool."
+        },
+        {
+          "role": "assistant",
+          "content": "A mile? That's a whole other planet down there. Are you a swimmer or more of a splash-and-go person?"
+        },
+        {
+          "role": "user",
+          "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+        },
+        {
+          "role": "assistant",
+          "content": "Water anxiety is real, and it's usually not about the water itself, it's about losing control. Are you scared of drowning or more of the open water thing?"
+        },
+        {
+          "role": "user",
+          "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+        },
+        {
+          "role": "assistant",
+          "content": "Sand on your clothes is a constant battle. Do you have kids or pets that run around barefoot?"
+        }
+      ]
+    }
+  ]
+}

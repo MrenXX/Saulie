@@ -1,0 +1,113 @@
+{
+  "generated_at": "2026-05-28T18:37:02.981570",
+  "policy": "hf_bnb_policy",
+  "description": "BnB 8-bit base with selectable PEFT adapter mode; policy means set_adapter([default, dpo])",
+  "base_model": "/root/saulie/Qwen3-4B-Instruct-2507",
+  "sft_adapter": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+  "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-10/best_adapter/dpo",
+  "adapter_mode": "policy",
+  "active_adapters": [
+    "default",
+    "dpo"
+  ],
+  "policy_stack": [
+    "default",
+    "dpo"
+  ],
+  "dpo_weight": 1.0,
+  "dpo_scaled_modules": 0,
+  "adapter_diagnostics": {
+    "active_adapters": [
+      "default",
+      "dpo"
+    ],
+    "available_adapters": [
+      "default",
+      "dpo"
+    ],
+    "has_ref_adapter": false,
+    "trainable_by_adapter": {
+      "default": 0,
+      "dpo": 16515072,
+      "ref": 0
+    },
+    "trainable_total": 16515072,
+    "optimizer_param_groups": null,
+    "non_dpo_trainable_param_names": [],
+    "non_dpo_trainable_count": 0,
+    "only_dpo_trainable": true
+  },
+  "generation": {
+    "decode": "greedy",
+    "max_new_tokens": 350,
+    "temperature": null,
+    "top_p": null
+  },
+  "skeletons_path": "/root/saulie/dpo/eval/eval_skeletons.json",
+  "conversations": [
+    {
+      "skeleton_id": "eval_A4_001",
+      "opening_type": "A",
+      "target_turns": 4,
+      "actual_turns": 4,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My hands are always freezing when I'm typing at my computer."
+        },
+        {
+          "role": "assistant",
+          "content": "Cold hands at a keyboard don't need a heater, they need a boundary between your skin and the cold side of the desk. Is it just fingers going numb, or is the palm or back of your wrist also pulling down before you even pick up the mouse? And are you wearing gloves, a sleeve, or just a thin layer of sleeves or a shirt cuff that doesn't actually cup the wrist?"
+        },
+        {
+          "role": "user",
+          "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+        },
+        {
+          "role": "assistant",
+          "content": "Dry air from a heater stops skin from holding heat instead of just moving it, so a thin sleeve that doesn't pull fabric over your wrist stops the cold from hitting the nerve cluster at the base of your fingers without fighting the room's actual temperature. A thin microfiber or knitted finger-wrap sleeve goes over one or two fingers without covering the palm where grip stays warm, and the wrist stays tucked under your sleeve instead of dangling in a dry draft. That's the part your gloves skip and your heater can't fix because it's not air hitting your skin, it's air not holding moisture on it."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_B8_001",
+      "opening_type": "B",
+      "target_turns": 8,
+      "actual_turns": 8,
+      "messages": [
+        {
+          "role": "user",
+          "content": "What's the deepest point in the ocean?"
+        },
+        {
+          "role": "assistant",
+          "content": "Challenger Deep, Mariana Trench, about 36,000 feet below mean sea level. That's not just deep, that's where the pressure of a thousand trucks sits on a single square inch of your suit if you tried to go down without a submarine. What's the real question behind the number, curiosity or something you're trying to not panic about?"
+        },
+        {
+          "role": "user",
+          "content": "That's insane. I can barely handle the deep end of a swimming pool."
+        },
+        {
+          "role": "assistant",
+          "content": "Not the water, the difference between a pool where you're pushing your arms and a trench where your suit is already doing the math for you. You're not a test subject, you're not a diver, so the gear that stops the panic before the suit is the one that matters, not the one that goes underwater. What you're not doing is carrying a thousand-pound helmet to a lake, you're carrying a sealed pocket that says 'your lungs don't need to know what's below you yet.'"
+        },
+        {
+          "role": "user",
+          "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+        },
+        {
+          "role": "assistant",
+          "content": "Then the thousand-pound helmet doesn't live in your pack, it lives in your pocket when the water stops being a straight line and starts being a drop you can't time. A sealed pocket with a one-way valve on the inside lets you slide a hand into a square of air, not a helmet, not a dive, just a square of your own breath between your wrist and the drop you can still read before you stop reading it. Stops the pool-to-trench math without letting the trench live in your lungs first."
+        },
+        {
+          "role": "user",
+          "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+        },
+        {
+          "role": "assistant",
+          "content": "Sand not in your eyes is still sand in your pocket, and a one-way valve pocket on a pair you already carry stops that from being a read-before-you-sit decision instead of a wet-suit-before-you-read one. You don't need the trench math, you need the sand not to become a second layer of your wrist before you pick up the book. That pocket stays closed until your hand goes in, and the drop you're reading doesn't get a second vote in your pocket."
+        }
+      ]
+    }
+  ]
+}

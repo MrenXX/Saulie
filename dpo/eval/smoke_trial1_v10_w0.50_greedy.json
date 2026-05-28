@@ -1,0 +1,113 @@
+{
+  "generated_at": "2026-05-28T18:43:39.739401",
+  "policy": "hf_bnb_policy",
+  "description": "BnB 8-bit base with selectable PEFT adapter mode; policy means set_adapter([default, dpo])",
+  "base_model": "/root/saulie/Qwen3-4B-Instruct-2507",
+  "sft_adapter": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+  "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial-1/best_adapter/dpo",
+  "adapter_mode": "policy",
+  "active_adapters": [
+    "default",
+    "dpo"
+  ],
+  "policy_stack": [
+    "default",
+    "dpo"
+  ],
+  "dpo_weight": 0.5,
+  "dpo_scaled_modules": 252,
+  "adapter_diagnostics": {
+    "active_adapters": [
+      "default",
+      "dpo"
+    ],
+    "available_adapters": [
+      "default",
+      "dpo"
+    ],
+    "has_ref_adapter": false,
+    "trainable_by_adapter": {
+      "default": 0,
+      "dpo": 33030144,
+      "ref": 0
+    },
+    "trainable_total": 33030144,
+    "optimizer_param_groups": null,
+    "non_dpo_trainable_param_names": [],
+    "non_dpo_trainable_count": 0,
+    "only_dpo_trainable": true
+  },
+  "generation": {
+    "decode": "greedy",
+    "max_new_tokens": 350,
+    "temperature": null,
+    "top_p": null
+  },
+  "skeletons_path": "/root/saulie/dpo/eval/eval_skeletons.json",
+  "conversations": [
+    {
+      "skeleton_id": "eval_A4_001",
+      "opening_type": "A",
+      "target_turns": 4,
+      "actual_turns": 4,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My hands are always freezing when I'm typing at my computer."
+        },
+        {
+          "role": "assistant",
+          "content": "Cold hands at the keyboard? That's a real distraction. Are you sitting in a drafty room, or is the heater just not reaching your palms?"
+        },
+        {
+          "role": "user",
+          "content": "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+        },
+        {
+          "role": "assistant",
+          "content": "A space heater is a room heater, not a hand heater. You're fighting the whole room temperature instead of the cold that's actually touching your fingers. A heated keyboard sleeve is the targeted fix. You wrap it around the keyboard, it circulates warm air directly over your hands as you type, and the heater stays off. Your fingers stay warm, the room doesn't dry out, and you stop typing with a frozen thumb."
+        }
+      ]
+    },
+    {
+      "skeleton_id": "eval_B8_001",
+      "opening_type": "B",
+      "target_turns": 8,
+      "actual_turns": 8,
+      "messages": [
+        {
+          "role": "user",
+          "content": "What's the deepest point in the ocean?"
+        },
+        {
+          "role": "assistant",
+          "content": "The Mariana Trench, about 36,000 feet below sea level. That's nearly 11 miles down. It's so deep that the pressure at the bottom is about 1,000 times what we feel at sea level. If you were to drop a basketball into the trench, it would take about 10 minutes to reach the bottom, and it would be flattened into a pancake by the time it arrived. The water temperature there is actually around 3 degrees Celsius, so it's not a warm bath, but it is a very cold bath. The trench is so deep that the sun's light never reaches it, and the only life forms that survive there are extremophiles that can withstand the crushing pressure and near-freezing temperatures. It's one of the most extreme environments on Earth, and it's still not fully mapped. The deepest point, Challenger Deep, has only been visited a handful of times, and each descent takes a team of scientists and a specially designed submersible. It's a place of such isolation and pressure that it's hard to imagine what it would feel like to be there."
+        },
+        {
+          "role": "user",
+          "content": "That's insane. I can barely handle the deep end of a swimming pool."
+        },
+        {
+          "role": "assistant",
+          "content": "The deep end of a pool is a fraction of the pressure, but it's still a significant difference from the Mariana Trench. The human body is adapted to the surface, and going below about 30 feet without a scuba tank is a very different experience from going 36,000 feet below sea level. Have you ever been scuba diving, or is that more of a fantasy?"
+        },
+        {
+          "role": "user",
+          "content": "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though."
+        },
+        {
+          "role": "assistant",
+          "content": "Anxiety in water where you can't see the bottom is a very specific fear, and it's not about the depth of the water, it's about the depth of the unknown. You're not afraid of the water itself, you're afraid of what's below it. That's a very different kind of fear than being afraid of the deep ocean, because in the deep ocean, the water is dark and the bottom is a mystery, but in a pool, the bottom is a flat surface, and the mystery is just a few feet away. The difference is that in a pool, the bottom is visible, and in the deep ocean, the bottom is invisible. Have you ever tried to relax in the water, or does the anxiety come from the water itself?"
+        },
+        {
+          "role": "user",
+          "content": "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+        },
+        {
+          "role": "assistant",
+          "content": "Sand is the one part of the beach that is genuinely annoying because it is not a surface, it is a substance that moves. It is not a flat surface like a sidewalk, it is a loose collection of particles that will find every crevice of your clothes, your hair, your shoes, and your skin. It is not a surface, it is a substance that is trying to get into your clothes. Have you ever tried to fight it with a towel, or does the towel just get covered in sand and you end up with a wet towel on your face?"
+        }
+      ]
+    }
+  ]
+}
