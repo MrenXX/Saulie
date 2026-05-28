@@ -305,6 +305,9 @@ def run_training(
         data_collator=collator,
         callbacks=callbacks,
     )
+    from dpo.train.dpo_trainer_compat import require_reference_adapter
+
+    require_reference_adapter(trainer.accelerator.unwrap_model(trainer.model))
     print(f"  peft adapters (post-trainer): {list(trainer.model.peft_config.keys())}")
     enforce_adapter_gradients(trainer.model)
     trainable = sum(p.numel() for p in trainer.model.parameters() if p.requires_grad)

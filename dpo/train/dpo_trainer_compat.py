@@ -69,9 +69,18 @@ def ensure_policy_adapter_stack(model) -> None:
 
 def collect_adapter_diagnostics(model, trainer=None) -> dict:
     """Report active adapters, trainable counts, and non-DPO gradients if any."""
-    diag: dict[str, Any] = {"active_adapters": None, "trainable_by_adapter": {}, "trainable_total": 0}
+    diag: dict[str, Any] = {
+        "active_adapters": None,
+        "available_adapters": [],
+        "has_ref_adapter": False,
+        "trainable_by_adapter": {},
+        "trainable_total": 0,
+    }
     if not is_peft_available() or not isinstance(model, PeftModel):
         return diag
+
+    diag["available_adapters"] = list(model.peft_config.keys())
+    diag["has_ref_adapter"] = REF_ADAPTER_NAME in model.peft_config
 
     try:
         diag["active_adapters"] = list(model.active_adapters)
@@ -106,6 +115,18 @@ def collect_adapter_diagnostics(model, trainer=None) -> dict:
     diag["non_dpo_trainable_count"] = len(non_dpo_grad_params)
     diag["only_dpo_trainable"] = len(non_dpo_grad_params) == 0
     return diag
+
+
+def require_reference_adapter(model) -> None:
+    """Fail closed if TRL did not create the frozen SFT reference adapter."""
+    if not is_peft_available() or not isinstance(model, PeftModel):
+        return
+    if REF_ADAPTER_NAME not in model.peft_config:
+        raise RuntimeError(
+            "Missing PEFT reference adapter 'ref'. DPO must compare the policy "
+            "against frozen SFT behavior, not raw base. Check the installed TRL/PEFT "
+            "adapter-copy behavior before training."
+        )
 
 
 @dataclass
@@ -329,6 +350,7 @@ def _load_or_compute_ref_npz(
     batch_size: int,
     path: Path,
 ) -> tuple[np.ndarray, np.ndarray]:
+    require_reference_adapter(trainer.accelerator.unwrap_model(trainer.model))
     lock_path = path.with_suffix(path.suffix + ".lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("w", encoding="utf-8") as lock_f:

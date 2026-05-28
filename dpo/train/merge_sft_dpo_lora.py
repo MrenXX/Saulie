@@ -6,6 +6,7 @@ FP8 Qwen3 in vLLM (closest supported substitute for 8-bit training).
 
   python dpo/train/merge_sft_dpo_lora.py \\
     --dpo-adapter .../trial-29/best_adapter \\
+        --dpo-weight 0.25 \\
     --output .../trial-29/sft_dpo_cat \\
     --check-logps
 """
@@ -139,7 +140,9 @@ def flatten_adapter_dir(output_dir: Path, adapter_name: str) -> Path:
     return output_dir
 
 
-def merge_cat(model: PeftModel) -> PeftModel:
+def merge_cat(model: PeftModel, dpo_weight: float) -> PeftModel:
+    if dpo_weight < 0:
+        raise ValueError("dpo_weight must be non-negative")
     if SFT_ADAPTER_NAME not in model.peft_config or DPO_ADAPTER_NAME not in model.peft_config:
         raise ValueError(
             f"Expected adapters {SFT_ADAPTER_NAME} and {DPO_ADAPTER_NAME}, "
@@ -147,28 +150,50 @@ def merge_cat(model: PeftModel) -> PeftModel:
         )
     model.add_weighted_adapter(
         adapters=POLICY_ADAPTER_STACK,
-        weights=[1.0, 1.0],
+        weights=[1.0, dpo_weight],
         adapter_name=CAT_ADAPTER_NAME,
         combination_type="cat",
     )
     return model
 
 
+def _scale_adapter_temporarily(model: PeftModel, adapter_name: str, weight: float):
+    originals = []
+    if weight == 1.0:
+        return originals
+    for module in model.modules():
+        scaling = getattr(module, "scaling", None)
+        if isinstance(scaling, dict) and adapter_name in scaling:
+            originals.append((scaling, scaling[adapter_name]))
+            scaling[adapter_name] *= weight
+    if not originals:
+        raise ValueError(f"No scaling entries found for adapter {adapter_name!r}")
+    return originals
+
+
+def _restore_adapter_scaling(originals) -> None:
+    for scaling, value in originals:
+        scaling[DPO_ADAPTER_NAME] = value
+
+
 def _model_device(model: PeftModel) -> torch.device:
     return next(model.parameters()).device
 
 
-def verify_weight_matrices(model: PeftModel) -> dict:
-    """Per-layer ΔW: sum(scaling_i * B_i @ A_i) must match cat (exact for linear LoRA)."""
+def verify_weight_matrices(model: PeftModel, dpo_weight: float) -> dict:
+    """Per-layer delta-W: SFT + weight*DPO must match cat exactly for linear LoRA."""
     max_diff = 0.0
     layers = 0
     for _name, module in model.named_modules():
         if not (hasattr(module, "lora_A") and CAT_ADAPTER_NAME in module.lora_A):
             continue
-        d_stack = sum(
-            module.scaling[ad] * (module.lora_B[ad].weight.float() @ module.lora_A[ad].weight.float())
-            for ad in POLICY_ADAPTER_STACK
-            if ad in module.lora_A
+        d_stack = module.scaling[SFT_ADAPTER_NAME] * (
+            module.lora_B[SFT_ADAPTER_NAME].weight.float()
+            @ module.lora_A[SFT_ADAPTER_NAME].weight.float()
+        )
+        d_stack = d_stack + dpo_weight * module.scaling[DPO_ADAPTER_NAME] * (
+            module.lora_B[DPO_ADAPTER_NAME].weight.float()
+            @ module.lora_A[DPO_ADAPTER_NAME].weight.float()
         )
         d_cat = module.scaling[CAT_ADAPTER_NAME] * (
             module.lora_B[CAT_ADAPTER_NAME].weight.float() @ module.lora_A[CAT_ADAPTER_NAME].weight.float()
@@ -188,8 +213,9 @@ def compare_logps_chat(
     model: PeftModel,
     tokenizer: AutoTokenizer,
     conversations: list[list[dict]],
+    dpo_weight: float,
 ) -> dict:
-    """Training policy [default,dpo] vs cat adapter; same BnB base as train_dpo."""
+    """Scaled training policy [default,dpo] vs cat adapter; same BnB base as train_dpo."""
     model.eval()
     device = _model_device(model)
     diffs = []
@@ -207,7 +233,11 @@ def compare_logps_chat(
         ids = ids.to(device)
         with torch.no_grad():
             model.base_model.set_adapter(POLICY_ADAPTER_STACK)
-            logits_s = model(ids).logits[0, -1]
+            originals = _scale_adapter_temporarily(model, DPO_ADAPTER_NAME, dpo_weight)
+            try:
+                logits_s = model(ids).logits[0, -1]
+            finally:
+                _restore_adapter_scaling(originals)
             model.set_adapter(CAT_ADAPTER_NAME)
             logits_c = model(ids).logits[0, -1]
         diff = (logits_s - logits_c).abs().max().item()
@@ -216,6 +246,7 @@ def compare_logps_chat(
 
     return {
         "validation_base": TRAIN_BASE_LABEL,
+        "dpo_weight": dpo_weight,
         "prompts": len(conversations),
         "tolerance": LOGIT_TOL,
         "max_abs_logit_diff": max(diffs),
@@ -229,6 +260,12 @@ def main():
     parser = argparse.ArgumentParser(description="Cat-stack SFT + DPO LoRA for FP8 vLLM")
     parser.add_argument("--dpo-adapter", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--dpo-weight",
+        type=float,
+        default=1.0,
+        help="Scale the DPO residual before cat export; 1.0 reproduces the training policy.",
+    )
     parser.add_argument(
         "--check-logps",
         action="store_true",
@@ -245,9 +282,9 @@ def main():
     print(f"  adapters before cat: {list(model.peft_config.keys())}")
 
     compat = validate_merge_compatibility(model, dpo_path)
-    merge_cat(model)
+    merge_cat(model, args.dpo_weight)
 
-    weight_check = verify_weight_matrices(model)
+    weight_check = verify_weight_matrices(model, args.dpo_weight)
     print(f"  weight-matrix check: {weight_check}")
     if not weight_check["pass"]:
         raise ValueError(
@@ -259,7 +296,7 @@ def main():
     if args.check_logps:
         tokenizer = AutoTokenizer.from_pretrained(str(MODEL_ID_BF16))
         patch_chat_template_for_assistant_loss(tokenizer)
-        logit_check = compare_logps_chat(model, tokenizer, FIXED_CHAT_CONVERSATIONS)
+        logit_check = compare_logps_chat(model, tokenizer, FIXED_CHAT_CONVERSATIONS, args.dpo_weight)
         print(f"  forward logit check ({TRAIN_BASE_LABEL}, informational): {logit_check}")
         if not logit_check["pass"]:
             print(
@@ -277,7 +314,8 @@ def main():
 
     meta = {
         "combination_type": "cat",
-        "weights": [1.0, 1.0],
+        "weights": [1.0, args.dpo_weight],
+        "dpo_weight": args.dpo_weight,
         "source_adapters": POLICY_ADAPTER_STACK,
         "output_adapter_dir": str(args.output.resolve()),
         "adapter_config_json": str((args.output / "adapter_config.json").resolve()),
