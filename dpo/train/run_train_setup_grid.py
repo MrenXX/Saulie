@@ -19,6 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 from dpo.train.merge_sft_dpo_lora import load_stacked_for_merge, resolve_dpo_adapter_path
+from dpo.train.qwen3_decode import add_decode_argparse
 from dpo.train.smoke_policy_stack_hf import (
     DPO_ADAPTER_NAME,
     activate_adapter_mode,
@@ -44,7 +45,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=REPO_ROOT / "dpo/eval/train_setup_grid_10skel.jsonl")
     parser.add_argument("--n-skeletons", type=int, default=10)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--decode", choices=("greedy", "sample"), default="greedy")
+    add_decode_argparse(parser)
     parser.add_argument("--skeleton-ids", type=str, default=None, help="comma list; overrides random pick")
     args = parser.parse_args()
 
@@ -85,9 +86,11 @@ def main() -> None:
                         sk,
                         adapter_mode="policy",
                         decode=args.decode,
-                        max_new_tokens=350,
-                        temperature=0.7,
-                        top_p=0.8,
+                        max_new_tokens=args.max_new_tokens,
+                        temperature=args.temperature,
+                        top_p=args.top_p,
+                        top_k=args.top_k,
+                        repetition_penalty=args.repetition_penalty,
                     )
                     row = {
                         "skeleton_id": sk["id"],

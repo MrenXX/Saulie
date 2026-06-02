@@ -26,8 +26,8 @@ import torch
 from peft import PeftModel
 from transformers import AutoTokenizer
 
-from dpo.train.model_load import load_bnb_8bit_base
-from dpo.train.paths import MODEL_ID_BF16, MODEL_ID_FP8, SFT_ADAPTER
+from dpo.train.model_load import BaseKind, load_base, load_sft_baked_base
+from dpo.train.paths import MODEL_ID_BF16, MODEL_ID_FP8, MODEL_ID_SFT_MERGED_BF16, SFT_ADAPTER
 from train.train_sft import patch_chat_template_for_assistant_loss
 
 SFT_ADAPTER_NAME = "default"
@@ -103,16 +103,62 @@ def validate_merge_compatibility(model: PeftModel, dpo_adapter_dir: Path) -> dic
     return meta
 
 
-def load_stacked_for_merge(dpo_adapter_dir: Path) -> PeftModel:
-    """BnB 8-bit base — matches DPO training policy stack."""
-    base = load_bnb_8bit_base()
+def load_sft_stack(*, base: BaseKind = "bnb") -> PeftModel:
+    """Frozen SFT trial-17 on selectable base (default BnB 8-bit = DPO training)."""
     model = PeftModel.from_pretrained(
-        base,
+        load_base(base),
         str(SFT_ADAPTER),
         adapter_name=SFT_ADAPTER_NAME,
         is_trainable=False,
     )
+    return model
+
+
+def load_stacked_for_merge(dpo_adapter_dir: Path, *, base: BaseKind = "bnb") -> PeftModel:
+    """SFT + DPO policy stack on selectable base (default BnB 8-bit = DPO training)."""
+    model = load_sft_stack(base=base)
     model.load_adapter(str(dpo_adapter_dir), adapter_name=DPO_ADAPTER_NAME, is_trainable=False)
+    return model
+
+
+def load_cat_merged_adapter(cat_adapter_dir: Path, *, base: BaseKind = "bnb") -> PeftModel:
+    """Single cat-merged SFT+DPO adapter on base (HF REPL / vLLM export)."""
+    cat_dir = cat_adapter_dir.resolve()
+    if not (cat_dir / "adapter_config.json").is_file():
+        raise FileNotFoundError(
+            f"No adapter_config.json in {cat_dir}; run merge_sft_dpo_lora.py first"
+        )
+    meta_path = cat_dir / "merge_meta.json"
+    if meta_path.is_file():
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        wcheck = meta.get("weight_matrix_check") or {}
+        print(f"  merge_meta: dpo_weight={meta.get('dpo_weight')} merged_rank={meta.get('merged_rank')}")
+        print(f"  weight_matrix_check pass={wcheck.get('pass')} max_diff={wcheck.get('max_abs_delta_diff')}")
+        if wcheck and not wcheck.get("pass"):
+            print("  WARNING: merge_meta reports failed weight-matrix check")
+    model = PeftModel.from_pretrained(
+        load_base(base),
+        str(cat_dir),
+        is_trainable=False,
+    )
+    return model
+
+
+def load_baked_dpo_stack(
+    dpo_adapter_dir: Path,
+    *,
+    base: BaseKind = "bnb",
+    merged_path: Path | None = None,
+) -> PeftModel:
+    """Plan B inference: BnB(SFT-merged base) + trained DPO adapter only."""
+    dpo_path = resolve_dpo_adapter_path(dpo_adapter_dir)
+    path = merged_path if merged_path is not None else MODEL_ID_SFT_MERGED_BF16
+    model = PeftModel.from_pretrained(
+        load_sft_baked_base(base, merged_path=path),
+        str(dpo_path),
+        adapter_name=DPO_ADAPTER_NAME,
+        is_trainable=False,
+    )
     return model
 
 

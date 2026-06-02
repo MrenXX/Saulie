@@ -104,7 +104,7 @@ def main() -> None:
 
             s = json.loads(summary_path.read_text())
             if s.get("target_reached"):
-                print(f"{now} DONE target_reached", flush=True)
+                print(f"{now} DONE target_reached (trial_summary.json)", flush=True)
                 return
         study = optuna.load_study(study_name=args.study_name, storage=storage)
         from collections import Counter

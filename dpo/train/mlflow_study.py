@@ -9,7 +9,7 @@ from typing import Any
 
 import mlflow
 
-from dpo.train.paths import EXPERIMENT_NAME, MLRUNS_DIR
+from dpo.train.paths import EXPERIMENT_NAME, MLRUNS_DIR, experiment_name_for_version
 
 SKIP_METRIC_ATTRS = frozenset({
     "val_diagnostics_json",
@@ -103,6 +103,18 @@ def log_trial_run(
         params["parallel_oom_recovered"] = "true"
     if ua.get("anchor_trial"):
         params["anchor_trial"] = "true"
+    if ua.get("enqueued_trial"):
+        params["enqueued_trial"] = "true"
+    if ua.get("rescue_label"):
+        params["rescue_label"] = _mlflow_param_value(ua["rescue_label"])
+    if ua.get("plan_b_label"):
+        params["plan_b_label"] = _mlflow_param_value(ua["plan_b_label"])
+    if ua.get("stack_mode"):
+        params["stack_mode"] = _mlflow_param_value(ua["stack_mode"])
+    if ua.get("plan_a_trial_index") is not None:
+        params["plan_a_trial_index"] = str(ua["plan_a_trial_index"])
+    if ua.get("high_margin_warning"):
+        params["high_margin_warning"] = "true"
     if ua.get("duplicate_of") is not None:
         params["duplicate_of"] = str(ua["duplicate_of"])
 
@@ -260,13 +272,16 @@ def backfill_study_from_summary(
     summary_path = summary_path.resolve()
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     run_dir = Path(summary.get("run_dir", summary_path.parent))
-    setup_mlflow()
+    exp_name = summary.get("experiment_name") or EXPERIMENT_NAME
+    if summary.get("study_version"):
+        exp_name = experiment_name_for_version(str(summary["study_version"]))
+    setup_mlflow(exp_name)
 
     if parent_run_name:
         client = mlflow.tracking.MlflowClient()
-        exp = client.get_experiment_by_name(EXPERIMENT_NAME)
+        exp = client.get_experiment_by_name(exp_name)
         if exp is None:
-            raise RuntimeError(f"Experiment not found: {EXPERIMENT_NAME}")
+            raise RuntimeError(f"Experiment not found: {exp_name}")
         runs = client.search_runs(
             experiment_ids=[exp.experiment_id],
             filter_string=f"attributes.run_name = '{parent_run_name}'",
@@ -296,12 +311,32 @@ def backfill_study_from_summary(
                     summary.get("target_complete_trials")
                 ),
             })
-            for t in summary.get("trials") or []:
+            for t in _trials_with_resolved_params(summary):
                 log_trial_run(parent_id, t, run_dir=run_dir)
             log_parent_study_summary(summary, summary_path, reports)
 
     if parent_run_name:
-        for t in summary.get("trials") or []:
+        for t in _trials_with_resolved_params(summary):
             log_trial_run(parent_id, t, run_dir=run_dir)
 
     return parent_id
+
+
+def _trials_with_resolved_params(summary: dict) -> list[dict]:
+    """Ensure each trial row has canonical params for MLflow backfill."""
+    from dpo.train.optuna_parallel import params_for_summary_row
+
+    study_version = str(summary.get("study_version") or "")
+    out: list[dict] = []
+    for row in summary.get("trials") or []:
+        trial = dict(row)
+        p = params_for_summary_row(trial, study_version)
+        if p:
+            trial["params"] = p
+            derived = trial.get("derived") or {}
+            if not derived and p:
+                from dpo.train.optuna_parallel import derive_summary_fields
+
+                trial["derived"] = derive_summary_fields(p)
+        out.append(trial)
+    return out

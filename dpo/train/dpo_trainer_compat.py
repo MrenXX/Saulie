@@ -38,6 +38,29 @@ SFT_ADAPTER_NAME = "default"
 DPO_ADAPTER_NAME = "dpo"
 REF_ADAPTER_NAME = "ref"
 POLICY_ADAPTER_STACK = [SFT_ADAPTER_NAME, DPO_ADAPTER_NAME]
+BAKED_POLICY_ADAPTER_STACK = [DPO_ADAPTER_NAME]
+SAULIE_STACK_ATTR = "_saulie_dpo_stack"
+
+
+def is_baked_stack_model(model) -> bool:
+    return getattr(model, SAULIE_STACK_ATTR, None) == "baked"
+
+
+def ensure_baked_policy_adapter(model) -> None:
+    """Plan B: policy = baked SFT-merged base + trainable DPO only."""
+    if not is_peft_available() or not isinstance(model, PeftModel):
+        return
+    if DPO_ADAPTER_NAME not in model.peft_config:
+        return
+    model.set_adapter(DPO_ADAPTER_NAME)
+    enforce_adapter_gradients(model)
+
+
+def ensure_policy_forward(model) -> None:
+    if is_baked_stack_model(model):
+        ensure_baked_policy_adapter(model)
+    else:
+        ensure_policy_adapter_stack(model)
 
 
 def _adapter_from_param_name(name: str) -> str | None:
@@ -75,11 +98,14 @@ def collect_adapter_diagnostics(model, trainer=None) -> dict:
         "has_ref_adapter": False,
         "trainable_by_adapter": {},
         "trainable_total": 0,
+        "stack_mode": getattr(model, SAULIE_STACK_ATTR, "legacy_sft_lora"),
     }
     if not is_peft_available() or not isinstance(model, PeftModel):
         return diag
 
     diag["available_adapters"] = list(model.peft_config.keys())
+    if is_baked_stack_model(model):
+        diag["policy_stack"] = list(BAKED_POLICY_ADAPTER_STACK)
     diag["has_ref_adapter"] = REF_ADAPTER_NAME in model.peft_config
 
     try:
@@ -394,9 +420,11 @@ class AssistantOnlyDPOTrainer(DPOTrainer):
     """Skip TRL re-tokenization; policy forward stacks SFT + DPO adapters (no merge)."""
 
     def _precompute_ref_logps(self, dataset: Dataset, name: str, batch_size: int) -> Dataset:
+        baked = is_baked_stack_model(self.accelerator.unwrap_model(self.model))
         key = ref_cache_key(
             dataset_fingerprint=dataset._fingerprint,
             precompute_batch_size=batch_size,
+            baked_base=baked,
         )
         path = cache_path(key, name)
         fingerprint = Hasher.hash((dataset._fingerprint, key))
@@ -440,9 +468,9 @@ class AssistantOnlyDPOTrainer(DPOTrainer):
         return super()._prepare_dataset(dataset, processing_class, args, dataset_name)
 
     def _compute_loss(self, model, inputs, return_outputs=False):
-        ensure_policy_adapter_stack(self.accelerator.unwrap_model(model))
+        ensure_policy_forward(self.accelerator.unwrap_model(model))
         return super()._compute_loss(model, inputs, return_outputs=return_outputs)
 
     def training_step(self, model, inputs, num_items_in_batch=None):
-        ensure_policy_adapter_stack(self.accelerator.unwrap_model(model))
+        ensure_policy_forward(self.accelerator.unwrap_model(model))
         return super().training_step(model, inputs, num_items_in_batch)

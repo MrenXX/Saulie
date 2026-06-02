@@ -56,6 +56,88 @@ ANCHOR_TRIAL_PARAMS_V11 = {
     "neftune_noise_alpha": 5.0,
     "length_mode": "ld_0.3",
 }
+
+# Plan A Step 2 — fixed rescue configs (plan_a_existing_trials_and_final_stack_retrains.md)
+PLAN_A_RESCUE_SHARED = {
+    "beta": 0.20,
+    "num_train_epochs": 1,
+    "learning_rate": 5e-6,
+    "lora_r": 8,
+    "lora_dropout": 0.05,
+    "batch_combo": "1x8",
+    "lr_scheduler_type": "constant_with_warmup",
+    "max_grad_norm": 0.3,
+    "neftune_noise_alpha": 0.0,
+}
+PLAN_A_RESCUE_TRIAL_1 = {**PLAN_A_RESCUE_SHARED, "length_mode": "ld_0.5"}
+PLAN_A_RESCUE_TRIAL_2 = {**PLAN_A_RESCUE_SHARED, "length_mode": "ipo"}
+PLAN_A_RESCUE_TRIALS = (PLAN_A_RESCUE_TRIAL_1, PLAN_A_RESCUE_TRIAL_2)
+PLAN_A_RESCUE_LABELS = ("plan_a_minimal_dpo", "plan_a_ipo")
+
+# Plan B fixed trials (v1.3 baked merged base; v1.4 unmerged SFT+DPO stack)
+PLAN_B_STUDY_VERSIONS = ("v1.3", "v1.4")
+PLAN_B_SHARED = {
+    "num_train_epochs": 1,
+    "batch_combo": "1x8",
+    "lora_dropout": 0.05,
+    "lr_scheduler_type": "constant_with_warmup",
+    "max_grad_norm": 0.3,
+    "neftune_noise_alpha": 0.0,
+}
+PLAN_B_TRIAL_ANCHOR = {
+    **PLAN_B_SHARED,
+    "beta": 0.20,
+    "learning_rate": 5e-6,
+    "lora_r": 8,
+    "length_mode": "ld_0.5",
+}
+PLAN_B_TRIAL_BRIDGE = {
+    **PLAN_B_SHARED,
+    "beta": 0.08,
+    "learning_rate": 1.0e-5,
+    "lora_r": 12,
+    "length_mode": "ld_0.3",
+}
+PLAN_B_TRIAL_V11_LITE = {
+    **PLAN_B_SHARED,
+    "beta": 0.05,
+    "learning_rate": 1.5e-5,
+    "lora_r": 16,
+    "length_mode": "ld_0.3",
+}
+PLAN_B_TRIAL_V10_23_LITE = {
+    **PLAN_B_SHARED,
+    "beta": 0.05,
+    "learning_rate": 1.85e-5,
+    "lora_r": 16,
+    "length_mode": "ld_0.3",
+}
+PLAN_B_TRIALS = (
+    PLAN_B_TRIAL_ANCHOR,
+    PLAN_B_TRIAL_BRIDGE,
+    PLAN_B_TRIAL_V11_LITE,
+    PLAN_B_TRIAL_V10_23_LITE,
+)
+PLAN_B_LABELS = (
+    "plan_b_anchor",
+    "plan_b_bridge",
+    "plan_b_v11_lite",
+    "plan_b_v10_23_lite",
+)
+
+# Canonical Optuna keys stored in summary / MLflow / HTML (batch_combo form).
+TRIAL_PARAM_KEYS = (
+    "beta",
+    "learning_rate",
+    "lora_r",
+    "lora_dropout",
+    "num_train_epochs",
+    "batch_combo",
+    "length_mode",
+    "lr_scheduler_type",
+    "max_grad_norm",
+    "neftune_noise_alpha",
+)
 VRAM_WAIT_CAP_S = 120
 VRAM_WAIT_NORMAL_GB = 10.5
 VRAM_WAIT_HIGH_GB = 12.0
@@ -114,6 +196,10 @@ class OptunaRunConfig:
 
 def default_study_name(study_version: str = "v1.0") -> str:
     exp = experiment_name_for_version(study_version)
+    if study_version in PLAN_B_STUDY_VERSIONS:
+        return f"{exp}-plan-b-seed{SPLIT_SEED}"
+    if study_version == "v1.2":
+        return f"{exp}-plan-a-seed{SPLIT_SEED}"
     return f"{exp}-v4-seed{SPLIT_SEED}"
 
 
@@ -247,6 +333,133 @@ def expand_params_for_training(params: dict) -> dict:
     return out
 
 
+def to_canonical_params(params: dict) -> dict:
+    """Drop expanded batch fields when batch_combo is the source of truth."""
+    out = dict(params)
+    if "batch_combo" in out:
+        out.pop("per_device_train_batch_size", None)
+        out.pop("gradient_accumulation_steps", None)
+    return out
+
+
+def persist_trial_params(trial: optuna.Trial, canonical: dict) -> None:
+    """Store hyperparameters on the trial (ask/tell leaves Optuna params empty)."""
+    canon = to_canonical_params(canonical)
+    trial.set_user_attr("trial_params", canon)
+    trial.set_user_attr("trial_params_json", json.dumps(canon, sort_keys=True))
+    for key in TRIAL_PARAM_KEYS:
+        if key in canon:
+            trial.set_user_attr(key, canon[key])
+
+
+def resolve_canonical_trial_params(
+    trial: optuna.Trial,
+    cfg: OptunaRunConfig,
+    *,
+    solo_record: dict | None = None,
+    fixed_params: dict | None = None,
+) -> dict:
+    """Return Optuna-shaped params (batch_combo, not expanded)."""
+    if fixed_params is not None:
+        return to_canonical_params(dict(fixed_params))
+    if solo_record is not None:
+        return to_canonical_params(dict(solo_record["params"]))
+    if dict(trial.params):
+        return to_canonical_params(dict(trial.params))
+    if cfg.study_version == "v1.2":
+        fixed = plan_a_params_by_trial_number(trial.number)
+        if not fixed:
+            trial.set_user_attr("failure_reason", "v1.2_only_enqueued")
+            raise optuna.TrialPruned("v1.2_only_enqueued")
+        return dict(fixed)
+    if cfg.study_version in PLAN_B_STUDY_VERSIONS:
+        fixed = plan_b_params_by_trial_number(trial.number)
+        if not fixed:
+            trial.set_user_attr("failure_reason", f"{cfg.study_version}_only_enqueued")
+            raise optuna.TrialPruned(f"{cfg.study_version}_only_enqueued")
+        return dict(fixed)
+    return {}
+
+
+def params_for_frozen_trial(trial: optuna.trial.FrozenTrial, study_version: str) -> dict:
+    """Hyperparams for summaries/HTML from Optuna storage or fallbacks."""
+    if dict(trial.params):
+        return to_canonical_params(dict(trial.params))
+    ua = trial.user_attrs or {}
+    stored = ua.get("trial_params")
+    if isinstance(stored, dict) and stored:
+        return to_canonical_params(stored)
+    raw = ua.get("trial_params_json")
+    if raw:
+        try:
+            return to_canonical_params(json.loads(raw))
+        except json.JSONDecodeError:
+            pass
+    if study_version in PLAN_B_STUDY_VERSIONS:
+        fixed = plan_b_params_by_trial_number(trial.number)
+        return dict(fixed) if fixed else {}
+    if study_version == "v1.2":
+        fixed = plan_a_params_by_trial_number(trial.number)
+        return dict(fixed) if fixed else {}
+    return {}
+
+
+def enrich_summary_dict(summary: dict) -> dict:
+    """Fill empty trial params/derived for fixed-trial studies (v1.2/v1.3/v1.4)."""
+    study_version = str(summary.get("study_version") or "")
+    for row in summary.get("trials") or []:
+        p = params_for_summary_row(row, study_version)
+        if p:
+            row["params"] = p
+            row["derived"] = derive_summary_fields(p)
+    for row in summary.get("complete_trials") or []:
+        n = row.get("number")
+        if n is None:
+            continue
+        match = next(
+            (t for t in summary.get("trials") or [] if t.get("trial_number") == n),
+            None,
+        )
+        if match and match.get("params"):
+            row["params"] = dict(match["params"])
+    complete = [
+        t
+        for t in (summary.get("trials") or [])
+        if t.get("state") == "COMPLETE" and t.get("value") is not None
+    ]
+    if complete:
+        best_row = max(complete, key=lambda t: t.get("value") or -1)
+        summary["best_params"] = dict(best_row.get("params") or {})
+        summary["best_trial"] = best_row.get("trial_number")
+    return summary
+
+
+def params_for_summary_row(trial_row: dict, study_version: str) -> dict:
+    """Resolve params from a trial_summary.json row."""
+    p = trial_row.get("params") or {}
+    if isinstance(p, dict) and p:
+        return to_canonical_params(p)
+    ua = trial_row.get("user_attrs") or {}
+    stored = ua.get("trial_params")
+    if isinstance(stored, dict) and stored:
+        return to_canonical_params(stored)
+    raw = ua.get("trial_params_json")
+    if raw:
+        try:
+            return to_canonical_params(json.loads(raw))
+        except json.JSONDecodeError:
+            pass
+    n = trial_row.get("trial_number", trial_row.get("number"))
+    if n is not None:
+        if study_version in PLAN_B_STUDY_VERSIONS:
+            fixed = plan_b_params_by_trial_number(int(n))
+            return dict(fixed) if fixed else {}
+        if study_version == "v1.2":
+            fixed = plan_a_params_by_trial_number(int(n))
+            return dict(fixed) if fixed else {}
+    return {}
+
+
 def derive_summary_fields(params: dict) -> dict:
     from dpo.train.train_dpo import parse_length_mode
 
@@ -273,6 +486,178 @@ def enqueue_anchor_if_needed(study: optuna.Study, cfg: OptunaRunConfig) -> bool:
                 return False
     study.enqueue_trial(ANCHOR_TRIAL_PARAMS_V11)
     return True
+
+
+def enqueue_plan_a_rescue_trials(study: optuna.Study, cfg: OptunaRunConfig) -> int:
+    """Enqueue exactly two fixed Plan A trials (trial-1 DPO, trial-2 IPO). Idempotent."""
+    if cfg.study_version != "v1.2":
+        return 0
+    active_states = (TrialState.COMPLETE, TrialState.RUNNING, TrialState.WAITING)
+    existing = {
+        params_key(dict(t.params))
+        for t in study.trials
+        if t.state in active_states and dict(t.params)
+    }
+    enqueued = 0
+    for params in PLAN_A_RESCUE_TRIALS:
+        key = params_key(params)
+        if key in existing:
+            continue
+        study.enqueue_trial(params)
+        existing.add(key)
+        enqueued += 1
+    return enqueued
+
+
+def rescue_label_for_params(params: dict) -> str:
+    if params.get("length_mode") == "ipo":
+        return PLAN_A_RESCUE_LABELS[1]
+    return PLAN_A_RESCUE_LABELS[0]
+
+
+def plan_a_params_by_trial_number(trial_number: int) -> dict | None:
+    if 0 <= trial_number < len(PLAN_A_RESCUE_TRIALS):
+        return dict(PLAN_A_RESCUE_TRIALS[trial_number])
+    return None
+
+
+def plan_b_params_by_trial_number(trial_number: int) -> dict | None:
+    if 0 <= trial_number < len(PLAN_B_TRIALS):
+        return dict(PLAN_B_TRIALS[trial_number])
+    return None
+
+
+def plan_b_label_for_params(params: dict) -> str:
+    key = params_key(params)
+    for label, trial_params in zip(PLAN_B_LABELS, PLAN_B_TRIALS):
+        if params_key(trial_params) == key:
+            return label
+    return "plan_b_unknown"
+
+
+def resolve_trial_params(
+    trial: optuna.Trial,
+    cfg: OptunaRunConfig,
+    *,
+    solo_record: dict | None = None,
+    fixed_params: dict | None = None,
+) -> dict:
+    """Expanded training dict (batch fields materialized)."""
+    canonical = resolve_canonical_trial_params(
+        trial, cfg, solo_record=solo_record, fixed_params=fixed_params
+    )
+    if cfg.study_version not in ("v1.2", *PLAN_B_STUDY_VERSIONS) and not canonical:
+        return sample_trial_params(trial, cfg)
+    if not canonical:
+        raise optuna.TrialPruned("missing_trial_params")
+    return expand_params_for_training(canonical)
+
+
+def _v12_rescue_already_complete(study: optuna.Study, params: dict) -> bool:
+    key = params_key(params)
+    for t in study.trials:
+        if t.state == TrialState.COMPLETE and params_key(dict(t.params)) == key:
+            return True
+    return False
+
+
+def run_plan_a_v12_worker_loop(cfg: OptunaRunConfig, run_trial_fn: TrialFn) -> None:
+    """Run exactly two fixed trials via ask/tell (enqueue queue); no TPE sampling."""
+    from dpo.train.dpo_diagnostics import log_line, worker_prefix
+
+    prefix = worker_prefix(cfg.worker_id)
+    study = open_study(cfg, with_sampler=True)
+    try:
+        optuna.storages.fail_stale_trials(study)
+        log_line(prefix, "fail_stale_trials: cleaned zombie RUNNING trials")
+    except Exception as e:
+        log_line(prefix, f"fail_stale_trials skipped: {e}")
+
+    for idx, params in enumerate(PLAN_A_RESCUE_TRIALS, start=1):
+        if _v12_rescue_already_complete(study, params):
+            log_line(prefix, f"skip rescue {idx}/2 (already COMPLETE)")
+            continue
+        log_line(prefix, f"plan_a rescue {idx}/2 ask trial ({params.get('length_mode')})")
+        trial = study.ask()
+        try:
+            value = run_trial_fn(cfg, trial, fixed_params=dict(params))
+            study.tell(trial, value)
+            log_line(prefix, f"plan_a rescue {idx}/2 COMPLETE trial #{trial.number} value={value:.4f}")
+        except optuna.TrialPruned:
+            study.tell(trial, state=TrialState.PRUNED)
+            log_line(prefix, f"plan_a rescue {idx}/2 PRUNED trial #{trial.number}")
+        finally:
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.reset_peak_memory_stats()
+        study = reload_study(cfg)
+
+    c = study_counts(study)
+    log_line(prefix, f"v1.2 worker done | counts={c}")
+
+
+def enqueue_plan_b_trials(study: optuna.Study, cfg: OptunaRunConfig) -> int:
+    """Enqueue four fixed Plan B trials (v1.3 baked or v1.4 unmerged). Idempotent."""
+    if cfg.study_version not in PLAN_B_STUDY_VERSIONS:
+        return 0
+    active_states = (TrialState.COMPLETE, TrialState.RUNNING, TrialState.WAITING)
+    existing = {
+        params_key(dict(t.params))
+        for t in study.trials
+        if t.state in active_states and dict(t.params)
+    }
+    enqueued = 0
+    for params in PLAN_B_TRIALS:
+        key = params_key(params)
+        if key in existing:
+            continue
+        study.enqueue_trial(params)
+        existing.add(key)
+        enqueued += 1
+    return enqueued
+
+
+def run_plan_b_fixed_worker_loop(cfg: OptunaRunConfig, run_trial_fn: TrialFn) -> None:
+    """Run four fixed Plan B trials via ask/tell (v1.3 baked or v1.4 unmerged)."""
+    from dpo.train.dpo_diagnostics import log_line, worker_prefix
+
+    prefix = worker_prefix(cfg.worker_id)
+    study = open_study(cfg, with_sampler=True)
+    try:
+        optuna.storages.fail_stale_trials(study)
+        log_line(prefix, "fail_stale_trials: cleaned zombie RUNNING trials")
+    except Exception as e:
+        log_line(prefix, f"fail_stale_trials skipped: {e}")
+
+    for idx, params in enumerate(PLAN_B_TRIALS, start=1):
+        if _v12_rescue_already_complete(study, params):
+            log_line(prefix, f"skip plan_b {idx}/4 (already COMPLETE)")
+            continue
+        label = plan_b_label_for_params(params)
+        log_line(prefix, f"plan_b {idx}/4 ask trial ({label}, {params.get('length_mode')})")
+        trial = study.ask()
+        try:
+            value = run_trial_fn(cfg, trial, fixed_params=dict(params))
+            study.tell(trial, value)
+            log_line(prefix, f"plan_b {idx}/4 COMPLETE trial #{trial.number} value={value:.4f}")
+        except optuna.TrialPruned:
+            study.tell(trial, state=TrialState.PRUNED)
+            log_line(prefix, f"plan_b {idx}/4 PRUNED trial #{trial.number}")
+        finally:
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.reset_peak_memory_stats()
+        study = reload_study(cfg)
+
+    c = study_counts(study)
+    log_line(prefix, f"{cfg.study_version} plan_b worker done | counts={c}")
+
+
+def run_plan_b_v13_worker_loop(cfg: OptunaRunConfig, run_trial_fn: TrialFn) -> None:
+    """Backward-compatible alias."""
+    run_plan_b_fixed_worker_loop(cfg, run_trial_fn)
 
 
 def study_counts(study: optuna.Study) -> dict[str, int]:
@@ -497,9 +882,12 @@ def write_final_summary(
     trials_out = []
     oom_by_combo: dict[str, int] = {}
 
+    study_version = cfg.study_version
     for t in study.trials:
-        p = dict(t.params)
+        p = params_for_frozen_trial(t, study_version)
         derived = derive_summary_fields(p) if p else {}
+        if not derived and (t.user_attrs or {}).get("derived"):
+            derived = dict((t.user_attrs or {}).get("derived") or {})
         trials_out.append({
             "trial_number": t.number,
             "worker_id": t.user_attrs.get("worker_id"),
@@ -573,12 +961,12 @@ def write_final_summary(
         "best_objective": best.value if best else None,
         "best_hybrid_score": best.user_attrs.get("hybrid_score_v1_1", best.value) if best else None,
         "best_accuracy": best.user_attrs.get("eval_rewards_accuracy") if best else None,
-        "best_params": best.params if best else None,
+        "best_params": params_for_frozen_trial(best, study_version) if best else None,
         "complete_trials": [
             {
                 "number": t.number,
                 "value": t.value,
-                "params": dict(t.params),
+                "params": params_for_frozen_trial(t, study_version),
                 "solo_retry": t.user_attrs.get("solo_retry", False),
                 "parallel_oom_recovered": t.user_attrs.get("parallel_oom_recovered", False),
             }
@@ -645,6 +1033,13 @@ def spawn_worker(cfg: OptunaRunConfig, worker_id: int) -> tuple[subprocess.Popen
 
 def run_worker_loop(cfg: OptunaRunConfig, run_trial_fn: TrialFn) -> None:
     from dpo.train.dpo_diagnostics import log_line, worker_prefix
+
+    if cfg.study_version == "v1.2":
+        run_plan_a_v12_worker_loop(cfg, run_trial_fn)
+        return
+    if cfg.study_version in PLAN_B_STUDY_VERSIONS:
+        run_plan_b_fixed_worker_loop(cfg, run_trial_fn)
+        return
 
     prefix = worker_prefix(cfg.worker_id)
     log_line(prefix, f"worker started | run_dir={cfg.run_dir}")
@@ -734,10 +1129,25 @@ def run_parallel_launcher(
         experiment_name=cfg.experiment_name,
     )
     study = open_study(launcher_study_cfg, with_sampler=True)
-    enqueued_anchor = enqueue_anchor_if_needed(study, cfg)
+    if cfg.study_version == "v1.2":
+        enqueued_rescue = enqueue_plan_a_rescue_trials(study, cfg)
+        enqueued_plan_b = 0
+        enqueued_anchor = False
+    elif cfg.study_version in PLAN_B_STUDY_VERSIONS:
+        enqueued_rescue = 0
+        enqueued_plan_b = enqueue_plan_b_trials(study, cfg)
+        enqueued_anchor = False
+    else:
+        enqueued_rescue = 0
+        enqueued_plan_b = 0
+        enqueued_anchor = enqueue_anchor_if_needed(study, cfg)
     launcher_log(cfg, f"PARALLEL OPTUNA | workers={cfg.parallel_workers} target={cfg.target_complete_trials}")
     launcher_log(cfg, f"study_version={cfg.study_version} experiment={cfg.experiment_name}")
-    launcher_log(cfg, f"optuna_base_seed={cfg.optuna_base_seed} anchor_enqueued={enqueued_anchor}")
+    launcher_log(
+        cfg,
+        f"optuna_base_seed={cfg.optuna_base_seed} anchor_enqueued={enqueued_anchor} "
+        f"plan_a_enqueued={enqueued_rescue} plan_b_enqueued={enqueued_plan_b}",
+    )
     launcher_log(cfg, f"run_dir={cfg.run_dir}")
     launcher_log(cfg, f"study={cfg.study_name} db={cfg.study_storage}")
     monitor_doc = cfg.run_dir / "MONITOR.txt"
@@ -837,9 +1247,9 @@ def add_parallel_cli_args(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--study-version",
-        choices=("v1.0", "v1.1"),
+        choices=("v1.0", "v1.1", "v1.2", "v1.3", "v1.4"),
         default="v1.1",
-        help="v1.1: diverse search, hybrid objective, duplicate prune (default)",
+        help="v1.1: TPE; v1.2: Plan A rescue; v1.3: Plan B baked; v1.4: Plan B unmerged (4 fixed trials)",
     )
     parser.add_argument("--optuna-base-seed", type=int, default=OPTUNA_BASE_SEED)
     parser.add_argument("--experiment-name", type=str, default=None)
