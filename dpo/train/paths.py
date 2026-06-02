@@ -14,13 +14,25 @@ MLRUNS_DIR = DPO_TRAIN_DIR / "mlruns"
 
 MODEL_ID_BF16 = REPO_ROOT / "Qwen3-4B-Instruct-2507"
 MODEL_ID_FP8 = REPO_ROOT / "Qwen3-4B-Instruct-2507-FP8"
+MODEL_ID_SFT_MERGED_BF16 = REPO_ROOT / "Qwen3-4B-Instruct-2507-SFT-MERGED-BF16"
 SFT_ADAPTER = REPO_ROOT / "train/models/steering-sft-v1.1/trial-17/best_adapter"
 
 EXPERIMENT_NAME = "steering-dpo-v1.0"
 EXPERIMENT_NAME_V1_1 = "steering-dpo-v1.1"
+EXPERIMENT_NAME_V1_2 = "steering-dpo-v1.2"
+# Plan B: DPO on dense SFT-merged base (not raw base + frozen SFT LoRA)
+EXPERIMENT_NAME_V1_3 = "steering-dpo-v1.3-sft-merged"
+# Plan B configs replicated on raw BnB base + frozen SFT LoRA + trainable DPO LoRA
+EXPERIMENT_NAME_V1_4 = "steering-dpo-v1.4"
 
 
 def experiment_name_for_version(study_version: str) -> str:
+    if study_version == "v1.4":
+        return EXPERIMENT_NAME_V1_4
+    if study_version == "v1.3":
+        return EXPERIMENT_NAME_V1_3
+    if study_version == "v1.2":
+        return EXPERIMENT_NAME_V1_2
     if study_version == "v1.1":
         return EXPERIMENT_NAME_V1_1
     return EXPERIMENT_NAME

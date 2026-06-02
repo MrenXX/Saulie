@@ -38,6 +38,29 @@ SFT_ADAPTER_NAME = "default"
 DPO_ADAPTER_NAME = "dpo"
 REF_ADAPTER_NAME = "ref"
 POLICY_ADAPTER_STACK = [SFT_ADAPTER_NAME, DPO_ADAPTER_NAME]
+BAKED_POLICY_ADAPTER_STACK = [DPO_ADAPTER_NAME]
+SAULIE_STACK_ATTR = "_saulie_dpo_stack"
+
+
+def is_baked_stack_model(model) -> bool:
+    return getattr(model, SAULIE_STACK_ATTR, None) == "baked"
+
+
+def ensure_baked_policy_adapter(model) -> None:
+    """Plan B: policy = baked SFT-merged base + trainable DPO only."""
+    if not is_peft_available() or not isinstance(model, PeftModel):
+        return
+    if DPO_ADAPTER_NAME not in model.peft_config:
+        return
+    model.set_adapter(DPO_ADAPTER_NAME)
+    enforce_adapter_gradients(model)
+
+
+def ensure_policy_forward(model) -> None:
+    if is_baked_stack_model(model):
+        ensure_baked_policy_adapter(model)
+    else:
+        ensure_policy_adapter_stack(model)
 
 
 def _adapter_from_param_name(name: str) -> str | None:
@@ -69,9 +92,21 @@ def ensure_policy_adapter_stack(model) -> None:
 
 def collect_adapter_diagnostics(model, trainer=None) -> dict:
     """Report active adapters, trainable counts, and non-DPO gradients if any."""
-    diag: dict[str, Any] = {"active_adapters": None, "trainable_by_adapter": {}, "trainable_total": 0}
+    diag: dict[str, Any] = {
+        "active_adapters": None,
+        "available_adapters": [],
+        "has_ref_adapter": False,
+        "trainable_by_adapter": {},
+        "trainable_total": 0,
+        "stack_mode": getattr(model, SAULIE_STACK_ATTR, "legacy_sft_lora"),
+    }
     if not is_peft_available() or not isinstance(model, PeftModel):
         return diag
+
+    diag["available_adapters"] = list(model.peft_config.keys())
+    if is_baked_stack_model(model):
+        diag["policy_stack"] = list(BAKED_POLICY_ADAPTER_STACK)
+    diag["has_ref_adapter"] = REF_ADAPTER_NAME in model.peft_config
 
     try:
         diag["active_adapters"] = list(model.active_adapters)
@@ -106,6 +141,18 @@ def collect_adapter_diagnostics(model, trainer=None) -> dict:
     diag["non_dpo_trainable_count"] = len(non_dpo_grad_params)
     diag["only_dpo_trainable"] = len(non_dpo_grad_params) == 0
     return diag
+
+
+def require_reference_adapter(model) -> None:
+    """Fail closed if TRL did not create the frozen SFT reference adapter."""
+    if not is_peft_available() or not isinstance(model, PeftModel):
+        return
+    if REF_ADAPTER_NAME not in model.peft_config:
+        raise RuntimeError(
+            "Missing PEFT reference adapter 'ref'. DPO must compare the policy "
+            "against frozen SFT behavior, not raw base. Check the installed TRL/PEFT "
+            "adapter-copy behavior before training."
+        )
 
 
 @dataclass
@@ -329,6 +376,7 @@ def _load_or_compute_ref_npz(
     batch_size: int,
     path: Path,
 ) -> tuple[np.ndarray, np.ndarray]:
+    require_reference_adapter(trainer.accelerator.unwrap_model(trainer.model))
     lock_path = path.with_suffix(path.suffix + ".lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("w", encoding="utf-8") as lock_f:
@@ -372,9 +420,11 @@ class AssistantOnlyDPOTrainer(DPOTrainer):
     """Skip TRL re-tokenization; policy forward stacks SFT + DPO adapters (no merge)."""
 
     def _precompute_ref_logps(self, dataset: Dataset, name: str, batch_size: int) -> Dataset:
+        baked = is_baked_stack_model(self.accelerator.unwrap_model(self.model))
         key = ref_cache_key(
             dataset_fingerprint=dataset._fingerprint,
             precompute_batch_size=batch_size,
+            baked_base=baked,
         )
         path = cache_path(key, name)
         fingerprint = Hasher.hash((dataset._fingerprint, key))
@@ -418,9 +468,9 @@ class AssistantOnlyDPOTrainer(DPOTrainer):
         return super()._prepare_dataset(dataset, processing_class, args, dataset_name)
 
     def _compute_loss(self, model, inputs, return_outputs=False):
-        ensure_policy_adapter_stack(self.accelerator.unwrap_model(model))
+        ensure_policy_forward(self.accelerator.unwrap_model(model))
         return super()._compute_loss(model, inputs, return_outputs=return_outputs)
 
     def training_step(self, model, inputs, num_items_in_batch=None):
-        ensure_policy_adapter_stack(self.accelerator.unwrap_model(model))
+        ensure_policy_forward(self.accelerator.unwrap_model(model))
         return super().training_step(model, inputs, num_items_in_batch)

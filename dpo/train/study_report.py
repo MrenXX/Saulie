@@ -79,7 +79,33 @@ def _user_attrs(trial: dict[str, Any]) -> dict[str, Any]:
 
 def _params(trial: dict[str, Any]) -> dict[str, Any]:
     params = trial.get("params") or {}
-    return params if isinstance(params, dict) else {}
+    if isinstance(params, dict) and params:
+        return params
+    try:
+        from dpo.train.optuna_parallel import params_for_summary_row
+
+        study_version = trial.get("study_version") or ""
+        if not study_version and isinstance(trial.get("user_attrs"), dict):
+            study_version = (trial["user_attrs"] or {}).get("study_version") or ""
+        resolved = params_for_summary_row(trial, str(study_version))
+        if resolved:
+            return resolved
+    except Exception:
+        pass
+    ua = trial.get("user_attrs") or {}
+    if isinstance(ua, dict):
+        stored = ua.get("trial_params")
+        if isinstance(stored, dict) and stored:
+            return stored
+        raw = ua.get("trial_params_json")
+        if raw:
+            import json
+
+            try:
+                return json.loads(raw)
+            except json.JSONDecodeError:
+                pass
+    return {}
 
 
 def _derived(trial: dict[str, Any]) -> dict[str, Any]:

@@ -51,6 +51,7 @@ from dpo.train.dpo_report import write_report
 from dpo.train.dpo_trainer_compat import (
     AssistantOnlyDPOCollator,
     AssistantOnlyDPOTrainer,
+    BAKED_POLICY_ADAPTER_STACK,
     collect_adapter_diagnostics,
     enforce_adapter_gradients,
 )
@@ -172,6 +173,57 @@ def build_dpo_peft_model(lora_r: int, lora_alpha: int, lora_dropout: float) -> P
     return model
 
 
+def build_dpo_peft_model_baked(lora_r: int, lora_alpha: int, lora_dropout: float) -> PeftModel:
+    """
+    Plan B: BnB8(SFT-merged dense base) + frozen zero default + trainable DPO.
+    TRL copies default -> ref (baked-base reference, no trial-17 LoRA path).
+    """
+    from dpo.train.dpo_trainer_compat import SAULIE_STACK_ATTR
+    from dpo.train.model_load import load_sft_baked_base
+    from dpo.train.paths import MODEL_ID_SFT_MERGED_BF16
+
+    print(f"Loading Plan B stack: BnB SFT-merged base ({MODEL_ID_SFT_MERGED_BF16})")
+    print("  + frozen zero default (ref anchor) + trainable DPO LoRA...")
+    base = load_sft_baked_base("bnb")
+
+    zero_cfg = LoraConfig(
+        r=lora_r,
+        lora_alpha=lora_alpha,
+        lora_dropout=lora_dropout,
+        target_modules=LORA_TARGETS,
+        bias="none",
+        task_type="CAUSAL_LM",
+        init_lora_weights=True,
+    )
+    model = PeftModel(base, zero_cfg, adapter_name=SFT_ADAPTER_NAME)
+    for name, param in model.named_parameters():
+        if f".{SFT_ADAPTER_NAME}." in name and "lora_" in name:
+            param.data.zero_()
+        param.requires_grad = False
+
+    dpo_config = LoraConfig(
+        r=lora_r,
+        lora_alpha=lora_alpha,
+        lora_dropout=lora_dropout,
+        target_modules=LORA_TARGETS,
+        bias="none",
+        task_type="CAUSAL_LM",
+        init_lora_weights=True,
+    )
+    model.add_adapter(DPO_ADAPTER_NAME, dpo_config)
+    for name, param in model.named_parameters():
+        if f".{DPO_ADAPTER_NAME}." in name:
+            param.requires_grad = True
+
+    setattr(model, SAULIE_STACK_ATTR, "baked")
+    print(f"  peft adapters (pre-trainer): {list(model.peft_config.keys())}")
+    print(f"  policy stack: {BAKED_POLICY_ADAPTER_STACK} (set in trainer)")
+    print("  reference: TRL ref adapter (copy of zero default = baked base)")
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"  trainable params (dpo): {trainable:,}")
+    return model
+
+
 def save_dpo_adapter(model: PeftModel, output_dir: Path) -> None:
     """Persist only the DPO adapter; never overwrite SFT trial-17 files."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -276,6 +328,8 @@ def run_training(
     from dpo.train.dpo_trainer_compat import (
         StepWatchdogCallback,
         TrainingHeartbeatCallback,
+        ensure_policy_forward,
+        is_baked_stack_model,
     )
     from dpo.train.ref_logprob_cache import get_last_ref_cache_meta
 
@@ -305,8 +359,14 @@ def run_training(
         data_collator=collator,
         callbacks=callbacks,
     )
+    from dpo.train.dpo_trainer_compat import require_reference_adapter
+
+    require_reference_adapter(trainer.accelerator.unwrap_model(trainer.model))
     print(f"  peft adapters (post-trainer): {list(trainer.model.peft_config.keys())}")
-    enforce_adapter_gradients(trainer.model)
+    if is_baked_stack_model(trainer.model):
+        ensure_policy_forward(trainer.model)
+    else:
+        enforce_adapter_gradients(trainer.model)
     trainable = sum(p.numel() for p in trainer.model.parameters() if p.requires_grad)
     print(f"  trainable params after TRL init (dpo only): {trainable:,}")
     adapter_diag = collect_adapter_diagnostics(trainer.model, trainer)
@@ -555,6 +615,7 @@ def run_optuna_trial(
     trial: optuna.Trial,
     *,
     solo_record: dict | None = None,
+    fixed_params: dict | None = None,
 ) -> float:
     from dpo.train import optuna_parallel as op
     from dpo.train.dpo_diagnostics import (
@@ -574,7 +635,7 @@ def run_optuna_trial(
         os.environ.setdefault("MLFLOW_EXPERIMENT_NAME", cfg.experiment_name)
         setup_mlflow()
 
-    is_solo = solo_record is not None
+    is_solo = solo_record is not None and fixed_params is None
     is_parallel_worker = cfg.worker_id is not None and not is_solo
     prefix = worker_prefix(cfg.worker_id, solo=is_solo)
     t0 = time.time()
@@ -584,9 +645,10 @@ def run_optuna_trial(
 
     vram_start = op.cuda_mem_snapshot()
     stage = "init"
+    canonical: dict = {}
 
     if is_solo:
-        params = op.expand_params_for_training(dict(solo_record["params"]))
+        canonical = op.resolve_canonical_trial_params(trial, cfg, solo_record=solo_record)
         trial.set_user_attr("solo_retry", True)
         trial.set_user_attr("requires_solo", True)
         orig = solo_record.get("original_trial_numbers") or [
@@ -597,11 +659,45 @@ def run_optuna_trial(
             [n for n in orig if n is not None],
         )
     else:
-        params = op.sample_trial_params(trial, cfg)
-        op.check_duplicate_params(trial)
-        op.set_sampler_trial_metadata(trial, cfg)
-        if op.params_key(dict(trial.params)) == op.params_key(op.ANCHOR_TRIAL_PARAMS_V11):
-            trial.set_user_attr("anchor_trial", True)
+        canonical = op.resolve_canonical_trial_params(
+            trial, cfg, fixed_params=fixed_params
+        )
+        if cfg.study_version == "v1.2":
+            trial.set_user_attr("enqueued_trial", True)
+            trial.set_user_attr("rescue_label", op.rescue_label_for_params(canonical))
+            trial.set_user_attr(
+                "plan_a_trial_index", 2 if canonical.get("length_mode") == "ipo" else 1
+            )
+            op.set_sampler_trial_metadata(trial, cfg)
+        elif cfg.study_version in op.PLAN_B_STUDY_VERSIONS:
+            trial.set_user_attr("enqueued_trial", True)
+            label = op.plan_b_label_for_params(canonical)
+            if label == "plan_b_unknown" and 0 <= trial.number < len(op.PLAN_B_LABELS):
+                label = op.PLAN_B_LABELS[trial.number]
+            trial.set_user_attr("plan_b_label", label)
+            if cfg.study_version == "v1.3":
+                trial.set_user_attr("stack_mode", "baked_sft_merged")
+                trial.set_user_attr("base_kind", "sft_merged_bnb8")
+            else:
+                trial.set_user_attr("stack_mode", "unmerged_sft_lora")
+                trial.set_user_attr("base_kind", "bnb8_sft_lora")
+            op.set_sampler_trial_metadata(trial, cfg)
+        elif not fixed_params:
+            op.check_duplicate_params(trial)
+            op.set_sampler_trial_metadata(trial, cfg)
+            if op.params_key(dict(trial.params)) == op.params_key(op.ANCHOR_TRIAL_PARAMS_V11):
+                trial.set_user_attr("anchor_trial", True)
+        else:
+            op.set_sampler_trial_metadata(trial, cfg)
+
+    if cfg.study_version in ("v1.2", *op.PLAN_B_STUDY_VERSIONS) or fixed_params is not None or is_solo:
+        if not canonical:
+            raise optuna.TrialPruned("missing_trial_params")
+        params = op.expand_params_for_training(canonical)
+    else:
+        params = op.resolve_trial_params(trial, cfg)
+        canonical = op.to_canonical_params(params)
+    op.persist_trial_params(trial, canonical)
 
     derived = derive_trial_params(params)
     datasets, tokenizer = _ensure_optuna_data(cfg.dummy_report_path)
@@ -615,7 +711,7 @@ def run_optuna_trial(
         log_trial_from_optuna(
             trial,
             state=state,
-            params=params,
+            params=canonical if canonical else params,
             derived=derived,
             scorecard=scorecard,
             run_dir=cfg.run_dir,
@@ -641,7 +737,7 @@ def run_optuna_trial(
         log_line(prefix, f"stage={stage}")
 
     try:
-        if cfg.study_version != "v1.1" and (
+        if cfg.study_version not in ("v1.1", "v1.2", *op.PLAN_B_STUDY_VERSIONS) and (
             derived["effective_batch"] < 4 or derived["effective_batch"] > 16
         ):
             trial.set_user_attr(
@@ -680,9 +776,14 @@ def run_optuna_trial(
 
                 reset_ref_cache_meta()
                 _set_stage("model_build")
-                model = build_dpo_peft_model(
-                    params["lora_r"], derived["lora_alpha"], params["lora_dropout"]
-                )
+                if cfg.study_version == "v1.3":
+                    model = build_dpo_peft_model_baked(
+                        params["lora_r"], derived["lora_alpha"], params["lora_dropout"]
+                    )
+                else:
+                    model = build_dpo_peft_model(
+                        params["lora_r"], derived["lora_alpha"], params["lora_dropout"]
+                    )
                 dpo_args = make_dpo_config(
                     trial_dir,
                     num_train_epochs=params["num_train_epochs"],
@@ -773,28 +874,46 @@ def run_optuna_trial(
                 acc_f = float(acc)
                 trial.set_user_attr("eval_rewards_accuracy", acc_f)
                 objective = acc_f
-                if cfg.study_version == "v1.1":
-                    hybrid = compute_hybrid_score_v1_1(
-                        accuracy=acc_f,
-                        macro_family_category=val_diag.get(
-                            "macro_accuracy_by_source_family_category"
-                        )
-                        if val_diag
-                        else None,
-                        margin=scorecard.get("eval_rewards_margin"),
-                        eval_loss=scorecard.get("eval_loss"),
-                        len_corr=val_diag.get("margin_vs_length_delta_corr")
-                        if val_diag
-                        else None,
-                        abs_len_corr=val_diag.get("margin_vs_abs_length_delta_corr")
-                        if val_diag
-                        else None,
+                margin = scorecard.get("eval_rewards_margin")
+                if margin is not None:
+                    trial.set_user_attr("eval_rewards_margin", float(margin))
+                    if cfg.study_version in ("v1.2", *op.PLAN_B_STUDY_VERSIONS) and float(margin) > 5.0:
+                        trial.set_user_attr("high_margin_warning", True)
+                    if cfg.study_version in op.PLAN_B_STUDY_VERSIONS and float(margin) < -3.0:
+                        trial.set_user_attr("low_margin_note", True)
+                hybrid = compute_hybrid_score_v1_1(
+                    accuracy=acc_f,
+                    macro_family_category=val_diag.get(
+                        "macro_accuracy_by_source_family_category"
                     )
-                    trial.set_user_attr("hybrid_score_v1_1", hybrid)
+                    if val_diag
+                    else None,
+                    margin=margin,
+                    eval_loss=scorecard.get("eval_loss"),
+                    len_corr=val_diag.get("margin_vs_length_delta_corr")
+                    if val_diag
+                    else None,
+                    abs_len_corr=val_diag.get("margin_vs_abs_length_delta_corr")
+                    if val_diag
+                    else None,
+                )
+                trial.set_user_attr("hybrid_score_v1_1", hybrid)
+                if cfg.study_version == "v1.1":
                     objective = hybrid
                 log_trial_scorecard(prefix, trial.number, scorecard, val_diag)
                 if cfg.study_version == "v1.1":
                     log_line(prefix, f"  hybrid_score_v1_1={objective:.4f}")
+                elif cfg.study_version in ("v1.2", *op.PLAN_B_STUDY_VERSIONS):
+                    tag = {
+                        "v1.2": "v1.2",
+                        "v1.3": "v1.3-sft-merged",
+                        "v1.4": "v1.4-unmerged",
+                    }.get(cfg.study_version, cfg.study_version)
+                    log_line(
+                        prefix,
+                        f"  {tag} telemetry=accuracy={acc_f:.4f} hybrid_ref={hybrid:.4f} "
+                        f"margin={margin} (REPL picks winner)",
+                    )
                 objective_result = objective
                 _set_stage("complete")
             except TrialWallTimeout as e:
@@ -868,10 +987,26 @@ def run_optuna(args):
     elif args.optuna_smoke:
         print(" DPO OPTUNA SMOKE TEST (2 workers, 2 complete trials)")
     elif args.parallel_workers > 0:
-        print(
-            f" DPO PARALLEL OPTUNA ({args.parallel_workers} workers, "
-            f"target={args.target_complete_trials} complete)"
-        )
+        if getattr(args, "study_version", "v1.1") == "v1.2":
+            print(
+                f" DPO PLAN A v1.2 RESCUE ({args.parallel_workers} worker(s), "
+                f"target={args.target_complete_trials} fixed trials)"
+            )
+        elif getattr(args, "study_version", "v1.1") == "v1.3":
+            print(
+                f" DPO PLAN B v1.3 SFT-MERGED ({args.parallel_workers} worker(s), "
+                f"target={args.target_complete_trials} fixed trials)"
+            )
+        elif getattr(args, "study_version", "v1.1") == "v1.4":
+            print(
+                f" DPO PLAN B v1.4 UNMERGED ({args.parallel_workers} worker(s), "
+                f"target={args.target_complete_trials} fixed trials)"
+            )
+        else:
+            print(
+                f" DPO PARALLEL OPTUNA ({args.parallel_workers} workers, "
+                f"target={args.target_complete_trials} complete)"
+            )
     else:
         print(f" DPO OPTUNA STUDY ({args.n_trials} trials, single process)")
     print("=" * 60)

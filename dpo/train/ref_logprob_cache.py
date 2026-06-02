@@ -10,7 +10,7 @@ import numpy as np
 import trl
 
 from dpo.train.dpo_data import MAX_LENGTH, SPLIT_SEED, manifest_sha256, manifest_path_for_seed
-from dpo.train.paths import CACHE_DIR, SFT_ADAPTER
+from dpo.train.paths import CACHE_DIR, MODEL_ID_SFT_MERGED_BF16, SFT_ADAPTER
 
 _REF_CACHE_META: dict[str, Any] = {"splits": {}}
 
@@ -35,10 +35,30 @@ def sft_adapter_hash() -> str:
     return hashlib.sha256("".join(parts).encode()).hexdigest()[:16]
 
 
+def sft_merged_base_hash() -> str:
+    """Hash dense SFT-baked checkpoint (Plan B reference policy)."""
+    weights = MODEL_ID_SFT_MERGED_BF16 / "model.safetensors"
+    if weights.is_file():
+        return _sha256_file(weights)[:16]
+    meta = MODEL_ID_SFT_MERGED_BF16 / "merge_meta.json"
+    if meta.is_file():
+        return _sha256_file(meta)[:16]
+    raise FileNotFoundError(
+        f"No SFT-merged base at {MODEL_ID_SFT_MERGED_BF16}; run merge_sft_baked_base.py"
+    )
+
+
+def reference_policy_hash(*, baked_base: bool = False) -> str:
+    if baked_base:
+        return f"merged:{sft_merged_base_hash()}"
+    return f"sft_lora:{sft_adapter_hash()}"
+
+
 def ref_cache_key(
     *,
     dataset_fingerprint: str,
     precompute_batch_size: int,
+    baked_base: bool = False,
 ) -> str:
     manifest_path = manifest_path_for_seed(SPLIT_SEED)
     return hashlib.sha256(
@@ -46,7 +66,7 @@ def ref_cache_key(
             [
                 manifest_sha256(manifest_path),
                 dataset_fingerprint,
-                sft_adapter_hash(),
+                reference_policy_hash(baked_base=baked_base),
                 str(MAX_LENGTH),
                 str(precompute_batch_size),
                 trl.__version__,

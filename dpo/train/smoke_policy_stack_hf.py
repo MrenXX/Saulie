@@ -7,6 +7,7 @@ Smoke-generate with the exact DPO training policy forward (no cat merge).
 Example:
   python dpo/train/smoke_policy_stack_hf.py \\
     --dpo-adapter dpo/train/models/.../trial-29/best_adapter \\
+        --dpo-weight 0.25 \\
     --skeleton-ids eval_A4_001,eval_B8_001 \\
     --output dpo/eval/dpo_phase1_policy_stack_hf_smoke.json
 """
@@ -33,15 +34,28 @@ from dpo.train.dpo_trainer_compat import (
     POLICY_ADAPTER_STACK,
     SFT_ADAPTER_NAME,
     collect_adapter_diagnostics,
+    ensure_baked_policy_adapter,
     ensure_policy_adapter_stack,
+    ensure_policy_forward,
 )
 from dpo.train.merge_sft_dpo_lora import load_stacked_for_merge, resolve_dpo_adapter_path
 from dpo.train.paths import MODEL_ID_BF16, SFT_ADAPTER
+from dpo.train.qwen3_decode import (
+    DECODE_GREEDY,
+    DECODE_SAMPLE,
+    MAX_NEW_TOKENS_DEFAULT,
+    REPETITION_PENALTY_DEFAULT,
+    TEMPERATURE,
+    TOP_K,
+    TOP_P,
+    build_generate_kwargs,
+    generation_metadata,
+)
 from dpo.train.train_dpo import load_tokenizer
 
-MAX_TOKENS = 350
-TEMPERATURE = 0.7
-TOP_P = 0.8
+MAX_TOKENS = MAX_NEW_TOKENS_DEFAULT
+ADAPTER_MODES = ("policy", "sft", "dpo", "base", "baked")
+DECODE_MODES = (DECODE_SAMPLE, DECODE_GREEDY)
 DEFAULT_SKELETONS = REPO_ROOT / "dpo/eval/eval_skeletons.json"
 DEFAULT_DPO = (
     REPO_ROOT
@@ -53,13 +67,67 @@ def _device(model: PeftModel) -> torch.device:
     return next(model.parameters()).device
 
 
+def scale_adapter_residual(model: PeftModel, adapter_name: str, weight: float) -> int:
+    """Scale one LoRA adapter's runtime residual by multiplying PEFT scaling values."""
+    if weight < 0:
+        raise ValueError("adapter weight must be non-negative")
+    changed = 0
+    if weight == 1.0:
+        return changed
+    for module in model.modules():
+        scaling = getattr(module, "scaling", None)
+        if isinstance(scaling, dict) and adapter_name in scaling:
+            scaling[adapter_name] *= weight
+            changed += 1
+    if changed == 0:
+        raise ValueError(f"No scaling entries found for adapter {adapter_name!r}")
+    return changed
+
+
+def activate_adapter_mode(model: PeftModel, mode: str) -> None:
+    if mode == "baked":
+        if isinstance(model, PeftModel):
+            raise ValueError("adapter mode 'baked' requires a dense SFT-merged model (no PEFT)")
+        return
+    if mode == "base":
+        if isinstance(model, PeftModel):
+            raise ValueError("adapter mode 'base' requires a model with no PEFT adapters")
+        return
+    if not isinstance(model, PeftModel):
+        raise ValueError(f"adapter mode {mode!r} requires a PEFT model")
+    if mode == "policy":
+        ensure_policy_adapter_stack(model)
+    elif mode == "sft":
+        model.set_adapter(SFT_ADAPTER_NAME)
+    elif mode == "dpo":
+        model.set_adapter(DPO_ADAPTER_NAME)
+    elif mode == "cat":
+        names = list(model.peft_config.keys())
+        if not names:
+            raise ValueError("cat mode requires a loaded PEFT adapter")
+        model.set_adapter(names[0] if len(names) == 1 else names)
+    else:
+        raise ValueError(f"unknown adapter mode: {mode}")
+
+
 @torch.inference_mode()
 def generate_turn(
     model: PeftModel,
     tokenizer: AutoTokenizer,
     messages: list[dict],
+    *,
+    adapter_mode: str,
+    decode: str,
+    max_new_tokens: int,
+    temperature: float,
+    top_p: float,
+    top_k: int = TOP_K,
+    repetition_penalty: float = REPETITION_PENALTY_DEFAULT,
 ) -> str:
-    ensure_policy_adapter_stack(model)
+    if adapter_mode == "dpo":
+        ensure_baked_policy_adapter(model)
+    else:
+        activate_adapter_mode(model, adapter_mode)
     ids = tokenizer.apply_chat_template(
         messages,
         add_generation_prompt=True,
@@ -70,15 +138,16 @@ def generate_turn(
         ids = ids["input_ids"]
     ids = ids.to(_device(model))
     prompt_len = ids.shape[1]
-    out = model.generate(
-        ids,
-        max_new_tokens=MAX_TOKENS,
-        do_sample=True,
-        temperature=TEMPERATURE,
-        top_p=TOP_P,
-        pad_token_id=tokenizer.pad_token_id,
-        eos_token_id=tokenizer.eos_token_id,
+    generate_kwargs = build_generate_kwargs(
+        tokenizer,
+        decode=decode,
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        top_p=top_p,
+        top_k=top_k,
+        repetition_penalty=repetition_penalty,
     )
+    out = model.generate(ids, **generate_kwargs)
     new_ids = out[0, prompt_len:]
     return tokenizer.decode(new_ids, skip_special_tokens=True).strip()
 
@@ -87,11 +156,30 @@ def run_skeleton(
     model: PeftModel,
     tokenizer: AutoTokenizer,
     skeleton: dict,
+    *,
+    adapter_mode: str,
+    decode: str,
+    max_new_tokens: int,
+    temperature: float,
+    top_p: float,
+    top_k: int = TOP_K,
+    repetition_penalty: float = REPETITION_PENALTY_DEFAULT,
 ) -> list[dict]:
     messages: list[dict] = []
     for i, user_msg in enumerate(skeleton["user_turns"]):
         messages.append({"role": "user", "content": user_msg})
-        text = generate_turn(model, tokenizer, messages)
+        text = generate_turn(
+            model,
+            tokenizer,
+            messages,
+            adapter_mode=adapter_mode,
+            decode=decode,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            repetition_penalty=repetition_penalty,
+        )
         messages.append({"role": "assistant", "content": text})
         status = "FINAL" if i == len(skeleton["user_turns"]) - 1 else "intermediate"
         print(f"    Turn {i + 1}/{len(skeleton['user_turns'])} [{status}]: {len(text)} chars")
@@ -104,6 +192,24 @@ def main() -> None:
     parser.add_argument("--skeletons", type=Path, default=DEFAULT_SKELETONS)
     parser.add_argument("--skeleton-ids", type=str, default="eval_A4_001,eval_B8_001")
     parser.add_argument("--output", type=Path, default=REPO_ROOT / "dpo/eval/dpo_phase1_policy_stack_hf_smoke.json")
+    parser.add_argument("--adapter-mode", choices=ADAPTER_MODES, default="policy")
+    parser.add_argument("--dpo-weight", type=float, default=1.0)
+    parser.add_argument(
+        "--decode",
+        choices=DECODE_MODES,
+        default=DECODE_SAMPLE,
+        help="Default sample (Qwen3 non-thinking). Greedy discouraged.",
+    )
+    parser.add_argument("--max-new-tokens", type=int, default=MAX_TOKENS)
+    parser.add_argument("--temperature", type=float, default=TEMPERATURE)
+    parser.add_argument("--top-p", type=float, default=TOP_P)
+    parser.add_argument("--top-k", type=int, default=TOP_K)
+    parser.add_argument(
+        "--repetition-penalty",
+        type=float,
+        default=REPETITION_PENALTY_DEFAULT,
+        help="HF only; 1.0=off. Try 1.05 if loops persist (no presence_penalty in HF).",
+    )
     args = parser.parse_args()
 
     dpo_path = resolve_dpo_adapter_path(args.dpo_adapter)
@@ -121,18 +227,33 @@ def main() -> None:
     t0 = time.time()
     model = load_stacked_for_merge(dpo_path)
     load_s = time.time() - t0
-    ensure_policy_adapter_stack(model)
+    scaled_modules = 0
+    if args.adapter_mode in {"policy", "dpo"}:
+        scaled_modules = scale_adapter_residual(model, DPO_ADAPTER_NAME, args.dpo_weight)
+    activate_adapter_mode(model, args.adapter_mode)
     model.eval()
 
     diag = collect_adapter_diagnostics(model)
     print(f"  load time: {load_s:.1f}s")
     print(f"  active adapters: {diag.get('active_adapters')}")
-    print(f"  policy stack: {POLICY_ADAPTER_STACK}")
+    print(f"  adapter mode: {args.adapter_mode}")
+    print(f"  dpo weight: {args.dpo_weight} ({scaled_modules} modules scaled)")
 
     conversations = []
     for sk in skeletons:
         print(f"\n  Skeleton {sk['id']} (type={sk['opening_type']})")
-        messages = run_skeleton(model, tokenizer, sk)
+        messages = run_skeleton(
+            model,
+            tokenizer,
+            sk,
+            adapter_mode=args.adapter_mode,
+            decode=args.decode,
+            max_new_tokens=args.max_new_tokens,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            top_k=args.top_k,
+            repetition_penalty=args.repetition_penalty,
+        )
         conversations.append(
             {
                 "skeleton_id": sk["id"],
@@ -145,18 +266,25 @@ def main() -> None:
 
     payload = {
         "generated_at": datetime.now().isoformat(),
-        "policy": "hf_bnb_policy_stack",
-        "description": "BnB 8-bit base + set_adapter([default, dpo]) — matches DPO training forward",
+        "policy": f"hf_bnb_{args.adapter_mode}",
+        "description": "BnB 8-bit base with selectable PEFT adapter mode; policy means set_adapter([default, dpo])",
         "base_model": str(MODEL_ID_BF16),
         "sft_adapter": str(SFT_ADAPTER),
         "dpo_adapter": str(dpo_path),
-        "active_adapters": POLICY_ADAPTER_STACK,
+        "adapter_mode": args.adapter_mode,
+        "active_adapters": diag.get("active_adapters"),
+        "policy_stack": POLICY_ADAPTER_STACK,
+        "dpo_weight": args.dpo_weight,
+        "dpo_scaled_modules": scaled_modules,
         "adapter_diagnostics": diag,
-        "generation": {
-            "max_new_tokens": MAX_TOKENS,
-            "temperature": TEMPERATURE,
-            "top_p": TOP_P,
-        },
+        "generation": generation_metadata(
+            decode=args.decode,
+            max_new_tokens=args.max_new_tokens,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            top_k=args.top_k,
+            repetition_penalty=args.repetition_penalty,
+        ),
         "skeletons_path": str(args.skeletons),
         "conversations": conversations,
     }
