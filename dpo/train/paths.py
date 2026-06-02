@@ -24,9 +24,22 @@ EXPERIMENT_NAME_V1_2 = "steering-dpo-v1.2"
 EXPERIMENT_NAME_V1_3 = "steering-dpo-v1.3-sft-merged"
 # Plan B configs replicated on raw BnB base + frozen SFT LoRA + trainable DPO LoRA
 EXPERIMENT_NAME_V1_4 = "steering-dpo-v1.4"
+EXPERIMENT_NAME_V1_5 = "steering-dpo-v1.5"
+STUDY_RESULTS_DIR = REPO_ROOT / "dpo" / "study_results"
+
+
+def trial_summary_filename(study_version: str) -> str:
+    """Versioned trial summary basename, e.g. trial_summary_v1.5.json."""
+    return f"trial_summary_{study_version}.json"
+
+
+def trial_summary_path(run_dir: Path, study_version: str) -> Path:
+    return run_dir / trial_summary_filename(study_version)
 
 
 def experiment_name_for_version(study_version: str) -> str:
+    if study_version == "v1.5":
+        return EXPERIMENT_NAME_V1_5
     if study_version == "v1.4":
         return EXPERIMENT_NAME_V1_4
     if study_version == "v1.3":

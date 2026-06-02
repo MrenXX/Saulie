@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Babysit parallel Optuna study until trial_summary.json + target_reached."""
+"""Babysit parallel Optuna study until trial_summary_<version>.json + target_reached."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import time
@@ -12,6 +13,12 @@ from pathlib import Path
 
 import optuna
 from optuna.trial import TrialState
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+import sys
+
+sys.path.insert(0, str(REPO_ROOT))
+from dpo.train.paths import trial_summary_path
 
 
 def trial_budget_min(params: dict) -> float:
@@ -89,24 +96,39 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-dir", type=Path, required=True)
     ap.add_argument("--study-name", default="steering-dpo-v1.1-v4-seed42")
+    ap.add_argument("--study-version", default="v1.1")
     ap.add_argument("--target-complete", type=int, default=20)
     ap.add_argument("--poll-min", type=float, default=20.0)
     args = ap.parse_args()
     run_dir = args.run_dir.resolve()
     storage = f"sqlite:///{run_dir / 'optuna_study.db'}"
-    summary_path = run_dir / "trial_summary.json"
+    summary_path = trial_summary_path(run_dir, args.study_version)
+    legacy = run_dir / "trial_summary.json"
+    if legacy.is_file() and not summary_path.is_file():
+        summary_path = legacy
 
-    print(f"Babysit {run_dir} target={args.target_complete}", flush=True)
+    print(
+        f"Babysit {run_dir} target={args.target_complete} summary={summary_path.name}",
+        flush=True,
+    )
+    db_path = run_dir / "optuna_study.db"
     while True:
         now = datetime.now().isoformat(timespec="seconds")
         if summary_path.is_file():
-            import json
-
             s = json.loads(summary_path.read_text())
             if s.get("target_reached"):
-                print(f"{now} DONE target_reached (trial_summary.json)", flush=True)
+                print(f"{now} DONE target_reached ({summary_path.name})", flush=True)
                 return
-        study = optuna.load_study(study_name=args.study_name, storage=storage)
+        if not db_path.is_file():
+            print(f"{now} waiting for {db_path.name}...", flush=True)
+            time.sleep(5)
+            continue
+        try:
+            study = optuna.load_study(study_name=args.study_name, storage=storage)
+        except KeyError:
+            print(f"{now} waiting for study {args.study_name}...", flush=True)
+            time.sleep(5)
+            continue
         from collections import Counter
 
         c = Counter(t.state for t in study.trials)
@@ -187,15 +209,18 @@ def main() -> None:
 
         if stale_kill:
             kill_study_processes(run_dir)
-            print("Killed stale run; fail_stale_trials on next worker start.", flush=True)
+            try:
+                optuna.storages.fail_stale_trials(study)
+                print("fail_stale_trials: marked zombie RUNNING trials FAIL", flush=True)
+            except Exception as e:
+                print(f"fail_stale_trials skipped: {e}", flush=True)
+            print("Killed stale run; workers retry on next poll.", flush=True)
             time.sleep(10)
             continue
 
         if complete >= args.target_complete and not running:
             for _ in range(12):
                 if summary_path.is_file():
-                    import json
-
                     if json.loads(summary_path.read_text()).get("target_reached"):
                         print(f"{now} DONE", flush=True)
                         return

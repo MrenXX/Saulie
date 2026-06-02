@@ -7,6 +7,7 @@ import gc
 import json
 import os
 import random
+import shutil
 import subprocess
 import sys
 import time
@@ -26,8 +27,11 @@ from dpo.train.paths import (
     DATA_PATH,
     EXPERIMENT_NAME,
     OUTPUT_BASE,
+    STUDY_RESULTS_DIR,
     experiment_name_for_version,
     output_experiment_dir,
+    trial_summary_filename,
+    trial_summary_path,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +41,7 @@ DEFAULT_MAX_ATTEMPTED = 60
 DEFAULT_MAX_ATTEMPTED_V11 = 45
 OPTUNA_BASE_SEED = 42
 OPTUNA_STARTUP_TRIALS = 10
+V1_5_STARTUP_TRIALS = 12
 OPTUNA_SAMPLER_SETTINGS = {
     "n_startup_trials": OPTUNA_STARTUP_TRIALS,
     "multivariate": True,
@@ -125,6 +130,45 @@ PLAN_B_LABELS = (
     "plan_b_v10_23_lite",
 )
 
+# v1.5 hybrid: 12 fixed + 8 TPE (unmerged BnB + SFT + DPO, RPO via TRL sft auxiliary)
+V1_5_STUDY_VERSION = "v1.5"
+V1_5_SHARED = {
+    "num_train_epochs": 1,
+    "batch_combo": "1x8",
+    "lora_dropout": 0.05,
+    "lr_scheduler_type": "constant_with_warmup",
+    "max_grad_norm": 0.3,
+    "neftune_noise_alpha": 0.0,
+}
+# (fixed_id, label, beta, lr, lora_r, length_mode, rpo_alpha)
+_V1_5_FIXED_ROWS: tuple[tuple[int, str, float, float, int, str, float], ...] = (
+    (1, "v1.4 control replay", 0.05, 1.5e-5, 12, "ld_0.3", 0.0),
+    (2, "high-LR no-RPO control", 0.05, 1.85e-5, 16, "ld_0.3", 0.0),
+    (3, "light RPO", 0.05, 1.5e-5, 16, "ld_0.3", 0.25),
+    (4, "main RPO anchor", 0.05, 1.5e-5, 16, "ld_0.3", 0.5),
+    (5, "strong RPO anchor", 0.05, 1.5e-5, 16, "ld_0.3", 1.0),
+    (6, "stronger DPO with anchor", 0.08, 1.85e-5, 16, "ld_0.3", 0.75),
+    (7, "beta bridge", 0.08, 1.2e-5, 16, "ld_0.3", 0.5),
+    (8, "high-beta fair retest", 0.15, 1.5e-5, 16, "ld_0.3", 0.5),
+    (9, "r24 capacity test", 0.05, 1.2e-5, 24, "ld_0.3", 0.5),
+    (10, "r24 balanced high beta", 0.15, 1.2e-5, 24, "ld_0.3", 0.5),
+    (11, "r24 high beta + strong anchor", 0.15, 1.2e-5, 24, "ld_0.3", 1.0),
+    (12, "IPO fair probe", 0.05, 1.5e-5, 16, "ipo", 0.5),
+)
+V1_5_FIXED_TRIALS = tuple(
+    {
+        **V1_5_SHARED,
+        "beta": row[2],
+        "learning_rate": row[3],
+        "lora_r": row[4],
+        "length_mode": row[5],
+        "rpo_alpha": row[6],
+    }
+    for row in _V1_5_FIXED_ROWS
+)
+V1_5_LABELS = tuple(row[1] for row in _V1_5_FIXED_ROWS)
+V1_5_FIXED_IDS = tuple(row[0] for row in _V1_5_FIXED_ROWS)
+
 # Canonical Optuna keys stored in summary / MLflow / HTML (batch_combo form).
 TRIAL_PARAM_KEYS = (
     "beta",
@@ -137,6 +181,7 @@ TRIAL_PARAM_KEYS = (
     "lr_scheduler_type",
     "max_grad_norm",
     "neftune_noise_alpha",
+    "rpo_alpha",
 )
 VRAM_WAIT_CAP_S = 120
 VRAM_WAIT_NORMAL_GB = 10.5
@@ -196,6 +241,8 @@ class OptunaRunConfig:
 
 def default_study_name(study_version: str = "v1.0") -> str:
     exp = experiment_name_for_version(study_version)
+    if study_version == V1_5_STUDY_VERSION:
+        return f"{exp}-hybrid-seed{SPLIT_SEED}"
     if study_version in PLAN_B_STUDY_VERSIONS:
         return f"{exp}-plan-b-seed{SPLIT_SEED}"
     if study_version == "v1.2":
@@ -257,12 +304,14 @@ def optuna_sampler_seed(base_seed: int, worker_id: int | None) -> int:
 
 def build_sampler(cfg: OptunaRunConfig) -> optuna.samplers.TPESampler:
     sampler_seed = optuna_sampler_seed(cfg.optuna_base_seed, cfg.worker_id)
+    n_startup = V1_5_STARTUP_TRIALS if cfg.study_version == V1_5_STUDY_VERSION else OPTUNA_STARTUP_TRIALS
+    constant_liar = cfg.parallel_workers > 1
     return optuna.samplers.TPESampler(
         seed=sampler_seed,
-        n_startup_trials=OPTUNA_STARTUP_TRIALS,
+        n_startup_trials=n_startup,
         multivariate=True,
         group=True,
-        constant_liar=True,
+        constant_liar=constant_liar,
     )
 
 
@@ -383,9 +432,14 @@ def resolve_canonical_trial_params(
 
 def params_for_frozen_trial(trial: optuna.trial.FrozenTrial, study_version: str) -> dict:
     """Hyperparams for summaries/HTML from Optuna storage or fallbacks."""
-    if dict(trial.params):
-        return to_canonical_params(dict(trial.params))
     ua = trial.user_attrs or {}
+    if study_version == V1_5_STUDY_VERSION:
+        stored = ua.get("trial_params")
+        if isinstance(stored, dict) and stored:
+            return to_canonical_params(stored)
+    if dict(trial.params):
+        merged = {**V1_5_SHARED, **to_canonical_params(dict(trial.params))} if study_version == V1_5_STUDY_VERSION else to_canonical_params(dict(trial.params))
+        return merged if study_version == V1_5_STUDY_VERSION else to_canonical_params(dict(trial.params))
     stored = ua.get("trial_params")
     if isinstance(stored, dict) and stored:
         return to_canonical_params(stored)
@@ -401,11 +455,149 @@ def params_for_frozen_trial(trial: optuna.trial.FrozenTrial, study_version: str)
     if study_version == "v1.2":
         fixed = plan_a_params_by_trial_number(trial.number)
         return dict(fixed) if fixed else {}
+    if study_version == V1_5_STUDY_VERSION:
+        fixed = v1_5_params_by_trial_number(trial.number)
+        if fixed:
+            return dict(fixed)
+        stored = (trial.user_attrs or {}).get("trial_params")
+        if isinstance(stored, dict) and stored:
+            return to_canonical_params(stored)
     return {}
 
 
+def v1_5_fixed_id_for_params(params: dict) -> int | None:
+    key = params_key(params)
+    for fixed_id, trial_params in zip(V1_5_FIXED_IDS, V1_5_FIXED_TRIALS):
+        if params_key(trial_params) == key:
+            return fixed_id
+    return None
+
+
+def v1_5_params_by_trial_number(trial_number: int) -> dict | None:
+    if 0 <= trial_number < len(V1_5_FIXED_TRIALS):
+        return dict(V1_5_FIXED_TRIALS[trial_number])
+    return None
+
+
+def v1_5_label_for_params(params: dict) -> str:
+    fid = v1_5_fixed_id_for_params(params)
+    if fid is not None:
+        return V1_5_LABELS[fid - 1]
+    return "v1_5_sampled"
+
+
+def validate_v1_5_sampled_params(params: dict) -> str | None:
+    """Return prune reason if params violate v1.5 sampled constraints."""
+    beta = float(params["beta"])
+    lr = float(params["learning_rate"])
+    lora_r = int(params["lora_r"])
+    if lora_r == 24 and beta >= 0.15 and lr > 1.2e-5:
+        return "v1_5_constraint_r24_high_beta_lr"
+    if beta == 0.20 and lr > 1.2e-5:
+        return "v1_5_constraint_beta20_lr"
+    if lora_r == 12 and beta not in (0.08, 0.10, 0.15):
+        return "v1_5_constraint_r12_beta"
+    return None
+
+
+def _v1_5_match_fixed_trial(partial: dict) -> dict | None:
+    """If partial/complete params match an enqueued fixed trial, return full spec."""
+    if not partial:
+        return None
+    canon = to_canonical_params(partial)
+    for fixed in V1_5_FIXED_TRIALS:
+        fp = to_canonical_params(fixed)
+        if all(canon.get(k) == fp.get(k) for k in canon if k in fp):
+            if params_key(canon) == params_key(fp):
+                return dict(fp)
+            # Optuna enqueue may expose only a subset in trial.params before suggest finishes.
+            if set(canon.keys()) >= {"beta", "learning_rate", "lora_r"}:
+                if all(fp.get(k) == canon.get(k) for k in ("beta", "learning_rate", "lora_r")):
+                    return dict(fp)
+    return None
+
+
+def resolve_v1_5_canonical_params(trial: optuna.Trial) -> dict:
+    """Canonical v1.5 params (enqueue-safe; no suggest)."""
+    ua = trial.user_attrs or {}
+    stored = ua.get("trial_params")
+    if isinstance(stored, dict) and stored:
+        return to_canonical_params(stored)
+    if dict(trial.params):
+        matched = _v1_5_match_fixed_trial(dict(trial.params))
+        if matched:
+            return matched
+        return {**V1_5_SHARED, **to_canonical_params(dict(trial.params))}
+    return {}
+
+
+def sample_v1_5_trial_params(trial: optuna.Trial) -> dict[str, Any]:
+    """Sample TPE trials; never re-suggest enqueued fixed params (e.g. rpo_alpha=0)."""
+    matched = _v1_5_match_fixed_trial(dict(trial.params))
+    if matched:
+        return expand_params_for_training(matched)
+
+    merged = resolve_v1_5_canonical_params(trial)
+    required = ("beta", "learning_rate", "lora_r", "rpo_alpha", "length_mode")
+    if all(k in merged for k in required):
+        reason = validate_v1_5_sampled_params(merged)
+        if reason:
+            trial.set_user_attr("failure_reason", reason)
+            raise optuna.TrialPruned(reason)
+        return expand_params_for_training(merged)
+
+    if "beta" not in merged:
+        merged["beta"] = trial.suggest_categorical(
+            "beta", [0.05, 0.08, 0.10, 0.15, 0.20]
+        )
+    if "learning_rate" not in merged:
+        merged["learning_rate"] = trial.suggest_categorical(
+            "learning_rate", [8e-6, 1.0e-5, 1.2e-5, 1.5e-5, 1.85e-5]
+        )
+    if "lora_r" not in merged:
+        merged["lora_r"] = trial.suggest_categorical("lora_r", [12, 16, 24])
+    if "rpo_alpha" not in merged:
+        merged["rpo_alpha"] = trial.suggest_categorical(
+            "rpo_alpha", [0.25, 0.5, 0.75, 1.0]
+        )
+    merged.setdefault("length_mode", "ld_0.3")
+    params = {**V1_5_SHARED, **to_canonical_params(merged)}
+    reason = validate_v1_5_sampled_params(params)
+    if reason:
+        trial.set_user_attr("failure_reason", reason)
+        raise optuna.TrialPruned(reason)
+    return expand_params_for_training(params)
+
+
+def enqueue_v1_5_fixed_trials(study: optuna.Study, cfg: OptunaRunConfig) -> int:
+    if cfg.study_version != V1_5_STUDY_VERSION:
+        return 0
+    active_states = (TrialState.COMPLETE, TrialState.RUNNING, TrialState.WAITING)
+    existing = {
+        params_key(dict(t.params))
+        for t in study.trials
+        if t.state in active_states and dict(t.params)
+    }
+    enqueued = 0
+    for params in V1_5_FIXED_TRIALS:
+        key = params_key(params)
+        if key in existing:
+            continue
+        study.enqueue_trial(params)
+        existing.add(key)
+        enqueued += 1
+    return enqueued
+
+
+def copy_trial_summary_to_study_results(summary_path: Path, study_version: str) -> Path:
+    STUDY_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    dest = STUDY_RESULTS_DIR / trial_summary_filename(study_version)
+    shutil.copy2(summary_path, dest)
+    return dest
+
+
 def enrich_summary_dict(summary: dict) -> dict:
-    """Fill empty trial params/derived for fixed-trial studies (v1.2/v1.3/v1.4)."""
+    """Fill empty trial params/derived for fixed-trial studies (v1.2/v1.3/v1.4/v1.5)."""
     study_version = str(summary.get("study_version") or "")
     for row in summary.get("trials") or []:
         p = params_for_summary_row(row, study_version)
@@ -451,6 +643,10 @@ def params_for_summary_row(trial_row: dict, study_version: str) -> dict:
             pass
     n = trial_row.get("trial_number", trial_row.get("number"))
     if n is not None:
+        if study_version == V1_5_STUDY_VERSION:
+            fixed = v1_5_params_by_trial_number(int(n))
+            if fixed:
+                return dict(fixed)
         if study_version in PLAN_B_STUDY_VERSIONS:
             fixed = plan_b_params_by_trial_number(int(n))
             return dict(fixed) if fixed else {}
@@ -467,13 +663,16 @@ def derive_summary_fields(params: dict) -> dict:
         return {}
     loss_type, ld_alpha, use_weighting = parse_length_mode(params["length_mode"])
     lora_r = params.get("lora_r", 16)
-    return {
+    out = {
         "lora_alpha": 2 * lora_r,
         "effective_batch": effective_batch_from_params(params),
         "loss_type": loss_type,
         "ld_alpha": ld_alpha,
         "use_weighting": use_weighting,
     }
+    if "rpo_alpha" in params:
+        out["rpo_alpha"] = params["rpo_alpha"]
+    return out
 
 
 def enqueue_anchor_if_needed(study: optuna.Study, cfg: OptunaRunConfig) -> bool:
@@ -546,7 +745,9 @@ def resolve_trial_params(
     canonical = resolve_canonical_trial_params(
         trial, cfg, solo_record=solo_record, fixed_params=fixed_params
     )
-    if cfg.study_version not in ("v1.2", *PLAN_B_STUDY_VERSIONS) and not canonical:
+    if cfg.study_version == V1_5_STUDY_VERSION:
+        return sample_v1_5_trial_params(trial)
+    if cfg.study_version not in ("v1.2", *PLAN_B_STUDY_VERSIONS, V1_5_STUDY_VERSION) and not canonical:
         return sample_trial_params(trial, cfg)
     if not canonical:
         raise optuna.TrialPruned("missing_trial_params")
@@ -726,6 +927,8 @@ def wait_for_vram(params: dict, worker_id: int | None) -> str | None:
 
 
 def sample_trial_params(trial: optuna.Trial, cfg: OptunaRunConfig) -> dict[str, Any]:
+    if cfg.study_version == V1_5_STUDY_VERSION:
+        return sample_v1_5_trial_params(trial)
     if cfg.study_version == "v1.1":
         batch_combo = trial.suggest_categorical(
             "batch_combo", ["1x4", "1x8", "1x16", "2x2", "2x4", "2x8"]
@@ -876,7 +1079,7 @@ def write_final_summary(
 ) -> Path:
     import trl
 
-    from dpo.train.dpo_diagnostics import build_study_review
+    from dpo.train.dpo_diagnostics import build_study_review, build_trial_summary_record
     from train.train_sft import compute_data_hash
 
     trials_out = []
@@ -888,23 +1091,29 @@ def write_final_summary(
         derived = derive_summary_fields(p) if p else {}
         if not derived and (t.user_attrs or {}).get("derived"):
             derived = dict((t.user_attrs or {}).get("derived") or {})
-        trials_out.append({
-            "trial_number": t.number,
-            "worker_id": t.user_attrs.get("worker_id"),
-            "params": p,
-            "derived": derived,
-            "state": t.state.name,
-            "value": t.value,
-            "failure_reason": t.user_attrs.get("failure_reason"),
-            "queued_for_solo_retry": t.user_attrs.get("queued_for_solo_retry", False),
-            "solo_retry": t.user_attrs.get("solo_retry", False),
-            "parallel_oom_recovered": t.user_attrs.get("parallel_oom_recovered", False),
-            "requires_solo": t.user_attrs.get("requires_solo", False),
-            "original_parallel_oom_trial_numbers": t.user_attrs.get(
-                "original_parallel_oom_trial_numbers"
-            ),
-            "user_attrs": dict(t.user_attrs),
-        })
+        ua = dict(t.user_attrs)
+        adapter_diag = ua.get("adapter_diagnostics")
+        if isinstance(adapter_diag, dict):
+            pass
+        else:
+            adapter_diag = {}
+        row = build_trial_summary_record(
+            trial_number=t.number,
+            state=t.state.name,
+            value=t.value,
+            params=p,
+            derived=derived,
+            user_attrs=ua,
+            adapter_diag=adapter_diag if adapter_diag else None,
+        )
+        row["queued_for_solo_retry"] = ua.get("queued_for_solo_retry", False)
+        row["solo_retry"] = ua.get("solo_retry", False)
+        row["parallel_oom_recovered"] = ua.get("parallel_oom_recovered", False)
+        row["requires_solo"] = ua.get("requires_solo", False)
+        row["original_parallel_oom_trial_numbers"] = ua.get(
+            "original_parallel_oom_trial_numbers"
+        )
+        trials_out.append(row)
         if t.user_attrs.get("failure_reason") == "parallel_oom_queued_for_solo":
             combo = (
                 f"batch={p.get('batch_combo') or p.get('per_device_train_batch_size')}|"
@@ -953,14 +1162,25 @@ def write_final_summary(
         "study_version": cfg.study_version,
         "experiment_name": cfg.experiment_name,
         "optuna_base_seed": cfg.optuna_base_seed,
-        "sampler_settings": OPTUNA_SAMPLER_SETTINGS,
+        "sampler_settings": {
+            **OPTUNA_SAMPLER_SETTINGS,
+            "n_startup_trials": (
+                V1_5_STARTUP_TRIALS
+                if study_version == V1_5_STUDY_VERSION
+                else OPTUNA_STARTUP_TRIALS
+            ),
+        },
         "optuna_heartbeat_settings": optuna_heartbeat_settings(),
         "duplicate_pruned_count": duplicate_pruned_count,
         "unique_complete_config_count": len(unique_complete_keys),
         "best_trial": best.number if best else None,
         "best_objective": best.value if best else None,
         "best_hybrid_score": best.user_attrs.get("hybrid_score_v1_1", best.value) if best else None,
+        "best_v1_5_survival_score": (
+            best.user_attrs.get("v1_5_survival_score", best.value) if best else None
+        ),
         "best_accuracy": best.user_attrs.get("eval_rewards_accuracy") if best else None,
+        "trial_summary_file": trial_summary_filename(study_version),
         "best_params": params_for_frozen_trial(best, study_version) if best else None,
         "complete_trials": [
             {
@@ -976,12 +1196,15 @@ def write_final_summary(
         "study_review": build_study_review(study),
         **meta,
     }
-    out = cfg.run_dir / "trial_summary.json"
+    out = trial_summary_path(cfg.run_dir, study_version)
     out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     from dpo.train.study_report import write_study_report
 
     report_path = write_study_report(out)
     summary["study_report_html"] = str(report_path.resolve())
+    out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    copied = copy_trial_summary_to_study_results(out, study_version)
+    summary["trial_summary_study_results_copy"] = str(copied.resolve())
     out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return out
 
@@ -1133,20 +1356,29 @@ def run_parallel_launcher(
         enqueued_rescue = enqueue_plan_a_rescue_trials(study, cfg)
         enqueued_plan_b = 0
         enqueued_anchor = False
+        enqueued_v15 = 0
     elif cfg.study_version in PLAN_B_STUDY_VERSIONS:
         enqueued_rescue = 0
         enqueued_plan_b = enqueue_plan_b_trials(study, cfg)
         enqueued_anchor = False
+        enqueued_v15 = 0
+    elif cfg.study_version == V1_5_STUDY_VERSION:
+        enqueued_rescue = 0
+        enqueued_plan_b = 0
+        enqueued_anchor = False
+        enqueued_v15 = enqueue_v1_5_fixed_trials(study, cfg)
     else:
         enqueued_rescue = 0
         enqueued_plan_b = 0
         enqueued_anchor = enqueue_anchor_if_needed(study, cfg)
+        enqueued_v15 = 0
     launcher_log(cfg, f"PARALLEL OPTUNA | workers={cfg.parallel_workers} target={cfg.target_complete_trials}")
     launcher_log(cfg, f"study_version={cfg.study_version} experiment={cfg.experiment_name}")
     launcher_log(
         cfg,
         f"optuna_base_seed={cfg.optuna_base_seed} anchor_enqueued={enqueued_anchor} "
-        f"plan_a_enqueued={enqueued_rescue} plan_b_enqueued={enqueued_plan_b}",
+        f"plan_a_enqueued={enqueued_rescue} plan_b_enqueued={enqueued_plan_b} "
+        f"v1_5_fixed_enqueued={enqueued_v15}",
     )
     launcher_log(cfg, f"run_dir={cfg.run_dir}")
     launcher_log(cfg, f"study={cfg.study_name} db={cfg.study_storage}")
@@ -1247,9 +1479,9 @@ def add_parallel_cli_args(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--study-version",
-        choices=("v1.0", "v1.1", "v1.2", "v1.3", "v1.4"),
+        choices=("v1.0", "v1.1", "v1.2", "v1.3", "v1.4", "v1.5"),
         default="v1.1",
-        help="v1.1: TPE; v1.2: Plan A rescue; v1.3: Plan B baked; v1.4: Plan B unmerged (4 fixed trials)",
+        help="v1.5: hybrid 12 fixed + 8 TPE; v1.4: Plan B unmerged (4 fixed); v1.1: broad TPE",
     )
     parser.add_argument("--optuna-base-seed", type=int, default=OPTUNA_BASE_SEED)
     parser.add_argument("--experiment-name", type=str, default=None)

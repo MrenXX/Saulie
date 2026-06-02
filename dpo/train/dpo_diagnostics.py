@@ -359,6 +359,239 @@ def compute_hybrid_score_v1_1(
     return score
 
 
+def style_accuracy_from_val_diag(val_diag: dict | None) -> float | None:
+    if not val_diag:
+        return None
+    bucket = (val_diag.get("by_category") or {}).get("style")
+    if bucket and bucket.get("count", 0) > 0:
+        return float(bucket["accuracy"])
+    return None
+
+
+def _clamp01(x: float) -> float:
+    return max(0.0, min(1.0, float(x)))
+
+
+def load_v1_5_control_anchor(run_dir: Path) -> dict[str, Any]:
+    path = run_dir / "v1_5_control_anchor.json"
+    if not path.is_file():
+        return {"controls": {}, "anchor": None, "both_controls_complete": False}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {"controls": {}, "anchor": None, "both_controls_complete": False}
+
+
+def update_v1_5_control_anchor(
+    run_dir: Path,
+    *,
+    fixed_id: int | None,
+    eval_logps_chosen: float,
+) -> dict[str, Any]:
+    """Track no-RPO control logps; anchor = max(chosen logp) once fixed IDs 1 and 2 exist."""
+    path = run_dir / "v1_5_control_anchor.json"
+    data = load_v1_5_control_anchor(run_dir)
+    controls = dict(data.get("controls") or {})
+    if fixed_id in (1, 2):
+        controls[str(fixed_id)] = float(eval_logps_chosen)
+    data["controls"] = controls
+    both = "1" in controls and "2" in controls
+    data["both_controls_complete"] = both
+    if both:
+        data["anchor"] = max(float(controls["1"]), float(controls["2"]))
+    else:
+        data["anchor"] = data.get("anchor")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    return data
+
+
+def evaluate_v1_5_trial(
+    *,
+    scorecard: dict,
+    val_diag: dict | None,
+    provenance: dict,
+    adapter_diag: dict,
+    params: dict,
+    control_anchor: float | None,
+    both_controls_complete: bool,
+) -> tuple[float, dict[str, Any]]:
+    """Hard gates + survival score. Returns (objective, detail dict)."""
+    acc = scorecard.get("eval_rewards_accuracy")
+    margin = scorecard.get("eval_rewards_margin")
+    eval_loss = scorecard.get("eval_loss")
+    train_loss = scorecard.get("train_loss")
+    eval_logps_chosen = scorecard.get("eval_logps_chosen")
+    macro_fc = (
+        val_diag.get("macro_accuracy_by_source_family_category") if val_diag else None
+    )
+    macro_cat = val_diag.get("macro_accuracy_by_category") if val_diag else None
+    style_acc = style_accuracy_from_val_diag(val_diag)
+    len_corr = val_diag.get("margin_vs_length_delta_corr") if val_diag else None
+    abs_len_corr = val_diag.get("margin_vs_abs_length_delta_corr") if val_diag else None
+
+    detail: dict[str, Any] = {
+        "style_accuracy": style_acc,
+        "control_eval_logps_chosen": control_anchor,
+        "both_controls_complete": both_controls_complete,
+        "hard_gate_pass": True,
+        "hard_gate_reasons": [],
+        "penalties": 0.0,
+    }
+
+    def fail(reason: str) -> tuple[float, dict[str, Any]]:
+        detail["hard_gate_pass"] = False
+        detail["hard_gate_reasons"].append(reason)
+        detail["v1_5_survival_score"] = -1e6
+        return -1e6, detail
+
+    if not provenance.get("mask_audit_pass", True):
+        return fail("mask_audit_pass")
+    if not adapter_diag.get("only_dpo_trainable", True):
+        return fail("only_dpo_trainable")
+    if not adapter_diag.get("has_ref_adapter", True):
+        return fail("ref adapter missing")
+    if train_loss is not None and not math.isfinite(float(train_loss)):
+        return fail("nonfinite train_loss")
+    if eval_loss is not None and not math.isfinite(float(eval_loss)):
+        return fail("nonfinite eval_loss")
+    if acc is None or float(acc) < 0.80:
+        return fail("eval_rewards_accuracy < 0.80")
+    if macro_fc is not None and float(macro_fc) < 0.85:
+        return fail("macro_accuracy_by_source_family_category < 0.85")
+    if macro_cat is not None and float(macro_cat) < 0.85:
+        return fail("macro_accuracy_by_category < 0.85")
+    if style_acc is not None and float(style_acc) < 0.75:
+        return fail("style_accuracy < 0.75")
+    if margin is not None and float(margin) <= 0:
+        return fail("eval_rewards_margin <= 0")
+    if len_corr is not None:
+        lc = float(len_corr)
+        if lc < -0.50:
+            return fail("margin_vs_length_delta_corr < -0.50")
+        if abs(lc) > 0.97:
+            return fail("abs(margin_vs_length_delta_corr) > 0.97")
+    if (
+        both_controls_complete
+        and control_anchor is not None
+        and eval_logps_chosen is not None
+    ):
+        chosen_drop = max(0.0, float(control_anchor) - float(eval_logps_chosen))
+        if chosen_drop > 25.0:
+            return fail("eval_logps_chosen > 25 nats worse than control anchor")
+
+    accuracy_score = _clamp01(float(acc))
+    macro_family_category_score = _clamp01(float(macro_fc)) if macro_fc is not None else 0.0
+    macro_category_score = _clamp01(float(macro_cat)) if macro_cat is not None else 0.0
+    style_score = _clamp01(float(style_acc)) if style_acc is not None else 0.0
+
+    preferred_margin_center = 1.4
+    preferred_margin_width = 1.4
+    m = float(margin) if margin is not None else preferred_margin_center
+    margin_quality = _clamp01(
+        1.0 - abs(m - preferred_margin_center) / preferred_margin_width
+    )
+
+    chosen_logp_quality = 1.0
+    if both_controls_complete and control_anchor is not None and eval_logps_chosen is not None:
+        chosen_drop = max(0.0, float(control_anchor) - float(eval_logps_chosen))
+        chosen_logp_quality = _clamp01(1.0 - chosen_drop / 25.0)
+
+    penalties = 0.0
+    if margin is not None and float(margin) > 3.0:
+        penalties += 0.10
+    if len_corr is not None:
+        lc = float(len_corr)
+        if lc < -0.25:
+            penalties += 0.10
+        if lc > 0.95:
+            penalties += 0.05
+    if eval_loss is not None and float(eval_loss) > 1.5:
+        penalties += 0.05
+
+    score = (
+        0.30 * accuracy_score
+        + 0.25 * macro_family_category_score
+        + 0.15 * macro_category_score
+        + 0.10 * style_score
+        + 0.10 * margin_quality
+        + 0.10 * chosen_logp_quality
+        - penalties
+    )
+    detail["penalties"] = penalties
+    detail["v1_5_survival_score"] = score
+    detail["margin_quality"] = margin_quality
+    detail["chosen_logp_quality"] = chosen_logp_quality
+    return score, detail
+
+
+def build_trial_summary_record(
+    *,
+    trial_number: int,
+    state: str,
+    value: float | None,
+    params: dict,
+    derived: dict,
+    user_attrs: dict,
+    adapter_diag: dict | None = None,
+) -> dict[str, Any]:
+    """Flat trial row for trial_summary_v*.json (v1.5 metadata + diagnostics)."""
+    ua = dict(user_attrs or {})
+    p = dict(params or {})
+    d = dict(derived or {})
+    ad = adapter_diag or ua.get("adapter_diagnostics") or {}
+    record = {
+        "trial_number": trial_number,
+        "state": state,
+        "value": value,
+        "params": p,
+        "derived": d,
+        "fixed_or_sampled": ua.get("fixed_or_sampled"),
+        "fixed_id": ua.get("fixed_id"),
+        "beta": p.get("beta"),
+        "learning_rate": p.get("learning_rate"),
+        "lora_r": p.get("lora_r"),
+        "lora_alpha": d.get("lora_alpha") or (2 * p["lora_r"] if p.get("lora_r") else None),
+        "rpo_alpha": p.get("rpo_alpha"),
+        "length_mode": p.get("length_mode"),
+        "loss_type": d.get("loss_type"),
+        "num_train_epochs": p.get("num_train_epochs"),
+        "batch_combo": p.get("batch_combo"),
+        "neftune_noise_alpha": p.get("neftune_noise_alpha"),
+        "base_kind": ua.get("base_kind"),
+        "stack_mode": ua.get("stack_mode"),
+        "active_adapters": ua.get("active_adapters", ["default", "dpo"]),
+        "available_adapters": ua.get("available_adapters"),
+        "has_ref_adapter": ad.get("has_ref_adapter"),
+        "only_dpo_trainable": ad.get("only_dpo_trainable"),
+        "non_dpo_trainable_count": ad.get("non_dpo_trainable_count"),
+        "mask_audit_pass": ua.get("mask_audit_pass"),
+        "eval_logps_chosen": ua.get("eval_logps_chosen"),
+        "eval_logps_rejected": ua.get("eval_logps_rejected"),
+        "eval_rewards_accuracy": ua.get("eval_rewards_accuracy"),
+        "eval_rewards_margin": ua.get("eval_rewards_margin"),
+        "eval_rewards_chosen": ua.get("eval_rewards_chosen"),
+        "eval_rewards_rejected": ua.get("eval_rewards_rejected"),
+        "eval_loss": ua.get("eval_loss"),
+        "train_loss": ua.get("train_loss"),
+        "macro_accuracy_by_category": ua.get("macro_accuracy_by_category"),
+        "macro_accuracy_by_source_family": ua.get("macro_accuracy_by_source_family"),
+        "macro_accuracy_by_source_family_category": ua.get(
+            "macro_accuracy_by_source_family_category"
+        ),
+        "style_accuracy": ua.get("style_accuracy"),
+        "margin_vs_length_delta_corr": ua.get("margin_vs_length_delta_corr"),
+        "margin_vs_abs_length_delta_corr": ua.get("margin_vs_abs_length_delta_corr"),
+        "v1_5_survival_score": ua.get("v1_5_survival_score"),
+        "hybrid_score_v1_1": ua.get("hybrid_score_v1_1"),
+        "saved_adapter_path": ua.get("saved_adapter_path"),
+        "failure_reason": ua.get("failure_reason"),
+        "worker_id": ua.get("worker_id"),
+        "user_attrs": ua,
+    }
+    return record
+
+
 def log_trial_scorecard(prefix: str, trial_number: int, scorecard: dict, val_diag: dict | None) -> None:
     log_line(prefix, f"{'=' * 56}")
     log_line(prefix, f"TRIAL {trial_number} COMPLETE")

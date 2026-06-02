@@ -261,14 +261,60 @@ def log_parent_study_summary(
             mlflow.log_artifact(str(report_path.resolve()))
 
 
+def _nested_child_run_ids(client: mlflow.tracking.MlflowClient, parent_id: str) -> list[str]:
+    """Return run ids of direct nested children (filesystem store has no parent filter)."""
+    parent = client.get_run(parent_id)
+    exp_id = parent.info.experiment_id
+    out: list[str] = []
+    for run in client.search_runs(experiment_ids=[exp_id], max_results=500):
+        if run.data.tags.get("mlflow.parentRunId") == parent_id:
+            out.append(run.info.run_id)
+    return out
+
+
+def delete_parent_run_tree(
+    client: mlflow.tracking.MlflowClient,
+    experiment_id: str,
+    parent_run_name: str,
+) -> list[str]:
+    """Delete a top-level parent and all nested trial-* children. Returns deleted run ids."""
+    deleted: list[str] = []
+    parents = client.search_runs(
+        experiment_ids=[experiment_id],
+        filter_string=f"attributes.run_name = '{parent_run_name}'",
+        max_results=20,
+    )
+    parent_ids = {p.info.run_id for p in parents}
+    for parent in parents:
+        pid = parent.info.run_id
+        for child_id in _nested_child_run_ids(client, pid):
+            client.delete_run(child_id)
+            deleted.append(child_id)
+        client.delete_run(pid)
+        deleted.append(pid)
+    # Children orphaned when a parent was deleted without subtree cleanup (early launcher exit).
+    for run in client.search_runs(experiment_ids=[experiment_id], max_results=500):
+        parent_tag = run.data.tags.get("mlflow.parentRunId")
+        if parent_tag and parent_tag not in parent_ids:
+            if run.info.run_name and run.info.run_name.startswith("trial-"):
+                client.delete_run(run.info.run_id)
+                deleted.append(run.info.run_id)
+    return deleted
+
+
 def backfill_study_from_summary(
     summary_path: Path,
     *,
     parent_run_name: str | None = None,
     parent_name_suffix: str = "",
     report_paths: list[Path] | None = None,
+    replace_parent: bool = False,
 ) -> str:
-    """Create parent + nested trial runs from trial_summary.json. Returns parent run id."""
+    """Create parent + nested trial runs from trial_summary.json. Returns parent run id.
+
+    If replace_parent=True and parent_run_name is set, delete any existing parent run(s)
+    with that name (and nested children) before creating a fresh parent with full trials.
+    """
     summary_path = summary_path.resolve()
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     run_dir = Path(summary.get("run_dir", summary_path.parent))
@@ -276,12 +322,21 @@ def backfill_study_from_summary(
     if summary.get("study_version"):
         exp_name = experiment_name_for_version(str(summary["study_version"]))
     setup_mlflow(exp_name)
+    client = mlflow.tracking.MlflowClient()
+    exp = client.get_experiment_by_name(exp_name)
+    if exp is None:
+        raise RuntimeError(f"Experiment not found: {exp_name}")
 
-    if parent_run_name:
-        client = mlflow.tracking.MlflowClient()
-        exp = client.get_experiment_by_name(exp_name)
-        if exp is None:
-            raise RuntimeError(f"Experiment not found: {exp_name}")
+    if parent_run_name and replace_parent:
+        removed = delete_parent_run_tree(client, exp.experiment_id, parent_run_name)
+        if removed:
+            print(
+                f"[mlflow] deleted stale parent tree {parent_run_name!r}: "
+                f"{len(removed)} run(s)",
+                flush=True,
+            )
+
+    if parent_run_name and not replace_parent:
         runs = client.search_runs(
             experiment_ids=[exp.experiment_id],
             filter_string=f"attributes.run_name = '{parent_run_name}'",
@@ -290,34 +345,46 @@ def backfill_study_from_summary(
         if not runs:
             raise RuntimeError(f"Parent run not found: {parent_run_name}")
         parent_id = runs[0].info.run_id
+        for t in _trials_with_resolved_params(summary):
+            log_trial_run(parent_id, t, run_dir=run_dir)
+        return parent_id
+
+    if parent_run_name:
+        name = parent_run_name
     else:
         basename = run_dir.name
         suffix = f"-{parent_name_suffix}" if parent_name_suffix else ""
         name = f"optuna-parallel-review{suffix}-{basename}"
-        reports = report_paths
-        if reports is None:
-            reports = []
-            for candidate in (run_dir / "study_report_v2.html", run_dir / "study_report.html"):
-                if candidate.is_file():
-                    reports.append(candidate)
-        with mlflow.start_run(run_name=name):
-            parent_id = mlflow.active_run().info.run_id
-            mlflow.log_params({
-                "study_name": _mlflow_param_value(summary.get("study_name")),
-                "run_dir": str(run_dir),
-                "backfill": "true",
-                "report_suffix": _mlflow_param_value(parent_name_suffix or "default"),
-                "target_complete_trials": _mlflow_param_value(
-                    summary.get("target_complete_trials")
-                ),
-            })
-            for t in _trials_with_resolved_params(summary):
-                log_trial_run(parent_id, t, run_dir=run_dir)
-            log_parent_study_summary(summary, summary_path, reports)
 
-    if parent_run_name:
-        for t in _trials_with_resolved_params(summary):
+    reports = report_paths
+    if reports is None:
+        reports = []
+        for candidate in (run_dir / "study_report_v2.html", run_dir / "study_report.html"):
+            if candidate.is_file():
+                reports.append(candidate)
+
+    with mlflow.start_run(run_name=name):
+        parent_id = mlflow.active_run().info.run_id
+        mlflow.log_params({
+            "study_name": _mlflow_param_value(summary.get("study_name")),
+            "run_dir": str(run_dir),
+            "backfill": "true",
+            "report_suffix": _mlflow_param_value(parent_name_suffix or "default"),
+            "target_complete_trials": _mlflow_param_value(
+                summary.get("target_complete_trials")
+            ),
+            "target_reached": _mlflow_param_value(summary.get("target_reached")),
+        })
+        mlflow.set_tag("run_dir", str(run_dir.resolve()))
+        mlflow.set_tag("study_version", str(summary.get("study_version", "")))
+        trials = _trials_with_resolved_params(summary)
+        for t in trials:
             log_trial_run(parent_id, t, run_dir=run_dir)
+        log_parent_study_summary(summary, summary_path, reports)
+        print(
+            f"[mlflow] backfilled {len(trials)} nested runs under {name!r}",
+            flush=True,
+        )
 
     return parent_id
 

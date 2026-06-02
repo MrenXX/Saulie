@@ -23,7 +23,12 @@ def main() -> None:
         "--parent-run-name",
         type=str,
         default=None,
-        help="Attach nested runs to an existing parent run by name (default: new review parent)",
+        help="Parent run name (default: new optuna-parallel-review-* parent)",
+    )
+    parser.add_argument(
+        "--replace-parent",
+        action="store_true",
+        help="Delete existing parent+children with --parent-run-name, then backfill fresh",
     )
     parser.add_argument(
         "--skip-html",
@@ -66,6 +71,7 @@ def main() -> None:
         parent_run_name=args.parent_run_name,
         parent_name_suffix="v2" if args.v2 and not args.parent_run_name else "",
         report_paths=report_paths or None,
+        replace_parent=args.replace_parent,
     )
     uri = f"file://{MLRUNS_DIR.resolve()}"
     print(f"MLflow tracking: {uri}")
