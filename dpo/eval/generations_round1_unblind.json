@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-06-05T03:32:03.961915",
+  "baseline_model": "steering-sft-v1.1_trial-17",
+  "candidate_mapping": {
+    "candidate_A": {
+      "trial_number": 19,
+      "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-19/sft_dpo_cat",
+      "container_path": "/models/lora-host/v15-run/trial-19/sft_dpo_cat"
+    },
+    "candidate_B": {
+      "trial_number": 16,
+      "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-16/sft_dpo_cat",
+      "container_path": "/models/lora-host/v15-run/trial-16/sft_dpo_cat"
+    },
+    "candidate_C": {
+      "trial_number": 8,
+      "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-8/sft_dpo_cat",
+      "container_path": "/models/lora-host/v15-run/trial-8/sft_dpo_cat"
+    },
+    "candidate_D": {
+      "trial_number": 27,
+      "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-27/sft_dpo_cat",
+      "container_path": "/models/lora-host/v15-run/trial-27/sft_dpo_cat"
+    },
+    "candidate_E": {
+      "trial_number": 20,
+      "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-20/sft_dpo_cat",
+      "container_path": "/models/lora-host/v15-run/trial-20/sft_dpo_cat"
+    },
+    "candidate_F": {
+      "trial_number": 4,
+      "adapter_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-4/sft_dpo_cat",
+      "container_path": "/models/lora-host/v15-run/trial-4/sft_dpo_cat"
+    }
+  },
+  "checkpoint_complete": true,
+  "note": "Do not send to LLM judge."
+}

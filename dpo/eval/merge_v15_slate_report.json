@@ -1,0 +1,2433 @@
+{
+  "trials": [
+    {
+      "trial": 19,
+      "exit_code": 0,
+      "merge_meta": {
+        "candidate": {
+          "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-19/best_adapter",
+          "cat_adapter_dir": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-19/sft_dpo_cat",
+          "cat_adapter_name": "sft_dpo_cat",
+          "stack_adapters": [
+            "default",
+            "dpo"
+          ],
+          "dpo_weight": 1.0,
+          "train_base": "bnb_8bit",
+          "deploy_base": "fp8_vllm",
+          "deploy_model_path": "/root/saulie/Qwen3-4B-Instruct-2507-FP8",
+          "sft_path": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+          "sft_rank": 16,
+          "dpo_rank": 16,
+          "merged_rank": 32,
+          "sft_alpha": 32,
+          "dpo_alpha": 32,
+          "target_modules": [
+            "q_proj",
+            "o_proj",
+            "up_proj",
+            "k_proj",
+            "down_proj",
+            "v_proj",
+            "gate_proj"
+          ],
+          "peft_type": "LORA",
+          "dpo_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-19/best_adapter/dpo"
+        },
+        "merge_correctness": {
+          "blocking": true,
+          "method": "fp32 raw LoRA Delta-W reconstruction",
+          "pass": true,
+          "tolerance": 1e-05,
+          "max_abs_delta_diff": 1.1641532182693481e-09,
+          "layers_checked": 252,
+          "worst_module": "base_model.model.model.layers.29.mlp.gate_proj"
+        },
+        "local_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_stack",
+          "candidate": "bnb8_cat",
+          "legacy_max_abs_logit_tolerance": 0.001,
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.5,
+            "mean_abs_logit_diff": 0.9040178571428571,
+            "top1_agreement_mean": 0.7142857142857143,
+            "top5_overlap_mean": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.65625,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.0625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 0.859375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.77734375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 1.5,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.6875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.78515625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ]
+        },
+        "local_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "stack_clean_prompts": 7,
+            "cat_clean_prompts": 7,
+            "stack_failure_tags": [],
+            "cat_failure_tags": [],
+            "stack_clean_rate": 1.0,
+            "cat_clean_rate": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "For marathon training, you need a shoe that offers energy return, stability, and durability. Look at models like the Brooks Ghost or Hoka One One Bondi for support and cushioning. But what matters most is your foot type and gait. Do you know if you have flat feet, high arches, or neutral?",
+                "tags": []
+              },
+              "cat": {
+                "text": "For the average runner, a pair of neutral cushioned road running shoes with good arch support is your best bet. Brands like Brooks, Hoka, and Saucony offer solid options that last through long training runs without breaking down on you. Do you know if you're buying for yourself or for someone else?",
+                "tags": []
+              }
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Hydrate, stretch, and refuel with protein within 30 minutes to rebuild muscles and kickstart recovery.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hydrate, stretch, and refuel with protein.",
+                "tags": []
+              }
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "stack": {
+                "text": "Running tomorrow if it's good.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Running tomorrow if the sun shows.",
+                "tags": []
+              }
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "stack": {
+                "text": "For your mileage and neutral stride, Brooks Ghost wins. The Ghost's midsole foam is denser and more responsive than the Pegasus, so your legs feel less fatigued over 40 miles. You're not fighting your shoes; you're letting them carry your pace. Plus, Brooks tends to be slightly more durable on long runs. If you're doing mostly pavement or mixed terrain, Ghost is the engine that keeps you moving without the extra weight.",
+                "tags": []
+              },
+              "cat": {
+                "text": "For a neutral gait, both are solid choices but they serve different needs. The Brooks Ghost is built around the midsole's energy return and heel-to-toe drop, which means it feels like a smoother ride at 40 miles because it keeps your foot more planted and responsive. The Nike Pegasus is a durable, no-frills workhorse that will get you there, but if you want to feel less fatigued and recover better, the Brooks is where the difference shows up over time.",
+                "tags": []
+              }
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "stack": {
+                "text": "A half-marathon is a marathon's first cousin, so you can't skip the middle ground. Run a 5K, then a 10K, and finally a half-marathon race. If you're not running a half-marathon before you're ready for a full one, you're not building up your legs, you're building up your ego. A half-marathon is a race that teaches you what a marathon actually feels like, not a race that proves you can run a mile. You don't need to run the half-marathon at a half-marathon pace, but you do need to run it at a pace ",
+                "tags": []
+              },
+              "cat": {
+                "text": "A beginner's half marathon journey starts with a base of at least eight weekly miles, focusing on consistency and recovery over speed. A steady increase of one to two miles per week over the first three months builds aerobic capacity and mental stamina before tackling longer distances. When you reach twenty-five miles total for the year, add one to two long runs each month, gradually increasing by two to five miles per session until the twenty-six-mile mark is comfortably covered.",
+                "tags": []
+              }
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "stack": {
+                "text": "Hello, I'm a friendly AI assistant. What brings you here today?",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hello.",
+                "tags": []
+              }
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "stack": {
+                "text": "Four weeks from 25 to marathon distance with no injury risk is possible if the stress is controlled and the base is strong. Here's the practical path: Week 1-2, add one long run every other week to build consistency, keep weekly mileage around 30. Week 3-4, add a weekly tempo or hill session to build endurance without volume spikes. Your 25-mile baseline means you can handle this safely while your body adapts. The real marathon prep happens after those four weeks when you actually start running ",
+                "tags": []
+              },
+              "cat": {
+                "text": "You're at 25 miles per week and aiming to hit marathon pace before race day, so you need to build volume without breaking your current fitness or risking injury. The goal is to stretch the mileage up gradually, add a few longer runs, and include one tempo or threshold session that mimics race effort. For the next four weeks, keep the weekly total around 30-35 miles, split across three long runs: one at a conversational pace, one at a slightly faster pace, and one at a harder, sustained effort. Y",
+                "tags": []
+              }
+            }
+          ]
+        },
+        "deploy_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.375,
+            "mean_abs_logit_diff": 1.0658482142857142,
+            "top1_agreement_mean": 0.8571428571428571,
+            "top5_overlap_mean": 0.9428571428571428
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.875,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.0,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.28125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 1.0625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 1.375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.96875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.8984375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            }
+          ],
+          "note": "hf_fp8_proxy_not_vllm"
+        },
+        "deploy_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "note": "hf_fp8_proxy_not_vllm",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "bnb8_cat_clean_prompts": 7,
+            "fp8_cat_clean_prompts": 7,
+            "bnb8_cat_failure_tags": [],
+            "fp8_cat_failure_tags": [],
+            "bnb8_cat_clean_rate": 1.0,
+            "fp8_cat_clean_rate": 1.0,
+            "fp8_only_regression_prompts": 0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "For the average runner, a pair of neutral cushioned road running shoes with good arch support is your best bet. Brands like Brooks, Hoka, and Saucony offer solid options that last through long training runs without breaking down on you. Do you know if you're buying for yourself or for someone else?",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For marathon training, the shoe matters less than the fit. But if you're going to pick one, look for a shoe that balances cushioning and responsiveness so your muscles aren't fighting your heel. Do you know what kind of terrain you're mostly on, pavement or mixed?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "Hydrate, stretch, and refuel with protein.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Listen, the body needs to talk after that burn. First, hydrate like you mean it, not just a sip, because sweat is salty and your cells are crying out for water. Second, throw on those compression socks or sleeves, they're not fashion, they're a hug for your legs that speeds up blood flow back to your heart so you don't wake up sore tomorrow. Third, eat carbs within 30 minutes of stopping, especially if you ran more than an hour, your muscles are begging for fuel before they turn into a brick.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "bnb8_cat": {
+                "text": "Running tomorrow if the sun shows.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Morning run tomorrow, weather permitting.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "bnb8_cat": {
+                "text": "For a neutral gait, both are solid choices but they serve different needs. The Brooks Ghost is built around the midsole's energy return and heel-to-toe drop, which means it feels like a smoother ride at 40 miles because it keeps your foot more planted and responsive. The Nike Pegasus is a durable, no-frills workhorse that will get you there, but if you want to feel less fatigued and recover better, the Brooks is where the difference shows up over time.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For neutral gait and 40 miles, Brooks Ghost wins because it's designed to be a neutral shoe that actually feels neutral without the added cost of a full neutral running shoe. The Pegasus is a decent all-arounder but not specifically tuned for your needs. You're getting more value from Brooks at this mileage.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "bnb8_cat": {
+                "text": "A beginner's half marathon journey starts with a base of at least eight weekly miles, focusing on consistency and recovery over speed. A steady increase of one to two miles per week over the first three months builds aerobic capacity and mental stamina before tackling longer distances. When you reach twenty-five miles total for the year, add one to two long runs each month, gradually increasing by two to five miles per session until the twenty-six-mile mark is comfortably covered.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Start by completing a 5K and then add a 10K, not at the same pace as your half marathon. That gives you confidence before the longer distance. Then build up to 13.1 miles over eight to ten weeks. Run at a conversational pace, not race pace, and walk if you feel fatigued. You need to be able to run for 20 minutes without stopping before you even consider a half marathon.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "bnb8_cat": {
+                "text": "Hello.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hello!",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "bnb8_cat": {
+                "text": "You're at 25 miles per week and aiming to hit marathon pace before race day, so you need to build volume without breaking your current fitness or risking injury. The goal is to stretch the mileage up gradually, add a few longer runs, and include one tempo or threshold session that mimics race effort. For the next four weeks, keep the weekly total around 30-35 miles, split across three long runs: one at a conversational pace, one at a slightly faster pace, and one at a harder, sustained effort. Y",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Four weeks of marathon-specific mileage is where most beginners hit a wall: you've built enough base that more miles feels like a grind, but not enough volume to sustain the stress without injury risk. Is your current weekly routine structured around long runs or just a mix of tempo and recovery?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            }
+          ]
+        },
+        "export_decision": {
+          "saved_adapter": true,
+          "reason": "Delta-W merge correctness passed. Local drift/smoke checks are diagnostics.",
+          "verdict": "keep_cat_for_eval",
+          "deploy_fp8_note": "fp8_logits max=1.3750 top1=0.86; fp8_gen clean=7/7 regressions=0"
+        }
+      }
+    },
+    {
+      "trial": 16,
+      "exit_code": 0,
+      "merge_meta": {
+        "candidate": {
+          "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-16/best_adapter",
+          "cat_adapter_dir": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-16/sft_dpo_cat",
+          "cat_adapter_name": "sft_dpo_cat",
+          "stack_adapters": [
+            "default",
+            "dpo"
+          ],
+          "dpo_weight": 1.0,
+          "train_base": "bnb_8bit",
+          "deploy_base": "fp8_vllm",
+          "deploy_model_path": "/root/saulie/Qwen3-4B-Instruct-2507-FP8",
+          "sft_path": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+          "sft_rank": 16,
+          "dpo_rank": 16,
+          "merged_rank": 32,
+          "sft_alpha": 32,
+          "dpo_alpha": 32,
+          "target_modules": [
+            "gate_proj",
+            "q_proj",
+            "down_proj",
+            "o_proj",
+            "up_proj",
+            "k_proj",
+            "v_proj"
+          ],
+          "peft_type": "LORA",
+          "dpo_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-16/best_adapter/dpo"
+        },
+        "merge_correctness": {
+          "blocking": true,
+          "method": "fp32 raw LoRA Delta-W reconstruction",
+          "pass": true,
+          "tolerance": 1e-05,
+          "max_abs_delta_diff": 1.1641532182693481e-09,
+          "layers_checked": 252,
+          "worst_module": "base_model.model.model.layers.31.mlp.gate_proj"
+        },
+        "local_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_stack",
+          "candidate": "bnb8_cat",
+          "legacy_max_abs_logit_tolerance": 0.001,
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.328125,
+            "mean_abs_logit_diff": 0.8649553571428571,
+            "top1_agreement_mean": 0.8571428571428571,
+            "top5_overlap_mean": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.75,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.90234375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.328125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.765625,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.84375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.58984375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ]
+        },
+        "local_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "stack_clean_prompts": 7,
+            "cat_clean_prompts": 7,
+            "stack_failure_tags": [],
+            "cat_failure_tags": [],
+            "stack_clean_rate": 1.0,
+            "cat_clean_rate": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "For marathon training, look for shoes with a responsive midsole, good cushioning, and a flexible forefoot to support your stride. Do you run on pavement or trails?",
+                "tags": []
+              },
+              "cat": {
+                "text": "For long miles, look for a mid to high cushion shoe with a responsive sole. The more your foot absorbs impact and the less you feel every step, the more you can crank out the volume without soreness. Pair it with good training shoes for shorter runs so you're not swapping out the same pair every day.",
+                "tags": []
+              }
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Cool down, hydrate, stretch. A proper cool down prevents soreness and helps your body transition from high intensity to rest. Stretching the big muscle groups you used and hydration replenishes what you burned.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Easy. Stretch, hydrate, eat protein. Those three things rebuild the muscle fibers you just tore up and prevent the soreness from becoming a full-blown grudge match with your spine.",
+                "tags": []
+              }
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "stack": {
+                "text": "Run tomorrow if skies clear.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Morning run tomorrow if skies clear.",
+                "tags": []
+              }
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "stack": {
+                "text": "For 40 miles of neutral running, Brooks Ghost wins by a mile because it's designed for that exact workload. The Ghost's responsive cushioning absorbs impact better at longer distances, which is your actual priority. Nike Pegasus is more for shorter sessions or beginners because its cushioning compresses faster and doesn't recover as well over 40 miles. Your feet will appreciate the difference more than you think.",
+                "tags": []
+              },
+              "cat": {
+                "text": "For 40 miles of neutral running, Brooks Ghost wins because it's built for comfort at scale. The foam cushioning is denser and more responsive than Pegasus under sustained loads, which means less fatigue in the Achilles and plantar fascia over long sessions. You'll finish those 40 miles feeling like you didn't run them at all, while Pegasus might start to feel like you're carrying extra weight after mile 20. That's the difference between hitting your weekly target and running through it.",
+                "tags": []
+              }
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "stack": {
+                "text": "Beginners should start by running 3-4 times a week at a conversational pace for about 10 minutes, building endurance gradually before adding longer runs. A structured training plan that increases weekly mileage slowly and includes regular tempo and long run sessions is key. The goal is consistent progress without injury, so listen to your body and avoid overdoing it too early.",
+                "tags": []
+              },
+              "cat": {
+                "text": "A half marathon is a marathon's cousin, and cousins need a lot of practice before they're ready to run together. You don't need to do the full thing right away, you just need to do a lot of the half thing over time. Pick a comfortable pace, run it once a week for 8 weeks, then add a week of easy runs before the next race. Keep the pace steady and your body will catch up to the miles. Don't go faster than you can walk when you start, or you'll be sore by week three instead of excited by week eigh",
+                "tags": []
+              }
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "stack": {
+                "text": "Hello! I'm here to help with anything you need, no questions asked. Just say the word and I'm ready to go.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hello, and I'll keep it short because you asked for it.",
+                "tags": []
+              }
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "stack": {
+                "text": "Four weeks from 25 miles to marathon distance is achievable with focused volume and pacing. The key isn't more miles but better distribution across days and terrain. Your current base means you can add without overloading joints or risking injury. What does your typical weekly schedule look like right now: morning runs, evenings, weekend longs?",
+                "tags": []
+              },
+              "cat": {
+                "text": "Four weeks from 25 to about 35-40 miles weekly is a solid, safe ramp. No need to overcomplicate it. Here's what to do: Weeks 1 and 2, keep your current weekly mileage but add one long run each week, slowly increasing its distance by two to three miles per session. Week 3, the same pattern, but add a second easy-paced recovery run at a slightly faster tempo than you've done before. Week 4, the long run increases by another two or three miles, and you add a third run that day as well, but not as l",
+                "tags": []
+              }
+            }
+          ]
+        },
+        "deploy_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.125,
+            "mean_abs_logit_diff": 0.9860491071428571,
+            "top1_agreement_mean": 1.0,
+            "top5_overlap_mean": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.0625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.0546875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.9609375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.96875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.87109375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.859375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ],
+          "note": "hf_fp8_proxy_not_vllm"
+        },
+        "deploy_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "note": "hf_fp8_proxy_not_vllm",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "bnb8_cat_clean_prompts": 7,
+            "fp8_cat_clean_prompts": 7,
+            "bnb8_cat_failure_tags": [],
+            "fp8_cat_failure_tags": [],
+            "bnb8_cat_clean_rate": 1.0,
+            "fp8_cat_clean_rate": 1.0,
+            "fp8_only_regression_prompts": 0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "For long miles, look for a mid to high cushion shoe with a responsive sole. The more your foot absorbs impact and the less you feel every step, the more you can crank out the volume without soreness. Pair it with good training shoes for shorter runs so you're not swapping out the same pair every day.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Marathon training demands support and comfort. Look for a shoe with a responsive midsole, adequate arch support, and a durable outsole. Brands like Brooks, Hoka, or ASICS offer models specifically designed for long-distance training. Do you know what kind of terrain your runs usually involve?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "Easy. Stretch, hydrate, eat protein. Those three things rebuild the muscle fibers you just tore up and prevent the soreness from becoming a full-blown grudge match with your spine.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Cool down, hydrate, and stretch. A post-run cool down helps your body transition from high-intensity effort to rest mode. Hydration replenishes what you lost through sweat. And stretching loosens up tight muscles that can otherwise turn into soreness. You're training hard, so you need to let it do the work of recovery.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "bnb8_cat": {
+                "text": "Morning run tomorrow if skies clear.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Running tomorrow morning, weather permitting.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "bnb8_cat": {
+                "text": "For 40 miles of neutral running, Brooks Ghost wins because it's built for comfort at scale. The foam cushioning is denser and more responsive than Pegasus under sustained loads, which means less fatigue in the Achilles and plantar fascia over long sessions. You'll finish those 40 miles feeling like you didn't run them at all, while Pegasus might start to feel like you're carrying extra weight after mile 20. That's the difference between hitting your weekly target and running through it.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For 40 miles, Brooks Ghost wins hands down because it's built for your stride. The midsole uses a softer, more responsive foam that absorbs impact better over long distances without sacrificing comfort, which matters at volume. Nike Pegasus is durable but firmer, so you're running on pavement more than you're cushioning it. Your joints appreciate the difference after two weeks.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "bnb8_cat": {
+                "text": "A half marathon is a marathon's cousin, and cousins need a lot of practice before they're ready to run together. You don't need to do the full thing right away, you just need to do a lot of the half thing over time. Pick a comfortable pace, run it once a week for 8 weeks, then add a week of easy runs before the next race. Keep the pace steady and your body will catch up to the miles. Don't go faster than you can walk when you start, or you'll be sore by week three instead of excited by week eigh",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Run a 5K at least once a week and build mileage slowly over six weeks, adding about five percent more than the previous week. Pick a route you know well and run it at least once a month as a test of your fitness. When you can comfortably hit 10 miles, start adding in one or two longer runs each week that gradually increase distance until you can do a 13-mile loop without stopping.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "bnb8_cat": {
+                "text": "Hello, and I'll keep it short because you asked for it.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hello, world!",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "bnb8_cat": {
+                "text": "Four weeks from 25 to about 35-40 miles weekly is a solid, safe ramp. No need to overcomplicate it. Here's what to do: Weeks 1 and 2, keep your current weekly mileage but add one long run each week, slowly increasing its distance by two to three miles per session. Week 3, the same pattern, but add a second easy-paced recovery run at a slightly faster tempo than you've done before. Week 4, the long run increases by another two or three miles, and you add a third run that day as well, but not as l",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For 16 weeks of marathon training, four weeks of focused progression is about ramping up volume and building the foundation. You're at 25 miles a week, which is good, but your current mix likely doesn't include long runs or structured tempo work. For weeks five to eight, you need to build mileage, add a long run that pushes a little, and introduce one hard workout per week without overloading. Keep pace consistent, and focus on recovery days. The key in those four weeks is consistency over speed",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            }
+          ]
+        },
+        "export_decision": {
+          "saved_adapter": true,
+          "reason": "Delta-W merge correctness passed. Local drift/smoke checks are diagnostics.",
+          "verdict": "keep_cat_for_eval",
+          "deploy_fp8_note": "fp8_logits max=1.1250 top1=1.00; fp8_gen clean=7/7 regressions=0"
+        }
+      }
+    },
+    {
+      "trial": 8,
+      "exit_code": 0,
+      "merge_meta": {
+        "candidate": {
+          "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-8/best_adapter",
+          "cat_adapter_dir": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-8/sft_dpo_cat",
+          "cat_adapter_name": "sft_dpo_cat",
+          "stack_adapters": [
+            "default",
+            "dpo"
+          ],
+          "dpo_weight": 1.0,
+          "train_base": "bnb_8bit",
+          "deploy_base": "fp8_vllm",
+          "deploy_model_path": "/root/saulie/Qwen3-4B-Instruct-2507-FP8",
+          "sft_path": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+          "sft_rank": 16,
+          "dpo_rank": 24,
+          "merged_rank": 40,
+          "sft_alpha": 32,
+          "dpo_alpha": 48,
+          "target_modules": [
+            "up_proj",
+            "down_proj",
+            "gate_proj",
+            "o_proj",
+            "v_proj",
+            "k_proj",
+            "q_proj"
+          ],
+          "peft_type": "LORA",
+          "dpo_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-8/best_adapter/dpo"
+        },
+        "merge_correctness": {
+          "blocking": true,
+          "method": "fp32 raw LoRA Delta-W reconstruction",
+          "pass": true,
+          "tolerance": 1e-05,
+          "max_abs_delta_diff": 1.3969838619232178e-09,
+          "layers_checked": 252,
+          "worst_module": "base_model.model.model.layers.7.mlp.gate_proj"
+        },
+        "local_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_stack",
+          "candidate": "bnb8_cat",
+          "legacy_max_abs_logit_tolerance": 0.001,
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.15625,
+            "mean_abs_logit_diff": 0.8359375,
+            "top1_agreement_mean": 0.7142857142857143,
+            "top5_overlap_mean": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.625,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.15625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 0.98046875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.65234375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.96875,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.84375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ]
+        },
+        "local_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "stack_clean_prompts": 7,
+            "cat_clean_prompts": 7,
+            "stack_failure_tags": [],
+            "cat_failure_tags": [],
+            "stack_clean_rate": 1.0,
+            "cat_clean_rate": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Marathon training requires support and comfort. Do you run on trails or pavement, and are you a flat-footed runner or someone with a natural arch?",
+                "tags": []
+              },
+              "cat": {
+                "text": "Marathon training is a serious commitment, so the gear should match it. Do you have a preference between lightweight racing spikes and supportive trail boots, or are you just looking for something that won't give out on you when you're already sore?",
+                "tags": []
+              }
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Listen, listen, listen to your body. Three bullet points? You're a smart cookie. Listen to your body, hydrate like it's the last straw of a drought, and stretch like you're auditioning for a movie.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hydrate, stretch, sleep. You're not a machine, you're a human who just ran on pavement.",
+                "tags": []
+              }
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "stack": {
+                "text": "Run tomorrow if skies clear.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Morning run tomorrow if skies clear.",
+                "tags": []
+              }
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "stack": {
+                "text": "The Brooks Ghost is the clear choice here, especially at 40 miles per week. It's engineered for neutral runners to handle that volume without the fatigue or overpronation that can sneak up on you at high mileage. The midsole geometry gives more return on impact, the upper has more breathability in those long runs, and the heel-to-toe drop is more forgiving than the Pegasus. You're not racing against your own mileage limits when the ground keeps moving.",
+                "tags": []
+              },
+              "cat": {
+                "text": "For 40 miles a week, you want to minimize impact and maximize energy return because your body is doing work every single step. The Brooks Ghost has a more responsive energy return system and a softer heel transition than the Pegasus. That's not just a preference; it's about reducing fatigue over 40 miles. Your neutral gait means the fit and responsiveness matter more than the brand's identity. Pick Brooks for the ride that actually feels less punishing at mile 28.",
+                "tags": []
+              }
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "stack": {
+                "text": "Run 3-4 times per week, start at a comfortable pace, and gradually increase weekly mileage by no more than 10 percent. Add one long run each month that builds endurance. Cross-train for strength and recovery, and always listen to your body. A half marathon is a goal, not a sprint.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Start by running 3-4 times a week at a comfortable pace, gradually increasing distance each week by no more than 10 percent. Build aerobic endurance over the first eight weeks before adding any long runs. Add a weekly tempo run and one easy recovery run once you hit five consecutive weeks of consistent mileage. Cross-train for strength and flexibility two or three times a week, and taper your weekly mileage during the final two weeks leading up to race day. A half-marathon training plan designed",
+                "tags": []
+              }
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "stack": {
+                "text": "Hello, friend. Let's keep it simple and let the conversation unfold from here.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hello, world. I'm ready to go wherever you need me.",
+                "tags": []
+              }
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "stack": {
+                "text": "A four-week ramp-up from 25 miles to marathon-pace is a tight squeeze but doable if you're disciplined and avoid injury. You need to build volume, add tempo runs, and hit the race pace before the finish line. Week one: keep your current base of 25 miles, but add one long run at 80% effort that's longer than your current longest run. This teaches your body to handle extended duration without burning out. Week two: increase weekly mileage by 10%, so you hit 27.5 miles, and add a mid-week tempo run",
+                "tags": []
+              },
+              "cat": {
+                "text": "For a 25-mile-per-week baseline and a 16-week window to a marathon, you need to build endurance without overloading before your long run schedule starts. Four weeks of gradual volume increase is safe but might not be enough if your current weekly mileage is below what's typical at that fitness level. What does your current weekly mileage look like?",
+                "tags": []
+              }
+            }
+          ]
+        },
+        "deploy_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.25,
+            "mean_abs_logit_diff": 0.9559151785714286,
+            "top1_agreement_mean": 1.0,
+            "top5_overlap_mean": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.8671875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.96484375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.25,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 1.0625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.859375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.859375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.828125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ],
+          "note": "hf_fp8_proxy_not_vllm"
+        },
+        "deploy_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "note": "hf_fp8_proxy_not_vllm",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "bnb8_cat_clean_prompts": 7,
+            "fp8_cat_clean_prompts": 7,
+            "bnb8_cat_failure_tags": [],
+            "fp8_cat_failure_tags": [],
+            "bnb8_cat_clean_rate": 1.0,
+            "fp8_cat_clean_rate": 1.0,
+            "fp8_only_regression_prompts": 0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "Marathon training is a serious commitment, so the gear should match it. Do you have a preference between lightweight racing spikes and supportive trail boots, or are you just looking for something that won't give out on you when you're already sore?",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For long runs, a mid to high-mileage trainer is the way to go. Look for cushioning that can handle 20-30 miles of pavement and a heel-to-toe drop under 8mm if your feet are wide or flat. Are you already in a brand you trust?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "Hydrate, stretch, sleep. You're not a machine, you're a human who just ran on pavement.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hydrate, stretch, sleep. Easy wins.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "bnb8_cat": {
+                "text": "Morning run tomorrow if skies clear.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Running tomorrow if the forecast looks clear.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "bnb8_cat": {
+                "text": "For 40 miles a week, you want to minimize impact and maximize energy return because your body is doing work every single step. The Brooks Ghost has a more responsive energy return system and a softer heel transition than the Pegasus. That's not just a preference; it's about reducing fatigue over 40 miles. Your neutral gait means the fit and responsiveness matter more than the brand's identity. Pick Brooks for the ride that actually feels less punishing at mile 28.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For that mileage, the Brooks Ghost wins because its more cushioned midsole and softer heel-to-toe transition are better for long-term joint protection. But if you want to save money on the same comfort, look at the Asics Gel-Nimbus. It's got the same cushioning philosophy as the Ghost without the premium price tag.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "bnb8_cat": {
+                "text": "Start by running 3-4 times a week at a comfortable pace, gradually increasing distance each week by no more than 10 percent. Build aerobic endurance over the first eight weeks before adding any long runs. Add a weekly tempo run and one easy recovery run once you hit five consecutive weeks of consistent mileage. Cross-train for strength and flexibility two or three times a week, and taper your weekly mileage during the final two weeks leading up to race day. A half-marathon training plan designed",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "A beginner should start with a consistent 3-5 mile run once or twice a week and gradually increase weekly mileage by no more than 10 percent each week to avoid injury. Add one easy walk per run at first, then transition to running longer distances over several months before adding tempo work. The half marathon distance is not about speed but about building aerobic endurance through regular runs of increasing duration. Most beginners reach that goal within nine to twelve months.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "bnb8_cat": {
+                "text": "Hello, world. I'm ready to go wherever you need me.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hello!",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "bnb8_cat": {
+                "text": "For a 25-mile-per-week baseline and a 16-week window to a marathon, you need to build endurance without overloading before your long run schedule starts. Four weeks of gradual volume increase is safe but might not be enough if your current weekly mileage is below what's typical at that fitness level. What does your current weekly mileage look like?",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "A 16-week marathon prep program is long enough that most people lose motivation before the end, so the first four weeks are critical. What's your current weekly mileage and what does your current training look like?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            }
+          ]
+        },
+        "export_decision": {
+          "saved_adapter": true,
+          "reason": "Delta-W merge correctness passed. Local drift/smoke checks are diagnostics.",
+          "verdict": "keep_cat_for_eval",
+          "deploy_fp8_note": "fp8_logits max=1.2500 top1=1.00; fp8_gen clean=7/7 regressions=0"
+        }
+      }
+    },
+    {
+      "trial": 27,
+      "exit_code": 0,
+      "merge_meta": {
+        "candidate": {
+          "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-27/best_adapter",
+          "cat_adapter_dir": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-27/sft_dpo_cat",
+          "cat_adapter_name": "sft_dpo_cat",
+          "stack_adapters": [
+            "default",
+            "dpo"
+          ],
+          "dpo_weight": 1.0,
+          "train_base": "bnb_8bit",
+          "deploy_base": "fp8_vllm",
+          "deploy_model_path": "/root/saulie/Qwen3-4B-Instruct-2507-FP8",
+          "sft_path": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+          "sft_rank": 16,
+          "dpo_rank": 24,
+          "merged_rank": 40,
+          "sft_alpha": 32,
+          "dpo_alpha": 48,
+          "target_modules": [
+            "v_proj",
+            "k_proj",
+            "up_proj",
+            "down_proj",
+            "gate_proj",
+            "o_proj",
+            "q_proj"
+          ],
+          "peft_type": "LORA",
+          "dpo_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-27/best_adapter/dpo"
+        },
+        "merge_correctness": {
+          "blocking": true,
+          "method": "fp32 raw LoRA Delta-W reconstruction",
+          "pass": true,
+          "tolerance": 1e-05,
+          "max_abs_delta_diff": 1.3969838619232178e-09,
+          "layers_checked": 252,
+          "worst_module": "base_model.model.model.layers.28.mlp.up_proj"
+        },
+        "local_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_stack",
+          "candidate": "bnb8_cat",
+          "legacy_max_abs_logit_tolerance": 0.001,
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.03125,
+            "mean_abs_logit_diff": 0.7081473214285714,
+            "top1_agreement_mean": 1.0,
+            "top5_overlap_mean": 0.9428571428571428
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.703125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.765625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.03125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.5859375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.609375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.63671875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ]
+        },
+        "local_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "stack_clean_prompts": 7,
+            "cat_clean_prompts": 7,
+            "stack_failure_tags": [],
+            "cat_failure_tags": [],
+            "stack_clean_rate": 1.0,
+            "cat_clean_rate": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Marathon training is a beast of a beast, so let's find the right gear. Do you have a history with shoes, or are you jumping in cold?",
+                "tags": []
+              },
+              "cat": {
+                "text": "For long miles, stability is king. Look for a shoe with a wide toe box and a firm heel counter that doesn't collapse under your weight. Brands like Brooks and Hoka have models built specifically for the kind of mileage marathons demand.",
+                "tags": []
+              }
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Hydrate, stretch, and refuel within 30 minutes with protein and carbs.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hydrate, stretch, and eat protein within 30 minutes to replenish glycogen and prevent soreness.",
+                "tags": []
+              }
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "stack": {
+                "text": "Morning run tomorrow, weather permitting.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Running tomorrow if it's clear.",
+                "tags": []
+              }
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "stack": {
+                "text": "For 40 miles a week with neutral biomechanics, the Brooks Ghost is the more objectively durable choice in the long run. The Ghost's midsole design resists compression better than the Pegasus at higher volume, which means less heel wear and fewer microfractures in the cushioning over time. You're not going to be running at 15 mph all day, so the extra lateral stiffness of the Ghost isn't a hindrance either. If you can stretch the budget slightly, the Brooks delivers the consistent response that k",
+                "tags": []
+              },
+              "cat": {
+                "text": "For your mileage and gait, Brooks Ghost is the better choice because it has superior cushioning and energy return, especially in the midfoot and heel, which reduces impact on hard surfaces. The Ghost also has a more responsive ride that helps with longer runs at a consistent pace. While both are good options, the Brooks will feel smoother over 40 miles of pavement, which matters more than the Nike's slightly faster initial response.",
+                "tags": []
+              }
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "stack": {
+                "text": "Start with a consistent base of 20-30 minutes at a conversational pace, gradually adding distance each week. Build mileage slowly and listen to your body, avoiding injuries by incorporating cross-training and rest days. Once you've completed a 10K comfortably, increase your weekly mileage by no more than 10 percent. Add tempo runs and hills for strength and endurance, then taper significantly before the half marathon race day.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Start with a consistent base of steady-paced runs, gradually increasing weekly mileage by no more than 10 percent. Build aerobic capacity before adding long runs, and include cross-training or easy days for recovery. A beginner half-marathon training plan that structures this progression over eight to ten weeks, with a targeted long run increasing to around 12 to 14 miles at week's end, is the most effective path. The goal is not speed but building a sustainable rhythm your body can carry throug",
+                "tags": []
+              }
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "stack": {
+                "text": "Hello!",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hello, friend.",
+                "tags": []
+              }
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "stack": {
+                "text": "Four weeks is tight for a marathon buildup from 25 miles, but possible with smart pacing and consistency. Week 1: Add 3 miles to your current week's mileage. Keep it easy, no tempo runs or hills. Week 2: Add another 3 miles. You're at 31 miles per week. Week 3: Add 4 miles. You're at 35 miles per week. Week 4: Add 4 miles. You're at 39 miles per week. Your week-by-week mileage progression is 25 \u2192 28 \u2192 31 \u2192 35 \u2192 39. The key is to keep every run easy, avoid any fast intervals or hill repeats, and ",
+                "tags": []
+              },
+              "cat": {
+                "text": "Four weeks from 25 to a marathon is a lot of mileage, so the progression has to be conservative. The first week adds 3 miles per week for a total of 32, second week 4 miles (36), third week 5 miles (41), fourth week 6 miles (47). This builds aerobic capacity and leg strength without risking injury on week four. After that, you need to taper, but the four-week plan you're asking about is the foundation.",
+                "tags": []
+              }
+            }
+          ]
+        },
+        "deploy_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.265625,
+            "mean_abs_logit_diff": 1.0357142857142858,
+            "top1_agreement_mean": 0.7142857142857143,
+            "top5_overlap_mean": 0.9142857142857143
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.890625,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.171875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.265625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 1.0,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 1.09375,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 1.03125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.796875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            }
+          ],
+          "note": "hf_fp8_proxy_not_vllm"
+        },
+        "deploy_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "note": "hf_fp8_proxy_not_vllm",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "bnb8_cat_clean_prompts": 7,
+            "fp8_cat_clean_prompts": 7,
+            "bnb8_cat_failure_tags": [],
+            "fp8_cat_failure_tags": [],
+            "bnb8_cat_clean_rate": 1.0,
+            "fp8_cat_clean_rate": 1.0,
+            "fp8_only_regression_prompts": 0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "For long miles, stability is king. Look for a shoe with a wide toe box and a firm heel counter that doesn't collapse under your weight. Brands like Brooks and Hoka have models built specifically for the kind of mileage marathons demand.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For marathon training, you need a shoe that handles impact absorption and long-distance comfort. Look for a mid to high cushioning level with a wide toe box, so your feet aren't pinched at the end of 20 miles. Brands like Brooks Ghost, Hoka One One, and Asics Gel have proven track records in training groups. Pair those with proper running socks and a moisture-wicking base layer underneath. Your legs will thank you when you cross that finish line.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "Hydrate, stretch, and eat protein within 30 minutes to replenish glycogen and prevent soreness.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hydrate with electrolytes, stretch gently before bed, and eat protein within 30 minutes.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "bnb8_cat": {
+                "text": "Running tomorrow if it's clear.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Running tomorrow if the sun comes out.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "bnb8_cat": {
+                "text": "For your mileage and gait, Brooks Ghost is the better choice because it has superior cushioning and energy return, especially in the midfoot and heel, which reduces impact on hard surfaces. The Ghost also has a more responsive ride that helps with longer runs at a consistent pace. While both are good options, the Brooks will feel smoother over 40 miles of pavement, which matters more than the Nike's slightly faster initial response.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For that volume and neutral stride, the Brooks Ghost is the more intentional choice because it's engineered for longer runs with superior cushioning density and energy return. But both shoes can handle your mileage. Which terrain are most of your miles on?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "bnb8_cat": {
+                "text": "Start with a consistent base of steady-paced runs, gradually increasing weekly mileage by no more than 10 percent. Build aerobic capacity before adding long runs, and include cross-training or easy days for recovery. A beginner half-marathon training plan that structures this progression over eight to ten weeks, with a targeted long run increasing to around 12 to 14 miles at week's end, is the most effective path. The goal is not speed but building a sustainable rhythm your body can carry throug",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "A beginner's half marathon journey starts with a solid base of aerobic fitness, which comes from steady-state runs at a comfortable pace. Build mileage gradually over the first 12 weeks, increasing by no more than 10 percent weekly, and incorporate one or two easy long runs each week. As fitness improves, add a few strides or light hills to build strength and endurance. The goal is consistency before speed, so every run counts toward building the cardiovascular stamina needed for 13 miles. Once ",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "bnb8_cat": {
+                "text": "Hello, friend.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hello!",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "bnb8_cat": {
+                "text": "Four weeks from 25 to a marathon is a lot of mileage, so the progression has to be conservative. The first week adds 3 miles per week for a total of 32, second week 4 miles (36), third week 5 miles (41), fourth week 6 miles (47). This builds aerobic capacity and leg strength without risking injury on week four. After that, you need to taper, but the four-week plan you're asking about is the foundation.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Four weeks is the window to build endurance without risking injury, especially if you're going from 25 to 40+ miles weekly. The goal is gradual volume increase with consistent recovery days. Week 1: Add one easy session at 30% of your current weekly total. Week 2: Add another easy session and schedule one long run at 40% of weekly total (about 28-30 miles). Week 3: Add two sessions at 30% each and one longer session at 40%. Week 4: Hit 40-mile weekly total with three sessions at 30% and one at 4",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            }
+          ]
+        },
+        "export_decision": {
+          "saved_adapter": true,
+          "reason": "Delta-W merge correctness passed. Local drift/smoke checks are diagnostics.",
+          "verdict": "keep_cat_for_eval",
+          "deploy_fp8_note": "fp8_logits max=1.2656 top1=0.71; fp8_gen clean=7/7 regressions=0"
+        }
+      }
+    },
+    {
+      "trial": 20,
+      "exit_code": 0,
+      "merge_meta": {
+        "candidate": {
+          "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-20/best_adapter",
+          "cat_adapter_dir": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-20/sft_dpo_cat",
+          "cat_adapter_name": "sft_dpo_cat",
+          "stack_adapters": [
+            "default",
+            "dpo"
+          ],
+          "dpo_weight": 1.0,
+          "train_base": "bnb_8bit",
+          "deploy_base": "fp8_vllm",
+          "deploy_model_path": "/root/saulie/Qwen3-4B-Instruct-2507-FP8",
+          "sft_path": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+          "sft_rank": 16,
+          "dpo_rank": 16,
+          "merged_rank": 32,
+          "sft_alpha": 32,
+          "dpo_alpha": 32,
+          "target_modules": [
+            "up_proj",
+            "k_proj",
+            "v_proj",
+            "down_proj",
+            "q_proj",
+            "o_proj",
+            "gate_proj"
+          ],
+          "peft_type": "LORA",
+          "dpo_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-20/best_adapter/dpo"
+        },
+        "merge_correctness": {
+          "blocking": true,
+          "method": "fp32 raw LoRA Delta-W reconstruction",
+          "pass": true,
+          "tolerance": 1e-05,
+          "max_abs_delta_diff": 9.313225746154785e-10,
+          "layers_checked": 252,
+          "worst_module": "base_model.model.model.layers.5.mlp.gate_proj"
+        },
+        "local_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_stack",
+          "candidate": "bnb8_cat",
+          "legacy_max_abs_logit_tolerance": 0.001,
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.1875,
+            "mean_abs_logit_diff": 0.77734375,
+            "top1_agreement_mean": 0.8571428571428571,
+            "top5_overlap_mean": 0.9714285714285714
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.78125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.75,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.1875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.578125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.7734375,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.68359375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.6875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ]
+        },
+        "local_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "stack_clean_prompts": 6,
+            "cat_clean_prompts": 7,
+            "stack_failure_tags": [
+              "looping"
+            ],
+            "cat_failure_tags": [],
+            "stack_clean_rate": 0.8571428571428571,
+            "cat_clean_rate": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "For marathon training, look for a shoe that balances cushioning and responsiveness. If you're doing a lot of hills or have flat feet, consider a shoe with more arch support. Are you training on pavement, trails, or mixed surfaces?",
+                "tags": []
+              },
+              "cat": {
+                "text": "For marathon training, look for a shoe with good energy return and stability. A neutral cushioned trainer works best for most people. What's your current mileage and terrain like?",
+                "tags": []
+              }
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Easy to follow, hard to forget: hydrate with electrolytes within 10 minutes of stopping, stretch every major muscle group for five minutes, and eat a small carb-rich snack within 30 minutes to kickstart glycogen replenishment.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Easy. Stretch out the big guns, eat up the protein, and let your legs cool down slowly.",
+                "tags": []
+              }
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "stack": {
+                "text": "Running tomorrow if the sun shines.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Running tomorrow if the forecast looks clear.",
+                "tags": []
+              }
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "stack": {
+                "text": "For your weekly volume, the Brooks Ghost wins because it's built to handle the fatigue of 40 miles. The midsole uses a denser, more durable foam that doesn't compress as quickly under heavy loads. You'll get better impact absorption over time and less heel wear than a Pegasus at this mileage. The Pegasus is more about feel and versatility, but the Ghost is engineered specifically for the kind of weekly mileage you're describing.",
+                "tags": []
+              },
+              "cat": {
+                "text": "For consistent mileage, Brooks Ghost wins because it's designed specifically for runners who cover long distances. The responsive midsole cushions impact better than Nike's standard foam, and the stability is built-in so your feet stay on track without extra adjustments. You'll feel less fatigue after 40 miles, and you won't have to swap shoes halfway through the week.",
+                "tags": []
+              }
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "stack": {
+                "text": "Run at least 3-4 times per week, gradually increasing mileage by no more than 10 percent weekly. Build a base of endurance before adding speed or long runs. Join a running group or find a training plan online for structure and accountability. Keep your shoes, socks, and clothes the same for consistency so your body adapts to the gear before hitting a long run.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Start with a consistent 5K or 10K training plan that gradually increases weekly mileage by no more than 10 percent, building aerobic endurance before adding long runs. Incorporate easy-paced runs, strides, and one or two weekly tempo sessions to condition the legs. By months three to four, add a weekly 12- to 16-mile long run as the foundation for half-marathon distance. Listen to your body, allow recovery days, and taper the week before race day.",
+                "tags": []
+              }
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "stack": {
+                "text": "Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello! (pause) Hello",
+                "tags": [
+                  "looping",
+                  "looping"
+                ]
+              },
+              "cat": {
+                "text": "Hello! (No more)",
+                "tags": []
+              }
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "stack": {
+                "text": "A 16-week marathon build is ambitious for a beginner, especially given your current volume and goals. Let's be honest: 25 miles per week with no taper or recovery plan is a recipe for injury. Do you have access to a trainer or running group?",
+                "tags": []
+              },
+              "cat": {
+                "text": "Four weeks to go from 25 miles to marathon-ready is a tight window but doable with focus on quality over quantity. Your current base means you can add mileage gradually without risking injury. For weeks three through four, prioritize long runs and taper properly. Week three should be a long run of about 18-20 miles at a comfortable, conversational pace, then a steady build into week four with a long run around 22-24 miles, followed by a two-day taper leading into race day. The rest of your weekl",
+                "tags": []
+              }
+            }
+          ]
+        },
+        "deploy_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.375,
+            "mean_abs_logit_diff": 1.0133928571428572,
+            "top1_agreement_mean": 0.8571428571428571,
+            "top5_overlap_mean": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.9609375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.03125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.8515625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.96875,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.90625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 1.0,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ],
+          "note": "hf_fp8_proxy_not_vllm"
+        },
+        "deploy_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "note": "hf_fp8_proxy_not_vllm",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "bnb8_cat_clean_prompts": 7,
+            "fp8_cat_clean_prompts": 7,
+            "bnb8_cat_failure_tags": [],
+            "fp8_cat_failure_tags": [],
+            "bnb8_cat_clean_rate": 1.0,
+            "fp8_cat_clean_rate": 1.0,
+            "fp8_only_regression_prompts": 0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "For marathon training, look for a shoe with good energy return and stability. A neutral cushioned trainer works best for most people. What's your current mileage and terrain like?",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Marathon training is brutal, and the right shoe can mean the difference between a great race and a bad one. What's your mileage on average during training, and are you running mostly on pavement or mixed surfaces?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "Easy. Stretch out the big guns, eat up the protein, and let your legs cool down slowly.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Easy: hydrate immediately, stretch out the big muscles, and eat a carb-and-protein combo within 30 minutes.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "bnb8_cat": {
+                "text": "Running tomorrow if the forecast looks clear.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Running tomorrow if it's sunny.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "bnb8_cat": {
+                "text": "For consistent mileage, Brooks Ghost wins because it's designed specifically for runners who cover long distances. The responsive midsole cushions impact better than Nike's standard foam, and the stability is built-in so your feet stay on track without extra adjustments. You'll feel less fatigue after 40 miles, and you won't have to swap shoes halfway through the week.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For consistent mileage, Brooks offers better cushioning and energy return that can carry more volume without fatigue. The Ghost is built for the long haul.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "bnb8_cat": {
+                "text": "Start with a consistent 5K or 10K training plan that gradually increases weekly mileage by no more than 10 percent, building aerobic endurance before adding long runs. Incorporate easy-paced runs, strides, and one or two weekly tempo sessions to condition the legs. By months three to four, add a weekly 12- to 16-mile long run as the foundation for half-marathon distance. Listen to your body, allow recovery days, and taper the week before race day.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Start with a consistent weekly mileage base, gradually increasing by about 10 percent per week. A beginner half-marathon training plan usually involves building endurance over 16 to 20 weeks, incorporating easy runs, tempo runs, and long runs that increase in distance each week. The key is consistency, not speed. A pair of well-fitting running shoes is essential, as are basic running socks.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "bnb8_cat": {
+                "text": "Hello! (No more)",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hello, and done.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "bnb8_cat": {
+                "text": "Four weeks to go from 25 miles to marathon-ready is a tight window but doable with focus on quality over quantity. Your current base means you can add mileage gradually without risking injury. For weeks three through four, prioritize long runs and taper properly. Week three should be a long run of about 18-20 miles at a comfortable, conversational pace, then a steady build into week four with a long run around 22-24 miles, followed by a two-day taper leading into race day. The rest of your weekl",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "You're already doing 25 miles a week and you're aiming to do that plus longer runs in the final weeks of training. A good plan focuses on adding distance gradually, not speed or intensity. You're building aerobic capacity, so the focus is on volume with recovery built in. A typical progression for a beginner-to-intermediate runner is to increase weekly mileage by about 10 percent each week. You'll want to add one long run each week where you extend your longest run by about 1 to 2 miles, and kee",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            }
+          ]
+        },
+        "export_decision": {
+          "saved_adapter": true,
+          "reason": "Delta-W merge correctness passed. Local drift/smoke checks are diagnostics.",
+          "verdict": "keep_cat_for_eval",
+          "deploy_fp8_note": "fp8_logits max=1.3750 top1=0.86; fp8_gen clean=7/7 regressions=0"
+        }
+      }
+    },
+    {
+      "trial": 4,
+      "exit_code": 0,
+      "merge_meta": {
+        "candidate": {
+          "dpo_adapter": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-4/best_adapter",
+          "cat_adapter_dir": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-4/sft_dpo_cat",
+          "cat_adapter_name": "sft_dpo_cat",
+          "stack_adapters": [
+            "default",
+            "dpo"
+          ],
+          "dpo_weight": 1.0,
+          "train_base": "bnb_8bit",
+          "deploy_base": "fp8_vllm",
+          "deploy_model_path": "/root/saulie/Qwen3-4B-Instruct-2507-FP8",
+          "sft_path": "/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter",
+          "sft_rank": 16,
+          "dpo_rank": 16,
+          "merged_rank": 32,
+          "sft_alpha": 32,
+          "dpo_alpha": 32,
+          "target_modules": [
+            "v_proj",
+            "k_proj",
+            "down_proj",
+            "q_proj",
+            "gate_proj",
+            "up_proj",
+            "o_proj"
+          ],
+          "peft_type": "LORA",
+          "dpo_path": "/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-4/best_adapter/dpo"
+        },
+        "merge_correctness": {
+          "blocking": true,
+          "method": "fp32 raw LoRA Delta-W reconstruction",
+          "pass": true,
+          "tolerance": 1e-05,
+          "max_abs_delta_diff": 1.3969838619232178e-09,
+          "layers_checked": 252,
+          "worst_module": "base_model.model.model.layers.30.mlp.gate_proj"
+        },
+        "local_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_stack",
+          "candidate": "bnb8_cat",
+          "legacy_max_abs_logit_tolerance": 0.001,
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.0,
+            "mean_abs_logit_diff": 0.8883928571428571,
+            "top1_agreement_mean": 0.8571428571428571,
+            "top5_overlap_mean": 0.9428571428571428
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.875,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.0,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.0,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.84375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 0.875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.6875,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 0.9375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            }
+          ]
+        },
+        "local_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "stack_clean_prompts": 7,
+            "cat_clean_prompts": 7,
+            "stack_failure_tags": [],
+            "cat_failure_tags": [],
+            "stack_clean_rate": 1.0,
+            "cat_clean_rate": 1.0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Marathon training is a serious commitment, and the right pair of running shoes can make or break your experience. Are you looking at a new pair for the first time, or are you trying to find a replacement for a pair that's not holding up anymore?",
+                "tags": []
+              },
+              "cat": {
+                "text": "For a long-distance build-up, a neutral, lightweight cushioned shoe like a Brooks Ghost or Hoka One One Bondi is the smart play. They handle the mileage without adding extra weight to your legs. What's your current mileage and pace doing, roughly?",
+                "tags": []
+              }
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "stack": {
+                "text": "Listen to your body, hydrate, stretch. A little care goes a long way.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hydrate, stretch, and refuel with carbs and protein within 30 minutes.",
+                "tags": []
+              }
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "stack": {
+                "text": "Running tomorrow if the sun comes out.",
+                "tags": []
+              },
+              "cat": {
+                "text": "Running tomorrow if it's good.",
+                "tags": []
+              }
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "stack": {
+                "text": "For 40 miles of neutral running, the Brooks Ghost wins hands down because its more responsive energy return and targeted cushioning reduce impact stress better than the Pegasus at this volume. But if you want to run more than 50 miles a week or have stiff calves, the Pegasus is actually a better fit.",
+                "tags": []
+              },
+              "cat": {
+                "text": "For 40 miles a week, Brooks Ghost wins because its targeted heel-to-toe cushioning reduces impact and fatigue better than the Pegasus's more uniform midsole, especially on longer runs. Your neutral gait means both shoes will work, but Brooks prioritizes comfort over durability in your stride.",
+                "tags": []
+              }
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "stack": {
+                "text": "Start with a solid aerobic base, build mileage gradually over months, and run at least one long run per week. Begin with shorter distances and slowly increase by 10% each week until you hit the half-marathon mark. Mix in speed work, cross-training, and recovery runs to prevent injury. Listen to your body, rest when needed, and track progress so you know what's working.",
+                "tags": []
+              },
+              "cat": {
+                "text": "A beginner should aim for a 6- to 8-week base-building period with five runs per week, starting with a mix of easy-paced runs and one longer session each week. Build mileage gradually, not faster than 10 percent weekly increases, and add strength training twice a week to prevent injury. After that foundation, transition into a 4- to 6-week taper before the half marathon, keeping runs steady but reducing volume slightly as race day approaches.",
+                "tags": []
+              }
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "stack": {
+                "text": "Hello, universe!",
+                "tags": []
+              },
+              "cat": {
+                "text": "Hello!",
+                "tags": []
+              }
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "stack": {
+                "text": "Four weeks from 25 to 35 miles is a solid goal with room for error. Keep it simple: Week one add two miles to your current weekly total, so you're at 27. Week two add two more, bringing it to 29. Week three add two again, hitting 31. Week four hit 33 and cap the week at 35. This progression respects your current capacity while building volume gradually. No fancy intervals, no pushing hard, just adding distance each week until you reach your target. The key is consistency over intensity.",
+                "tags": []
+              },
+              "cat": {
+                "text": "You're at a good base and you want to stay safe through this transition. Four weeks is short but manageable if you do the work right. A simple weekly structure: keep your base of 25 miles, add one long run each week that's 3-4 miles longer than the week before, and keep all other runs at or below current pace. That's the core of the plan. But you also need to talk to your body. Do you have any soreness, or are your legs holding up well?",
+                "tags": []
+              }
+            }
+          ]
+        },
+        "deploy_forward_drift": {
+          "blocking": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "summary": {
+            "prompts": 7,
+            "max_abs_logit_diff": 1.125,
+            "mean_abs_logit_diff": 0.9988839285714286,
+            "top1_agreement_mean": 0.8571428571428571,
+            "top5_overlap_mean": 0.9428571428571428
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 1.09375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "max_abs_logit_diff": 0.9375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "max_abs_logit_diff": 1.125,
+              "top1_agreement": 1.0,
+              "top5_overlap": 0.8
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "max_abs_logit_diff": 0.8984375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "max_abs_logit_diff": 1.078125,
+              "top1_agreement": 0.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "max_abs_logit_diff": 0.84375,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "max_abs_logit_diff": 1.015625,
+              "top1_agreement": 1.0,
+              "top5_overlap": 1.0
+            }
+          ],
+          "note": "hf_fp8_proxy_not_vllm"
+        },
+        "deploy_behavior_smoke": {
+          "blocking_for_export": false,
+          "status": "measured",
+          "reference": "bnb8_cat",
+          "candidate": "fp8_cat",
+          "note": "hf_fp8_proxy_not_vllm",
+          "sampling": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.05,
+            "max_new_tokens": 256
+          },
+          "summary": {
+            "prompts": 7,
+            "bnb8_cat_clean_prompts": 7,
+            "fp8_cat_clean_prompts": 7,
+            "bnb8_cat_failure_tags": [],
+            "fp8_cat_failure_tags": [],
+            "bnb8_cat_clean_rate": 1.0,
+            "fp8_cat_clean_rate": 1.0,
+            "fp8_only_regression_prompts": 0
+          },
+          "per_prompt": [
+            {
+              "id": "chat_01",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "For a long-distance build-up, a neutral, lightweight cushioned shoe like a Brooks Ghost or Hoka One One Bondi is the smart play. They handle the mileage without adding extra weight to your legs. What's your current mileage and pace doing, roughly?",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Marathon training demands durability and comfort. If you're serious, a pair of Nike Pegasus or Brooks Ghosts is a safe bet for the miles. But the real question is: how far are you running each week before the race?",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "chat_02",
+              "category": "normal_english_chat",
+              "bnb8_cat": {
+                "text": "Hydrate, stretch, and refuel with carbs and protein within 30 minutes.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hydrate, stretch, and eat protein within 30 minutes.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "instr_01",
+              "category": "short_instruction",
+              "bnb8_cat": {
+                "text": "Running tomorrow if it's good.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Running tomorrow if it's clear.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "task_01",
+              "category": "task_style",
+              "bnb8_cat": {
+                "text": "For 40 miles a week, Brooks Ghost wins because its targeted heel-to-toe cushioning reduces impact and fatigue better than the Pegasus's more uniform midsole, especially on longer runs. Your neutral gait means both shoes will work, but Brooks prioritizes comfort over durability in your stride.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For your mileage, Brooks is the better neutral gait choice. The Ghost is designed to be a more comfortable shoe for longer runs because it has a more flexible heel and a softer midsole than the Pegasus. Your 40-mile weekly load favors the softer feel of Brooks over the slightly firmer feel of the Pegasus.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "style_01",
+              "category": "style_sensitive",
+              "bnb8_cat": {
+                "text": "A beginner should aim for a 6- to 8-week base-building period with five runs per week, starting with a mix of easy-paced runs and one longer session each week. Build mileage gradually, not faster than 10 percent weekly increases, and add strength training twice a week to prevent injury. After that foundation, transition into a 4- to 6-week taper before the half marathon, keeping runs steady but reducing volume slightly as race day approaches.",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Start slow and steady, building mileage gradually over months rather than pushing hard early. Run at least three times a week, mix in long runs that increase weekly, and never exceed 20% more than the previous week's distance. Cross-training and strength work help prevent injury. Join a group or find a training plan online for structure. Most beginners complete a half marathon within 12 to 16 weeks of consistent, paced effort.",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "collapse_01",
+              "category": "collapse_probe",
+              "bnb8_cat": {
+                "text": "Hello!",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "Hello!",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            },
+            {
+              "id": "long_01",
+              "category": "longish_prompt",
+              "bnb8_cat": {
+                "text": "You're at a good base and you want to stay safe through this transition. Four weeks is short but manageable if you do the work right. A simple weekly structure: keep your base of 25 miles, add one long run each week that's 3-4 miles longer than the week before, and keep all other runs at or below current pace. That's the core of the plan. But you also need to talk to your body. Do you have any soreness, or are your legs holding up well?",
+                "tags": []
+              },
+              "fp8_cat": {
+                "text": "For your first marathon prep, four weeks of consistent, smart increases are more effective than a frantic final spike. Your current base is good, but you need to build volume and tempo gradually. Here's how to structure those weeks without risking injury: Week 1, add one long run at easy pace (target 30 miles), keep your other runs steady. Week 2, add another long run (31 miles), keep one tempo session if you feel ready, otherwise just easy runs. Week 3, hit 32 miles with a light pace jog after ",
+                "tags": []
+              },
+              "fp8_only_regression_tags": []
+            }
+          ]
+        },
+        "export_decision": {
+          "saved_adapter": true,
+          "reason": "Delta-W merge correctness passed. Local drift/smoke checks are diagnostics.",
+          "verdict": "keep_cat_for_eval",
+          "deploy_fp8_note": "fp8_logits max=1.1250 top1=0.86; fp8_gen clean=7/7 regressions=0"
+        }
+      }
+    }
+  ]
+}

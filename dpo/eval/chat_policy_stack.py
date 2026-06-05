@@ -311,7 +311,7 @@ Cat-merged SFT+DPO (one adapter, after merge_sft_dpo_lora.py):
     decode_note = args.decode
     if args.decode == "sample":
         decode_note = (
-            f"sample temp={args.temperature}} top_p={args.top_p} top_k={args.top_k} "
+            f"sample temp={args.temperature} top_p={args.top_p} top_k={args.top_k} "
             f"rep_penalty={args.repetition_penalty}"
         )
     print(

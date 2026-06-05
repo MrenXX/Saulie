@@ -8,9 +8,9 @@ from typing import Literal
 import torch
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig
 
-from dpo.train.paths import MODEL_ID_BF16, MODEL_ID_SFT_MERGED_BF16
+from dpo.train.paths import MODEL_ID_BF16, MODEL_ID_FP8, MODEL_ID_SFT_MERGED_BF16
 
-BaseKind = Literal["bnb", "bf16"]
+BaseKind = Literal["bnb", "bf16", "fp8"]
 
 
 def default_device_map() -> str | dict:
@@ -34,11 +34,29 @@ def load_bnb_8bit_base(*, device_map: str | dict | None = None) -> AutoModelForC
     )
 
 
+def load_fp8_base(*, device_map: str | dict | None = None) -> AutoModelForCausalLM:
+    """
+    HF FP8 checkpoint (same weights path as vLLM deploy).
+
+    Uses bfloat16 on load so base + PEFT LoRA share one dtype (HF may dequantize FP8
+    on GPUs with compute capability < 8.9; mixed bf16/fp16 LoRA forwards fail).
+    """
+    if device_map is None:
+        device_map = default_device_map()
+    return AutoModelForCausalLM.from_pretrained(
+        str(MODEL_ID_FP8),
+        torch_dtype=torch.bfloat16,
+        device_map=device_map,
+    )
+
+
 def load_base(kind: BaseKind = "bnb", *, device_map: str | dict | None = None) -> AutoModelForCausalLM:
     if kind == "bnb":
         return load_bnb_8bit_base(device_map=device_map)
     if kind == "bf16":
         return load_bf16_base(device_map=device_map)
+    if kind == "fp8":
+        return load_fp8_base(device_map=device_map)
     raise ValueError(f"unknown base kind: {kind!r}")
 
 
