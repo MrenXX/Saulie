@@ -1,0 +1,1411 @@
+{
+  "collection": "amazon_products_v2",
+  "rrf": [
+    {
+      "query": "wireless earbuds noise cancelling",
+      "category": null,
+      "hits": [
+        {
+          "score": 0.7,
+          "name": "HISOOS Wireless Earbuds Bluetooth Active Noise Cancelling Headphone Wireless Ear Buds in-Ear Headphones with Charging Case IPX7 Waterproof Earphones for iPhone Android, Gifts for Her (Pink)",
+          "actual_price": 17.99,
+          "discount_price": 17.99,
+          "ratings": 4.1,
+          "no_of_ratings": 1431,
+          "parent_asin": "B0BSDT6YYJ",
+          "link": "https://www.amazon.com/dp/B0BSDT6YYJ",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.5714,
+          "name": "Tribit Active Noise Cancelling Earbuds with CVC8.0 Mics,Wireless Bluetooth Earbuds Deep Bass Call Noise Reduction Comfort Fit,30H Playtime,Fast USB-C Charging for Travel/Work",
+          "actual_price": 39.99,
+          "discount_price": 39.99,
+          "ratings": 4.3,
+          "no_of_ratings": 630,
+          "parent_asin": "B08C9F3LFS",
+          "link": "https://www.amazon.com/dp/B08C9F3LFS",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.4583,
+          "name": "EarFun Air S Noise Cancelling Wireless Earbuds, Qualcomm\u00ae aptX\u2122, 4 Mics CVC 8.0 Call, Multipoint Connection, Wireless Charging, 10mm Wool Composite Drivers, App with Custom EQ, Game Mode, Black",
+          "actual_price": 59.99,
+          "discount_price": 59.99,
+          "ratings": 4.2,
+          "no_of_ratings": 977,
+          "parent_asin": "B0BQJ77CTM",
+          "link": "https://www.amazon.com/dp/B0BQJ77CTM",
+          "main_category": "All Electronics"
+        }
+      ]
+    },
+    {
+      "query": "bluetooth speaker portable waterproof",
+      "category": null,
+      "hits": [
+        {
+          "score": 0.5,
+          "name": "JBL GO2 - Waterproof Ultra Portable Bluetooth Speaker - Cinnamon",
+          "actual_price": 36.4,
+          "discount_price": 36.4,
+          "ratings": 4.7,
+          "no_of_ratings": 4361,
+          "parent_asin": "B0B6B2LQ2H",
+          "link": "https://www.amazon.com/dp/B0B6B2LQ2H",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.5,
+          "name": "Altec Lansing Soundbucket XL - Waterproof Bluetooth Speaker with Customizable LED Lights, Qi Wireless Charging, 20 Hours Playtime & 100 Foot Range",
+          "actual_price": 139.99,
+          "discount_price": 139.99,
+          "ratings": 4.1,
+          "no_of_ratings": 1093,
+          "parent_asin": "B0B3GNJS9L",
+          "link": "https://www.amazon.com/dp/B0B3GNJS9L",
+          "main_category": "Home Audio & Theater"
+        },
+        {
+          "score": 0.3333,
+          "name": "Monster Blaster 3.0 Portable Speaker, 120W Wireless Bluetooth Speaker, IPX5 Rechargeable Waterproof Bluetooth Speaker with USB Charge Out & Aux Input",
+          "actual_price": 224.99,
+          "discount_price": 224.99,
+          "ratings": 4.5,
+          "no_of_ratings": 632,
+          "parent_asin": "B0B32WMYZB",
+          "link": "https://www.amazon.com/dp/B0B32WMYZB",
+          "main_category": "Home Audio & Theater"
+        }
+      ]
+    },
+    {
+      "query": "gaming laptop RTX",
+      "category": null,
+      "hits": [
+        {
+          "score": 0.5625,
+          "name": "Lenovo - Legion 5 - Gaming Laptop - AMD Ryzen 7 5800H - 16GB RAM - 512GB Storage - NVIDIA GeForce RTX 3050Ti - 15.6\" FHD Display - Windows 11 Home - Phantom Blue",
+          "actual_price": 1199.0,
+          "discount_price": 1199.0,
+          "ratings": 4.6,
+          "no_of_ratings": 619,
+          "parent_asin": "B0BTTZFKYF",
+          "link": "https://www.amazon.com/dp/B0BTTZFKYF",
+          "main_category": "Computers"
+        },
+        {
+          "score": 0.5,
+          "name": "Razer Blade 15 Base Gaming Laptop 2020: Intel Core i7-10750H 6-Core, NVIDIA GeForce RTX 2070 Max-Q,15.6\" 4K OLED,16GB RAM,512GB SSD, CNC Aluminum,Chroma RGB,Thunderbolt 3,Creator Ready, Mercury White",
+          "actual_price": 2299.99,
+          "discount_price": 2299.99,
+          "ratings": 4.4,
+          "no_of_ratings": 1441,
+          "parent_asin": "B08YCZ328B",
+          "link": "https://www.amazon.com/dp/B08YCZ328B",
+          "main_category": "Computers"
+        },
+        {
+          "score": 0.4333,
+          "name": "Lenovo Legion 5 Gaming Laptop, 15.6\" FHD Display, AMD Ryzen 7 5800H, 16GB RAM, 512GB Storage, NVIDIA GeForce RTX 3050Ti, Windows 10H, Phantom Blue",
+          "actual_price": 999.0,
+          "discount_price": 999.0,
+          "ratings": 4.5,
+          "no_of_ratings": 1388,
+          "parent_asin": "B09YVTK8LN",
+          "link": "https://www.amazon.com/dp/B09YVTK8LN",
+          "main_category": "Computers"
+        }
+      ]
+    },
+    {
+      "query": "32 inch smart TV 4K",
+      "category": "All Electronics",
+      "hits": [
+        {
+          "score": 0.625,
+          "name": "SAMSUNG Electronics UN32M4500A 32-Inch 720p Smart LED TV (2017 Model)",
+          "actual_price": 187.9,
+          "discount_price": 187.9,
+          "ratings": 4.6,
+          "no_of_ratings": 1975,
+          "parent_asin": "B074KRM3H4",
+          "link": "https://www.amazon.com/dp/B074KRM3H4",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.5833,
+          "name": "TCL 32S3800 32-Inch 720p Roku Smart LED TV (2015 Model)",
+          "actual_price": 250.0,
+          "discount_price": 250.0,
+          "ratings": 4.4,
+          "no_of_ratings": 8096,
+          "parent_asin": "B00X3TUHWG",
+          "link": "https://www.amazon.com/dp/B00X3TUHWG",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.5,
+          "name": "SAMSUNG 98-Inch Class Neo QLED 4K UHD QN90A Series Mini LED Quantum HDR 64x, Object Tracking Sound+, Ultra Viewing Angle, Smart TV with Alexa Built-In (QN98QN90AAFXZA, 2021 Model), Titan Black",
+          "actual_price": 9997.99,
+          "discount_price": 9997.99,
+          "ratings": 4.5,
+          "no_of_ratings": 1797,
+          "parent_asin": "B0973TPHH2",
+          "link": "https://www.amazon.com/dp/B0973TPHH2",
+          "main_category": "All Electronics"
+        }
+      ]
+    },
+    {
+      "query": "men's running shoes lightweight",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 0.5526,
+          "name": "WXQ Men's Running Shoes Comfortable Lightweight Breathable Walking Shoes Mesh Workout Casual Sports Shoes",
+          "actual_price": 32.99,
+          "discount_price": 32.99,
+          "ratings": 4.3,
+          "no_of_ratings": 14292,
+          "parent_asin": "B074X4WZ9M",
+          "link": "https://www.amazon.com/dp/B074X4WZ9M",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.5,
+          "name": "adidas Men's Duramo Sl 2.0 Running Shoe",
+          "actual_price": 46.8,
+          "discount_price": 46.8,
+          "ratings": 4.5,
+          "no_of_ratings": 1529,
+          "parent_asin": "B0B9QMSBWN",
+          "link": "https://www.amazon.com/dp/B0B9QMSBWN",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.3333,
+          "name": "TIOSEBON Men's Casual Comfortable Soft Walking Shoes Knit Running Slip-on Lightweight Sneakers",
+          "actual_price": 29.99,
+          "discount_price": 29.99,
+          "ratings": 4.4,
+          "no_of_ratings": 4164,
+          "parent_asin": "B079HTF5SN",
+          "link": "https://www.amazon.com/dp/B079HTF5SN",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "women's winter coat warm",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 0.5435,
+          "name": "ICEIVY Womens Wool Socks 5 Pairs Warm Wool Cotton Socks Thick Knit Vintage Casual Winter Socks",
+          "actual_price": 19.99,
+          "discount_price": 19.99,
+          "ratings": 4.7,
+          "no_of_ratings": 1356,
+          "parent_asin": "B0BFCS8N8Z",
+          "link": "https://www.amazon.com/dp/B0BFCS8N8Z",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.5,
+          "name": "Hanes Men's Boxer Briefs with Comfort Flex Waistband, Multipack",
+          "actual_price": 43.16,
+          "discount_price": 43.16,
+          "ratings": 4.6,
+          "no_of_ratings": 4326,
+          "parent_asin": "B09RY33Z6Y",
+          "link": "https://www.amazon.com/dp/B09RY33Z6Y",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.3333,
+          "name": "besky Womens Socks Winter Wool Socks Cozy Knit Warm Winter Socks for mountain climbing, Skiing and Christmas Gifts",
+          "actual_price": 7.99,
+          "discount_price": 7.99,
+          "ratings": 4.5,
+          "no_of_ratings": 2073,
+          "parent_asin": "B0BMV9MKBQ",
+          "link": "https://www.amazon.com/dp/B0BMV9MKBQ",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "cotton bed sheets king size",
+      "category": "Amazon Home",
+      "hits": [
+        {
+          "score": 0.6,
+          "name": "California Design Den Luxury 100% Cotton Sateen Buttery Soft 800 Thread Count Bed Sheet Set, Beats Fake Egyptian Claim, Durable Deep Pocket Fitted Sheet (King, Pastel Blue - Steel)",
+          "actual_price": 99.99,
+          "discount_price": 99.99,
+          "ratings": 4.6,
+          "no_of_ratings": 8819,
+          "parent_asin": "B09P51VL9Z",
+          "link": "https://www.amazon.com/dp/B09P51VL9Z",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 0.5,
+          "name": "Amazon Basics Cotton Jersey Bed Sheet Set, King, Oatmeal",
+          "actual_price": 51.62,
+          "discount_price": 51.62,
+          "ratings": 4.7,
+          "no_of_ratings": 33814,
+          "parent_asin": "B01FVQY7LA",
+          "link": "https://www.amazon.com/dp/B01FVQY7LA",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 0.3333,
+          "name": "Morgan Home Cotton Turkish Flannel Sheets 100% Brushed Cotton for Supreme Comfort - Deep Pockets - Warm and Cozy, Great for All Seasons (Light Blue, Queen)",
+          "actual_price": 37.99,
+          "discount_price": 37.99,
+          "ratings": 4.3,
+          "no_of_ratings": 4560,
+          "parent_asin": "B08CBP8SC1",
+          "link": "https://www.amazon.com/dp/B08CBP8SC1",
+          "main_category": "Amazon Home"
+        }
+      ]
+    },
+    {
+      "query": "stainless steel cookware set",
+      "category": "Amazon Home",
+      "hits": [
+        {
+          "score": 0.5217,
+          "name": "40-Piece Silverware Set, E-far Stainless Steel Flatware Set Service for 8, Modern Tableware Cutlery Set for Home and Restaurant, Square Edge & Mirror Finish, Dishwasher Safe",
+          "actual_price": 30.99,
+          "discount_price": 30.99,
+          "ratings": 4.6,
+          "no_of_ratings": 3302,
+          "parent_asin": "B0BHN62QYB",
+          "link": "https://www.amazon.com/dp/B0BHN62QYB",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 0.5,
+          "name": "Concord Cookware 7-Piece Stainless Steel Cookware Set, includes Pots and Pans",
+          "actual_price": 59.98,
+          "discount_price": 59.98,
+          "ratings": 4.3,
+          "no_of_ratings": 1678,
+          "parent_asin": "B00CHSJK90",
+          "link": "https://www.amazon.com/dp/B00CHSJK90",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 0.3889,
+          "name": "Farberware Millennium Stainless Steel Nonstick Cookware Set, 10-Piece Pot and Pan Set, Stainless Steel",
+          "actual_price": 144.24,
+          "discount_price": 144.24,
+          "ratings": 4.5,
+          "no_of_ratings": 2541,
+          "parent_asin": "B082WZHWT3",
+          "link": "https://www.amazon.com/dp/B082WZHWT3",
+          "main_category": "Amazon Home"
+        }
+      ]
+    },
+    {
+      "query": "yoga mat non slip thick",
+      "category": "Sports & Outdoors",
+      "hits": [
+        {
+          "score": 0.6,
+          "name": "COOLMOON 1/4 Inch Extra Thick Yoga Mat Double-Sided Non Slip,Yoga Mat For Women and Men,Fitness Mats With Carrying Strap,Eco Friendly TPE Yoga Mat, Pilates And Exercises Mat",
+          "actual_price": 32.99,
+          "discount_price": 32.99,
+          "ratings": 4.5,
+          "no_of_ratings": 509,
+          "parent_asin": "B09696H5BG",
+          "link": "https://www.amazon.com/dp/B09696H5BG",
+          "main_category": "Sports & Outdoors"
+        },
+        {
+          "score": 0.5333,
+          "name": "Extra Thick Yoga Mat, 5/8 Inch (16 mm) with No Stick Ridge - Non-Slip Grip Foam Cushion Aid with Carrying Strap for Workouts or Physical Therapy",
+          "actual_price": 37.99,
+          "discount_price": 37.99,
+          "ratings": 4.6,
+          "no_of_ratings": 2063,
+          "parent_asin": "B00M0ETE8S",
+          "link": "https://www.amazon.com/dp/B00M0ETE8S",
+          "main_category": "Sports & Outdoors"
+        },
+        {
+          "score": 0.5,
+          "name": "Sunny Health & Fitness Non-Slip Thick and Wide Exercise Yoga Mat - Size 68 in x 24 in",
+          "actual_price": 12.3,
+          "discount_price": 12.3,
+          "ratings": 4.4,
+          "no_of_ratings": 5038,
+          "parent_asin": "B00UWLMOJW",
+          "link": "https://www.amazon.com/dp/B00UWLMOJW",
+          "main_category": "Sports & Outdoors"
+        }
+      ]
+    },
+    {
+      "query": "protein powder whey chocolate",
+      "category": "Health & Personal Care",
+      "hits": [
+        {
+          "score": 0.8333,
+          "name": "Pure Protein 100% Whey Protein Powder, Rich Chocolate, 25 g Protein, 1.75 lb (Packaging May Vary)",
+          "actual_price": 26.99,
+          "discount_price": 26.99,
+          "ratings": 4.5,
+          "no_of_ratings": 22031,
+          "parent_asin": "B09FFNF6HY",
+          "link": "https://www.amazon.com/dp/B09FFNF6HY",
+          "main_category": "Health & Personal Care"
+        },
+        {
+          "score": 0.75,
+          "name": "MET-Rx Natural Whey Protein Powder, Chocolate Protein Powder, 5 Lb",
+          "actual_price": 59.89,
+          "discount_price": 59.89,
+          "ratings": 4.5,
+          "no_of_ratings": 1923,
+          "parent_asin": "B0925JHSPZ",
+          "link": "https://www.amazon.com/dp/B0925JHSPZ",
+          "main_category": "Health & Personal Care"
+        },
+        {
+          "score": 0.3718,
+          "name": "Optimum Nutrition Gold Standard 100% Whey Protein Powder, Naturally Flavored Chocolate, 4.8 Pound (Packaging May Vary)",
+          "actual_price": 84.99,
+          "discount_price": 84.99,
+          "ratings": 4.6,
+          "no_of_ratings": 1433,
+          "parent_asin": "B004QXV69G",
+          "link": "https://www.amazon.com/dp/B004QXV69G",
+          "main_category": "Health & Personal Care"
+        }
+      ]
+    },
+    {
+      "query": "baby diaper pants large pack",
+      "category": "Baby",
+      "hits": [
+        {
+          "score": 0.5,
+          "name": "Parker Baby Diaper Backpack - Full Zip Diaper Bag with Insulated Pockets - Cream",
+          "actual_price": 64.95,
+          "discount_price": 64.95,
+          "ratings": 4.4,
+          "no_of_ratings": 442,
+          "parent_asin": "B07R8XNL34",
+          "link": "https://www.amazon.com/dp/B07R8XNL34",
+          "main_category": "Baby"
+        },
+        {
+          "score": 0.5,
+          "name": "KAO Diapers Merries Sarasara Air Through Pants L-Size ( 9~14kg) 44sheets, Parallel Import Product, Made in Japan",
+          "actual_price": 29.99,
+          "discount_price": 29.99,
+          "ratings": 4.7,
+          "no_of_ratings": 157,
+          "parent_asin": "B00DSSOQYC",
+          "link": "https://www.amazon.com/dp/B00DSSOQYC",
+          "main_category": "Baby"
+        },
+        {
+          "score": 0.3333,
+          "name": "3 Sprouts Baby Diaper Caddy - Organizer Basket for Nursery, Elephant",
+          "actual_price": 16.99,
+          "discount_price": 16.99,
+          "ratings": 4.7,
+          "no_of_ratings": 407,
+          "parent_asin": "B081K4S55Q",
+          "link": "https://www.amazon.com/dp/B081K4S55Q",
+          "main_category": "Baby"
+        }
+      ]
+    },
+    {
+      "query": "dog food dry adult",
+      "category": "Pet Supplies",
+      "hits": [
+        {
+          "score": 0.5,
+          "name": "Rachael Ray Nutrish Limited Ingredient Lamb Meal & Brown Rice Recipe, Dry Dog Food, 14 Pound Bag (Packaging Design May Vary)",
+          "actual_price": 24.99,
+          "discount_price": 24.99,
+          "ratings": 4.5,
+          "no_of_ratings": 6109,
+          "parent_asin": "B0BJWCHW38",
+          "link": "https://www.amazon.com/dp/B0BJWCHW38",
+          "main_category": "Pet Supplies"
+        },
+        {
+          "score": 0.5,
+          "name": "Royal Canin Bulldog Adult Dry Dog Food, 30 lb bag",
+          "actual_price": 109.99,
+          "discount_price": 109.99,
+          "ratings": 4.7,
+          "no_of_ratings": 2212,
+          "parent_asin": "B0032BFAMM",
+          "link": "https://www.amazon.com/dp/B0032BFAMM",
+          "main_category": "Pet Supplies"
+        },
+        {
+          "score": 0.4444,
+          "name": "Hill's Science Diet Dry Dog Food, Adult 7+ for Senior Dogs, Chicken Meal, Barley & Brown Rice Recipe, 15 lb. Bag",
+          "actual_price": 45.99,
+          "discount_price": 45.99,
+          "ratings": 4.7,
+          "no_of_ratings": 5119,
+          "parent_asin": "B0BTSCV5ZV",
+          "link": "https://www.amazon.com/dp/B0BTSCV5ZV",
+          "main_category": "Pet Supplies"
+        }
+      ]
+    },
+    {
+      "query": "car phone mount dashboard",
+      "category": "Automotive",
+      "hits": [
+        {
+          "score": 1.0,
+          "name": "TRUE LINE Automotive Dashboard Car Windshield Cell Phone Holder Mounting Kit Clamp (Black/RED)",
+          "actual_price": 11.99,
+          "discount_price": 11.99,
+          "ratings": 3.8,
+          "no_of_ratings": 654,
+          "parent_asin": "B07KGHFZC6",
+          "link": "https://www.amazon.com/dp/B07KGHFZC6",
+          "main_category": "Automotive"
+        },
+        {
+          "score": 0.4583,
+          "name": "Rugged Ridge | Dash Multi-Mount Phone Kit | 13551.16 | Fits 2011-2018 Jeep Wrangler JK",
+          "actual_price": 57.5,
+          "discount_price": 57.5,
+          "ratings": 4.1,
+          "no_of_ratings": 3865,
+          "parent_asin": "B09X2JVNCN",
+          "link": "https://www.amazon.com/dp/B09X2JVNCN",
+          "main_category": "Automotive"
+        },
+        {
+          "score": 0.3409,
+          "name": "Car Phone Holder Mount [Military-Grade Suction & Stable Hook] Phone Mount for Car Windshield Dashboard Air Vent Universal Hands-Free Automobile Mounts Cell Phone Holder Fit for iPhone Smartphones",
+          "actual_price": 12.99,
+          "discount_price": 12.99,
+          "ratings": 4.3,
+          "no_of_ratings": 6293,
+          "parent_asin": "B0C6PXM1PF",
+          "link": "https://www.amazon.com/dp/B0C6PXM1PF",
+          "main_category": "Automotive"
+        }
+      ]
+    },
+    {
+      "query": "mechanical keyboard RGB gaming",
+      "category": "All Electronics",
+      "hits": [
+        {
+          "score": 0.8333,
+          "name": "RGB Gaming Keyboard and Mouse Combo,MageGee GK980 Wired Backlit Keyboard and Black Gaming Mouse Combo,PC Keyboard and Adjustable DPI Mouse for PC/loptop/MAC(Grey Black)",
+          "actual_price": 26.99,
+          "discount_price": 26.99,
+          "ratings": 4.5,
+          "no_of_ratings": 4855,
+          "parent_asin": "B07VFN58CC",
+          "link": "https://www.amazon.com/dp/B07VFN58CC",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.625,
+          "name": "One Handed RGB Gaming Keyboard and Mouse Combo, 35 Keys Portable PUBG Gaming Keyboard, Professional Gaming Mouse, Half Keyboard Gaming Set for Laptop PC Xbox PS4 Switch Gamer",
+          "actual_price": 29.99,
+          "discount_price": 29.99,
+          "ratings": 4.1,
+          "no_of_ratings": 1863,
+          "parent_asin": "B07R4LJT42",
+          "link": "https://www.amazon.com/dp/B07R4LJT42",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.5833,
+          "name": "FLAGPOWER RGB Gaming Keyboard and Breathing Mouse Combo, Adjutable Breathing Backlit Mechanical Feeling Keyboard with 4 Colors 4800DPI Backlight Mouse for PC Laptop Computer Game and Work",
+          "actual_price": 22.99,
+          "discount_price": 22.99,
+          "ratings": 4.5,
+          "no_of_ratings": 6554,
+          "parent_asin": "B07432V11H",
+          "link": "https://www.amazon.com/dp/B07432V11H",
+          "main_category": "All Electronics"
+        }
+      ]
+    },
+    {
+      "query": "men's formal leather belt",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 0.5,
+          "name": "Bullko Men's Casual Genuine Leather Dress Belt for Jeans",
+          "actual_price": 28.99,
+          "discount_price": 28.99,
+          "ratings": 4.6,
+          "no_of_ratings": 2960,
+          "parent_asin": "B06XKTNJLP",
+          "link": "https://www.amazon.com/dp/B06XKTNJLP",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.5,
+          "name": "Perry Ellis Men's Portfolio Double Stitched Leather Reversible Belt (Sizes 30-42 Inches)",
+          "actual_price": 35.99,
+          "discount_price": 35.99,
+          "ratings": 4.5,
+          "no_of_ratings": 2744,
+          "parent_asin": "B07MGKDY17",
+          "link": "https://www.amazon.com/dp/B07MGKDY17",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.3333,
+          "name": "XOUXOU Men's Casual Leather Jeans Belts Classic Work Business Dress Belt with Prong Buckle for Men",
+          "actual_price": 16.92,
+          "discount_price": 16.92,
+          "ratings": 4.5,
+          "no_of_ratings": 6441,
+          "parent_asin": "B08K59JHR3",
+          "link": "https://www.amazon.com/dp/B08K59JHR3",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "kids school backpack waterproof",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 0.527,
+          "name": "POWOFUN Kids Backpack School Bag Children Water-Resistant Cute Cartoon Travel Rucksack Backpack For Kindergarten Boys Girls with Chest Buckle One_Size",
+          "actual_price": 19.99,
+          "discount_price": 19.99,
+          "ratings": 4.5,
+          "no_of_ratings": 1221,
+          "parent_asin": "B0861KRP8L",
+          "link": "https://www.amazon.com/dp/B0861KRP8L",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.5,
+          "name": "BLUEFAIRY Camo Backpacks for Boys Kids Elementary Middle School Bags Primary Book Bags Waterproof Hiking Camping Outdoor Daypack Travel Gifts Mochila De Camo 17Inch (Gray)",
+          "actual_price": 28.99,
+          "discount_price": 28.99,
+          "ratings": 4.8,
+          "no_of_ratings": 2548,
+          "parent_asin": "B0C22LL1K5",
+          "link": "https://www.amazon.com/dp/B0C22LL1K5",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 0.4,
+          "name": "BLUEFAIRY Girls Elementary School Bag Kids Backpacks Cute Lightweight Bookbag for Student Children Waterproof Durable Gift Travel 17Inch (Purple)",
+          "actual_price": 19.99,
+          "discount_price": 19.99,
+          "ratings": 4.7,
+          "no_of_ratings": 3553,
+          "parent_asin": "B08F4BLWYW",
+          "link": "https://www.amazon.com/dp/B08F4BLWYW",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "air fryer large capacity",
+      "category": "Appliances",
+      "hits": [
+        {
+          "score": 1.0,
+          "name": "Galanz Combo 8-in-1 Air Fryer Toaster Oven, Convection Oven with Pizza & Dehydrator, 4 Accessories Included, 1800W, 26 Quart Large, Stainless Steel,25L,2 Knobs",
+          "actual_price": 69.99,
+          "discount_price": 69.99,
+          "ratings": 4.2,
+          "no_of_ratings": 1208,
+          "parent_asin": "B0BCXD88JV",
+          "link": "https://www.amazon.com/dp/B0BCXD88JV",
+          "main_category": "Appliances"
+        },
+        {
+          "score": 0.5333,
+          "name": "Cosmo COS-317AFOSS 1.1 cu. ft. Compact Electric Air Fryer Toaster Oven with LED Display, Air Fry Basket, Rotisserie Fork, 1800W in Stainless Steel (32.9 Quarts, Stainless Steel)",
+          "actual_price": 129.1,
+          "discount_price": 129.1,
+          "ratings": 4.4,
+          "no_of_ratings": 1253,
+          "parent_asin": "B09T1C1FK3",
+          "link": "https://www.amazon.com/dp/B09T1C1FK3",
+          "main_category": "Appliances"
+        },
+        {
+          "score": 0.5333,
+          "name": "FIOGOHUMI 10000BTU Portable Air Conditioner with Built-in Dehumidifier Fan Mode for Room up to 250 sq.ft. - Room Air Conditioner with 24Hour Timer & Remote Control Window Mount Kit",
+          "actual_price": 189.98,
+          "discount_price": 189.98,
+          "ratings": 4.3,
+          "no_of_ratings": 1072,
+          "parent_asin": "B0CJRMR8WR",
+          "link": "https://www.amazon.com/dp/B0CJRMR8WR",
+          "main_category": "Appliances"
+        }
+      ]
+    },
+    {
+      "query": "face moisturizer dry skin",
+      "category": "All Beauty",
+      "hits": [
+        {
+          "score": 0.55,
+          "name": "L'Oreal Paris Skincare Hydra Genius Daily Liquid Care Oil-Free Face Moisturizer for Extra Dry Skin, Hyaluronic Acid Moisturizer for Face with Aloe Water and Hyaluronic Acid, 3.04 fl. oz.",
+          "actual_price": 13.98,
+          "discount_price": 13.98,
+          "ratings": 4.4,
+          "no_of_ratings": 917,
+          "parent_asin": "B01M9F9ROS",
+          "link": "https://www.amazon.com/dp/B01M9F9ROS",
+          "main_category": "All Beauty"
+        },
+        {
+          "score": 0.5,
+          "name": "Face Moisturizer by Olay, Active Hydrating Beauty Moisturizing Lotion, 6 fl oz (Pack of 2)",
+          "actual_price": 21.94,
+          "discount_price": 21.94,
+          "ratings": 4.7,
+          "no_of_ratings": 9136,
+          "parent_asin": "B0C5TWXNM7",
+          "link": "https://www.amazon.com/dp/B0C5TWXNM7",
+          "main_category": "All Beauty"
+        },
+        {
+          "score": 0.3333,
+          "name": "Farmacy Honey Halo Ceramide Face Moisturizer Cream - Hydrating Facial Lotion for Dry Skin (3.4 Ounce)",
+          "actual_price": 74.0,
+          "discount_price": 74.0,
+          "ratings": 4.7,
+          "no_of_ratings": 1608,
+          "parent_asin": "B08VF8KG7V",
+          "link": "https://www.amazon.com/dp/B08VF8KG7V",
+          "main_category": "All Beauty"
+        }
+      ]
+    }
+  ],
+  "dbsf": [
+    {
+      "query": "wireless earbuds noise cancelling",
+      "category": null,
+      "hits": [
+        {
+          "score": 1.8056,
+          "name": "HISOOS Wireless Earbuds Bluetooth Active Noise Cancelling Headphone Wireless Ear Buds in-Ear Headphones with Charging Case IPX7 Waterproof Earphones for iPhone Android, Gifts for Her (Pink)",
+          "actual_price": 17.99,
+          "discount_price": 17.99,
+          "ratings": 4.1,
+          "no_of_ratings": 1431,
+          "parent_asin": "B0BSDT6YYJ",
+          "link": "https://www.amazon.com/dp/B0BSDT6YYJ",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 1.5435,
+          "name": "Tribit Active Noise Cancelling Earbuds with CVC8.0 Mics,Wireless Bluetooth Earbuds Deep Bass Call Noise Reduction Comfort Fit,30H Playtime,Fast USB-C Charging for Travel/Work",
+          "actual_price": 39.99,
+          "discount_price": 39.99,
+          "ratings": 4.3,
+          "no_of_ratings": 630,
+          "parent_asin": "B08C9F3LFS",
+          "link": "https://www.amazon.com/dp/B08C9F3LFS",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 1.5099,
+          "name": "EarFun Air S Noise Cancelling Wireless Earbuds, Qualcomm\u00ae aptX\u2122, 4 Mics CVC 8.0 Call, Multipoint Connection, Wireless Charging, 10mm Wool Composite Drivers, App with Custom EQ, Game Mode, Black",
+          "actual_price": 59.99,
+          "discount_price": 59.99,
+          "ratings": 4.2,
+          "no_of_ratings": 977,
+          "parent_asin": "B0BQJ77CTM",
+          "link": "https://www.amazon.com/dp/B0BQJ77CTM",
+          "main_category": "All Electronics"
+        }
+      ]
+    },
+    {
+      "query": "bluetooth speaker portable waterproof",
+      "category": null,
+      "hits": [
+        {
+          "score": 1.3838,
+          "name": "JBL JR POP - Waterproof portable Bluetooths Speaker Designed for Kids - Red, JBLJRPOPREDAM",
+          "actual_price": 39.95,
+          "discount_price": 39.95,
+          "ratings": 4.8,
+          "no_of_ratings": 3321,
+          "parent_asin": "B07X53M18Z",
+          "link": "https://www.amazon.com/dp/B07X53M18Z",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.9893,
+          "name": "Upside Golf Magnetic Bluetooth Speaker for Golf Cart - Super XL PRO Waterproof Sound System - Mountable Golf Cart Speaker - Awesome 120+ Foot Wireless Range - Rechargeable 12 HR Battery Life",
+          "actual_price": 121.99,
+          "discount_price": 121.99,
+          "ratings": 4.6,
+          "no_of_ratings": 684,
+          "parent_asin": "B09KJ4V3XQ",
+          "link": "https://www.amazon.com/dp/B09KJ4V3XQ",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 0.9401,
+          "name": "Altec Lansing Soundbucket XL - Waterproof Bluetooth Speaker with Customizable LED Lights, Qi Wireless Charging, 20 Hours Playtime & 100 Foot Range",
+          "actual_price": 139.99,
+          "discount_price": 139.99,
+          "ratings": 4.1,
+          "no_of_ratings": 1093,
+          "parent_asin": "B0B3GNJS9L",
+          "link": "https://www.amazon.com/dp/B0B3GNJS9L",
+          "main_category": "Home Audio & Theater"
+        }
+      ]
+    },
+    {
+      "query": "gaming laptop RTX",
+      "category": null,
+      "hits": [
+        {
+          "score": 1.654,
+          "name": "Lenovo IdeaPad Gaming 3 - (2022) - Essential Gaming Laptop Computer - 15.6\" FHD - 120Hz - AMD Ryzen 5 6600H - NVIDIA GeForce RTX 3050 - 8GB DDR5 RAM - 256GB NVMe Storage - Windows 11 Home",
+          "actual_price": 669.99,
+          "discount_price": 669.99,
+          "ratings": 4.3,
+          "no_of_ratings": 776,
+          "parent_asin": "B0C5ZRCWRH",
+          "link": "https://www.amazon.com/dp/B0C5ZRCWRH",
+          "main_category": "Computers"
+        },
+        {
+          "score": 1.6239,
+          "name": "Lenovo Legion 5 Gaming Laptop, 15.6\" FHD Display, AMD Ryzen 7 5800H, 16GB RAM, 512GB Storage, NVIDIA GeForce RTX 3050Ti, Windows 10H, Phantom Blue",
+          "actual_price": 999.0,
+          "discount_price": 999.0,
+          "ratings": 4.5,
+          "no_of_ratings": 1388,
+          "parent_asin": "B09YVTK8LN",
+          "link": "https://www.amazon.com/dp/B09YVTK8LN",
+          "main_category": "Computers"
+        },
+        {
+          "score": 1.6086,
+          "name": "Lenovo - Legion 5 - Gaming Laptop - AMD Ryzen 7 5800H - 16GB RAM - 512GB Storage - NVIDIA GeForce RTX 3050Ti - 15.6\" FHD Display - Windows 11 Home - Phantom Blue",
+          "actual_price": 1199.0,
+          "discount_price": 1199.0,
+          "ratings": 4.6,
+          "no_of_ratings": 619,
+          "parent_asin": "B0BTTZFKYF",
+          "link": "https://www.amazon.com/dp/B0BTTZFKYF",
+          "main_category": "Computers"
+        }
+      ]
+    },
+    {
+      "query": "32 inch smart TV 4K",
+      "category": "All Electronics",
+      "hits": [
+        {
+          "score": 1.8613,
+          "name": "SAMSUNG Electronics UN32M4500A 32-Inch 720p Smart LED TV (2017 Model)",
+          "actual_price": 187.9,
+          "discount_price": 187.9,
+          "ratings": 4.6,
+          "no_of_ratings": 1975,
+          "parent_asin": "B074KRM3H4",
+          "link": "https://www.amazon.com/dp/B074KRM3H4",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 1.7485,
+          "name": "TCL 32S3800 32-Inch 720p Roku Smart LED TV (2015 Model)",
+          "actual_price": 250.0,
+          "discount_price": 250.0,
+          "ratings": 4.4,
+          "no_of_ratings": 8096,
+          "parent_asin": "B00X3TUHWG",
+          "link": "https://www.amazon.com/dp/B00X3TUHWG",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 1.3722,
+          "name": "TCL 32\" Class 3-Series HD 720p LED Smart Roku TV - 32S355, Black",
+          "actual_price": 129.99,
+          "discount_price": 129.99,
+          "ratings": 4.6,
+          "no_of_ratings": 905,
+          "parent_asin": "B09YWT3P5Q",
+          "link": "https://www.amazon.com/dp/B09YWT3P5Q",
+          "main_category": "All Electronics"
+        }
+      ]
+    },
+    {
+      "query": "men's running shoes lightweight",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 1.3496,
+          "name": "WXQ Men's Running Shoes Comfortable Lightweight Breathable Walking Shoes Mesh Workout Casual Sports Shoes",
+          "actual_price": 32.99,
+          "discount_price": 32.99,
+          "ratings": 4.3,
+          "no_of_ratings": 14292,
+          "parent_asin": "B074X4WZ9M",
+          "link": "https://www.amazon.com/dp/B074X4WZ9M",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.2474,
+          "name": "PEAK Mens Lightweight Walking Shoes Comfortable Slip On Sports Sneakers for Tennis, Gym, Running, Casual Workout",
+          "actual_price": 59.99,
+          "discount_price": 59.99,
+          "ratings": 4.3,
+          "no_of_ratings": 1726,
+          "parent_asin": "B07ZR7GFF2",
+          "link": "https://www.amazon.com/dp/B07ZR7GFF2",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.2238,
+          "name": "adidas Men's Duramo Sl 2.0 Running Shoe",
+          "actual_price": 46.8,
+          "discount_price": 46.8,
+          "ratings": 4.5,
+          "no_of_ratings": 1529,
+          "parent_asin": "B0B9QMSBWN",
+          "link": "https://www.amazon.com/dp/B0B9QMSBWN",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "women's winter coat warm",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 1.6215,
+          "name": "ICEIVY Womens Wool Socks 5 Pairs Warm Wool Cotton Socks Thick Knit Vintage Casual Winter Socks",
+          "actual_price": 19.99,
+          "discount_price": 19.99,
+          "ratings": 4.7,
+          "no_of_ratings": 1356,
+          "parent_asin": "B0BFCS8N8Z",
+          "link": "https://www.amazon.com/dp/B0BFCS8N8Z",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.1775,
+          "name": "Women's Warm Fleece Winter - Women's Hat and Glove Set + Hats Gloves Scarves for Women",
+          "actual_price": 11.99,
+          "discount_price": 11.99,
+          "ratings": 4.3,
+          "no_of_ratings": 3731,
+          "parent_asin": "B00PSN3CTU",
+          "link": "https://www.amazon.com/dp/B00PSN3CTU",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.1517,
+          "name": "ROYAL MATRIX Women's Winter Coats Hooded Parka Coat Fleece Lined Warm Long Winter Jacket Thick Coats with Pockets",
+          "actual_price": 89.99,
+          "discount_price": 89.99,
+          "ratings": 4.6,
+          "no_of_ratings": 3474,
+          "parent_asin": "B08L3PJDZ5",
+          "link": "https://www.amazon.com/dp/B08L3PJDZ5",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "cotton bed sheets king size",
+      "category": "Amazon Home",
+      "hits": [
+        {
+          "score": 1.8449,
+          "name": "California Design Den Luxury 100% Cotton Sateen Buttery Soft 800 Thread Count Bed Sheet Set, Beats Fake Egyptian Claim, Durable Deep Pocket Fitted Sheet (King, Pastel Blue - Steel)",
+          "actual_price": 99.99,
+          "discount_price": 99.99,
+          "ratings": 4.6,
+          "no_of_ratings": 8819,
+          "parent_asin": "B09P51VL9Z",
+          "link": "https://www.amazon.com/dp/B09P51VL9Z",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 1.3229,
+          "name": "DREAMCARE King Size Sheets - 6 PCS Set - up to 15 inches - 2500 Supreme Collection - Superior Softness - Hotel Luxury Sheets & Pillowcases Set - Wrinkle and Fade Resistant (King, Purple)",
+          "actual_price": 36.98,
+          "discount_price": 36.98,
+          "ratings": 4.6,
+          "no_of_ratings": 24727,
+          "parent_asin": "B0C541MR7B",
+          "link": "https://www.amazon.com/dp/B0C541MR7B",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 1.3005,
+          "name": "QSH Floral King Size Sheet Sets - Flower Butterfly Print Pattern Egyptian Cotton Printed Bedding Sheets 4pcs Extra Soft and Breathable 17.5\" Extra Deep Pocket King Size Sheets",
+          "actual_price": 107.99,
+          "discount_price": 107.99,
+          "ratings": 4.6,
+          "no_of_ratings": 1633,
+          "parent_asin": "B0BHSQBP88",
+          "link": "https://www.amazon.com/dp/B0BHSQBP88",
+          "main_category": "Amazon Home"
+        }
+      ]
+    },
+    {
+      "query": "stainless steel cookware set",
+      "category": "Amazon Home",
+      "hits": [
+        {
+          "score": 1.4027,
+          "name": "HOMICHEF 14-Piece Nickel Free Stainless Steel Cookware Set - Nickel Free Stainless Steel Pots and Pans Set - Stainless Steel Non-Toxic Cookware Set - Stainless Steel Healthy Induction Cookware Sets",
+          "actual_price": 114.97,
+          "discount_price": 114.97,
+          "ratings": 4.2,
+          "no_of_ratings": 1599,
+          "parent_asin": "B07DL4XMZZ",
+          "link": "https://www.amazon.com/dp/B07DL4XMZZ",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 1.3387,
+          "name": "Mueller Pots and Pans Set 11-Piece, Ultra-Clad Pro Stainless Steel Cookware Set, Ergonomic and EverCool Stainless Steel Handle, Includes Saucepans, Skillets, Stockpot, Saute Pan, Steamer",
+          "actual_price": 129.99,
+          "discount_price": 129.99,
+          "ratings": 4.3,
+          "no_of_ratings": 1238,
+          "parent_asin": "B09HY5S7WK",
+          "link": "https://www.amazon.com/dp/B09HY5S7WK",
+          "main_category": "Amazon Home"
+        },
+        {
+          "score": 1.3189,
+          "name": "Concord Cookware 7-Piece Stainless Steel Cookware Set, includes Pots and Pans",
+          "actual_price": 59.98,
+          "discount_price": 59.98,
+          "ratings": 4.3,
+          "no_of_ratings": 1678,
+          "parent_asin": "B00CHSJK90",
+          "link": "https://www.amazon.com/dp/B00CHSJK90",
+          "main_category": "Amazon Home"
+        }
+      ]
+    },
+    {
+      "query": "yoga mat non slip thick",
+      "category": "Sports & Outdoors",
+      "hits": [
+        {
+          "score": 1.8414,
+          "name": "Extra Thick Yoga Mat, 5/8 Inch (16 mm) with No Stick Ridge - Non-Slip Grip Foam Cushion Aid with Carrying Strap for Workouts or Physical Therapy",
+          "actual_price": 37.99,
+          "discount_price": 37.99,
+          "ratings": 4.6,
+          "no_of_ratings": 2063,
+          "parent_asin": "B00M0ETE8S",
+          "link": "https://www.amazon.com/dp/B00M0ETE8S",
+          "main_category": "Sports & Outdoors"
+        },
+        {
+          "score": 1.7336,
+          "name": "COOLMOON 1/4 Inch Extra Thick Yoga Mat Double-Sided Non Slip,Yoga Mat For Women and Men,Fitness Mats With Carrying Strap,Eco Friendly TPE Yoga Mat, Pilates And Exercises Mat",
+          "actual_price": 32.99,
+          "discount_price": 32.99,
+          "ratings": 4.5,
+          "no_of_ratings": 509,
+          "parent_asin": "B09696H5BG",
+          "link": "https://www.amazon.com/dp/B09696H5BG",
+          "main_category": "Sports & Outdoors"
+        },
+        {
+          "score": 1.403,
+          "name": "Yoga Mat, Mersuii Eco Friendly Non Slip Fitness Exercise Mat with Carrying Strap for Yoga, Pilates and Floor Exercises - 72\" x 24\" x 1/4\"",
+          "actual_price": 14.36,
+          "discount_price": 14.36,
+          "ratings": 4.5,
+          "no_of_ratings": 526,
+          "parent_asin": "B08BRL8PWF",
+          "link": "https://www.amazon.com/dp/B08BRL8PWF",
+          "main_category": "Sports & Outdoors"
+        }
+      ]
+    },
+    {
+      "query": "protein powder whey chocolate",
+      "category": "Health & Personal Care",
+      "hits": [
+        {
+          "score": 1.9103,
+          "name": "Pure Protein 100% Whey Protein Powder, Rich Chocolate, 25 g Protein, 1.75 lb (Packaging May Vary)",
+          "actual_price": 26.99,
+          "discount_price": 26.99,
+          "ratings": 4.5,
+          "no_of_ratings": 22031,
+          "parent_asin": "B09FFNF6HY",
+          "link": "https://www.amazon.com/dp/B09FFNF6HY",
+          "main_category": "Health & Personal Care"
+        },
+        {
+          "score": 1.8885,
+          "name": "MET-Rx Natural Whey Protein Powder, Chocolate Protein Powder, 5 Lb",
+          "actual_price": 59.89,
+          "discount_price": 59.89,
+          "ratings": 4.5,
+          "no_of_ratings": 1923,
+          "parent_asin": "B0925JHSPZ",
+          "link": "https://www.amazon.com/dp/B0925JHSPZ",
+          "main_category": "Health & Personal Care"
+        },
+        {
+          "score": 1.5094,
+          "name": "MET-Rx Metamyosyn Protein Plus Whey Isolate and Casein Protein Powder, Chocolate, 2 Lb White",
+          "actual_price": 52.8,
+          "discount_price": 52.8,
+          "ratings": 4.4,
+          "no_of_ratings": 2017,
+          "parent_asin": "B09J1LPDGR",
+          "link": "https://www.amazon.com/dp/B09J1LPDGR",
+          "main_category": "Health & Personal Care"
+        }
+      ]
+    },
+    {
+      "query": "baby diaper pants large pack",
+      "category": "Baby",
+      "hits": [
+        {
+          "score": 1.458,
+          "name": "Gerber Plastic Pants, 0-3 Months, Fits Up to 12 lbs (4 pairs)",
+          "actual_price": 12.99,
+          "discount_price": 12.99,
+          "ratings": 4.4,
+          "no_of_ratings": 326,
+          "parent_asin": "B000KQ5MCU",
+          "link": "https://www.amazon.com/dp/B000KQ5MCU",
+          "main_category": "Baby"
+        },
+        {
+          "score": 1.1773,
+          "name": "Gerber Plastic Pants, 12 Months, Fits 20-24 lbs. (4 pairs)",
+          "actual_price": 9.19,
+          "discount_price": 9.19,
+          "ratings": 4.3,
+          "no_of_ratings": 150,
+          "parent_asin": "B000KQ1RQU",
+          "link": "https://www.amazon.com/dp/B000KQ1RQU",
+          "main_category": "Baby"
+        },
+        {
+          "score": 1.1026,
+          "name": "DERSTUEWE Diaper Bag Backpack\uff0cBaby Diaper Bags, Baby Shower Gifts, Multifunctional diaper backpack Large Capacity, (Heather Grey)",
+          "actual_price": 49.9,
+          "discount_price": 49.9,
+          "ratings": 4.7,
+          "no_of_ratings": 237,
+          "parent_asin": "B0C64VD8QZ",
+          "link": "https://www.amazon.com/dp/B0C64VD8QZ",
+          "main_category": "Baby"
+        }
+      ]
+    },
+    {
+      "query": "dog food dry adult",
+      "category": "Pet Supplies",
+      "hits": [
+        {
+          "score": 1.5642,
+          "name": "Wellness Complete Health Toy Breed Dry Dog Food with Grains, Chicken & Rice, 4-Pound Bag",
+          "actual_price": 19.98,
+          "discount_price": 19.98,
+          "ratings": 4.6,
+          "no_of_ratings": 1588,
+          "parent_asin": "B07H8TKWZ3",
+          "link": "https://www.amazon.com/dp/B07H8TKWZ3",
+          "main_category": "Pet Supplies"
+        },
+        {
+          "score": 1.5426,
+          "name": "Hill's Science Diet Dry Dog Food, Adult 7+ for Senior Dogs, Chicken Meal, Barley & Brown Rice Recipe, 15 lb. Bag",
+          "actual_price": 45.99,
+          "discount_price": 45.99,
+          "ratings": 4.7,
+          "no_of_ratings": 5119,
+          "parent_asin": "B0BTSCV5ZV",
+          "link": "https://www.amazon.com/dp/B0BTSCV5ZV",
+          "main_category": "Pet Supplies"
+        },
+        {
+          "score": 1.3329,
+          "name": "Nutro Natural Choice Large Breed Adult Dry Dog Food, Chicken & Brown Rice Recipe Dog Kibble, 13 lb. Bag",
+          "actual_price": 37.98,
+          "discount_price": 37.98,
+          "ratings": 4.7,
+          "no_of_ratings": 4266,
+          "parent_asin": "B08YP3P521",
+          "link": "https://www.amazon.com/dp/B08YP3P521",
+          "main_category": "Pet Supplies"
+        }
+      ]
+    },
+    {
+      "query": "car phone mount dashboard",
+      "category": "Automotive",
+      "hits": [
+        {
+          "score": 2.1401,
+          "name": "TRUE LINE Automotive Dashboard Car Windshield Cell Phone Holder Mounting Kit Clamp (Black/RED)",
+          "actual_price": 11.99,
+          "discount_price": 11.99,
+          "ratings": 3.8,
+          "no_of_ratings": 654,
+          "parent_asin": "B07KGHFZC6",
+          "link": "https://www.amazon.com/dp/B07KGHFZC6",
+          "main_category": "Automotive"
+        },
+        {
+          "score": 1.4657,
+          "name": "Rugged Ridge | Dash Multi-Mount Phone Kit | 13551.16 | Fits 2011-2018 Jeep Wrangler JK",
+          "actual_price": 57.5,
+          "discount_price": 57.5,
+          "ratings": 4.1,
+          "no_of_ratings": 3865,
+          "parent_asin": "B09X2JVNCN",
+          "link": "https://www.amazon.com/dp/B09X2JVNCN",
+          "main_category": "Automotive"
+        },
+        {
+          "score": 1.4437,
+          "name": "Rugged Ridge | Dash Multi-Mount Phone Holder | 13551.23 | Fits 2018-2023 Jeep Wrangler JL; 2020-2023 Jeep Gladiator JT",
+          "actual_price": 79.99,
+          "discount_price": 79.99,
+          "ratings": 3.7,
+          "no_of_ratings": 609,
+          "parent_asin": "B07GZ94R6S",
+          "link": "https://www.amazon.com/dp/B07GZ94R6S",
+          "main_category": "Automotive"
+        }
+      ]
+    },
+    {
+      "query": "mechanical keyboard RGB gaming",
+      "category": "All Electronics",
+      "hits": [
+        {
+          "score": 2.1138,
+          "name": "RGB Gaming Keyboard and Mouse Combo,MageGee GK980 Wired Backlit Keyboard and Black Gaming Mouse Combo,PC Keyboard and Adjustable DPI Mouse for PC/loptop/MAC(Grey Black)",
+          "actual_price": 26.99,
+          "discount_price": 26.99,
+          "ratings": 4.5,
+          "no_of_ratings": 4855,
+          "parent_asin": "B07VFN58CC",
+          "link": "https://www.amazon.com/dp/B07VFN58CC",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 1.8307,
+          "name": "FLAGPOWER RGB Gaming Keyboard and Breathing Mouse Combo, Adjutable Breathing Backlit Mechanical Feeling Keyboard with 4 Colors 4800DPI Backlight Mouse for PC Laptop Computer Game and Work",
+          "actual_price": 22.99,
+          "discount_price": 22.99,
+          "ratings": 4.5,
+          "no_of_ratings": 6554,
+          "parent_asin": "B07432V11H",
+          "link": "https://www.amazon.com/dp/B07432V11H",
+          "main_category": "All Electronics"
+        },
+        {
+          "score": 1.7644,
+          "name": "MoKo RGB Gaming Mouse Pad, Large Extended Glowing Led Mousepad with 15 Lighting Modes and USB 2.0 Port, Non-Slip Rubber Base Computer Keyboard Pad Mat for Gamer, 32.09 x 12 x 0.16 Inch - Cherry Pink",
+          "actual_price": 19.95,
+          "discount_price": 19.95,
+          "ratings": 4.7,
+          "no_of_ratings": 1258,
+          "parent_asin": "B07Y4CWPTT",
+          "link": "https://www.amazon.com/dp/B07Y4CWPTT",
+          "main_category": "All Electronics"
+        }
+      ]
+    },
+    {
+      "query": "men's formal leather belt",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 1.121,
+          "name": "Men's Dress Belt 'ALL GENUINE LEATHER' Stitching 30mm Regular Big and Tall Sizes",
+          "actual_price": 22.99,
+          "discount_price": 22.99,
+          "ratings": 4.4,
+          "no_of_ratings": 2367,
+          "parent_asin": "B07GHT9Z6B",
+          "link": "https://www.amazon.com/dp/B07GHT9Z6B",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.0796,
+          "name": "John William Leather Belts For Men - Mens Brown & Black Belt - Dress Casual Men's Belt in Gift Bag",
+          "actual_price": 16.61,
+          "discount_price": 16.61,
+          "ratings": 4.4,
+          "no_of_ratings": 1264,
+          "parent_asin": "B07DLCZCJV",
+          "link": "https://www.amazon.com/dp/B07DLCZCJV",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.0697,
+          "name": "Perry Ellis Men's Portfolio Feather Edge Etched Buckle Soft Touch Leather Reversible Belt",
+          "actual_price": 19.93,
+          "discount_price": 19.93,
+          "ratings": 4.5,
+          "no_of_ratings": 1939,
+          "parent_asin": "B09X9FK32D",
+          "link": "https://www.amazon.com/dp/B09X9FK32D",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "kids school backpack waterproof",
+      "category": "AMAZON FASHION",
+      "hits": [
+        {
+          "score": 1.548,
+          "name": "BLUEFAIRY Girls Elementary School Bag Kids Backpacks Cute Lightweight Bookbag for Student Children Waterproof Durable Gift Travel 17Inch (Purple)",
+          "actual_price": 19.99,
+          "discount_price": 19.99,
+          "ratings": 4.7,
+          "no_of_ratings": 3553,
+          "parent_asin": "B08F4BLWYW",
+          "link": "https://www.amazon.com/dp/B08F4BLWYW",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.5143,
+          "name": "POWOFUN Kids Backpack School Bag Children Water-Resistant Cute Cartoon Travel Rucksack Backpack For Kindergarten Boys Girls with Chest Buckle One_Size",
+          "actual_price": 19.99,
+          "discount_price": 19.99,
+          "ratings": 4.5,
+          "no_of_ratings": 1221,
+          "parent_asin": "B0861KRP8L",
+          "link": "https://www.amazon.com/dp/B0861KRP8L",
+          "main_category": "AMAZON FASHION"
+        },
+        {
+          "score": 1.1942,
+          "name": "BLUEFAIRY Camo Backpacks for Boys Kids Elementary Middle School Bags Primary Book Bags Waterproof Hiking Camping Outdoor Daypack Travel Gifts Mochila De Camo 17Inch (Gray)",
+          "actual_price": 28.99,
+          "discount_price": 28.99,
+          "ratings": 4.8,
+          "no_of_ratings": 2548,
+          "parent_asin": "B0C22LL1K5",
+          "link": "https://www.amazon.com/dp/B0C22LL1K5",
+          "main_category": "AMAZON FASHION"
+        }
+      ]
+    },
+    {
+      "query": "air fryer large capacity",
+      "category": "Appliances",
+      "hits": [
+        {
+          "score": 2.0752,
+          "name": "Galanz Combo 8-in-1 Air Fryer Toaster Oven, Convection Oven with Pizza & Dehydrator, 4 Accessories Included, 1800W, 26 Quart Large, Stainless Steel,25L,2 Knobs",
+          "actual_price": 69.99,
+          "discount_price": 69.99,
+          "ratings": 4.2,
+          "no_of_ratings": 1208,
+          "parent_asin": "B0BCXD88JV",
+          "link": "https://www.amazon.com/dp/B0BCXD88JV",
+          "main_category": "Appliances"
+        },
+        {
+          "score": 1.7856,
+          "name": "Cosmo COS-317AFOSS 1.1 cu. ft. Compact Electric Air Fryer Toaster Oven with LED Display, Air Fry Basket, Rotisserie Fork, 1800W in Stainless Steel (32.9 Quarts, Stainless Steel)",
+          "actual_price": 129.1,
+          "discount_price": 129.1,
+          "ratings": 4.4,
+          "no_of_ratings": 1253,
+          "parent_asin": "B09T1C1FK3",
+          "link": "https://www.amazon.com/dp/B09T1C1FK3",
+          "main_category": "Appliances"
+        },
+        {
+          "score": 1.7574,
+          "name": "FIOGOHUMI 10000BTU Portable Air Conditioner with Built-in Dehumidifier Fan Mode for Room up to 250 sq.ft. - Room Air Conditioner with 24Hour Timer & Remote Control Window Mount Kit",
+          "actual_price": 189.98,
+          "discount_price": 189.98,
+          "ratings": 4.3,
+          "no_of_ratings": 1072,
+          "parent_asin": "B0CJRMR8WR",
+          "link": "https://www.amazon.com/dp/B0CJRMR8WR",
+          "main_category": "Appliances"
+        }
+      ]
+    },
+    {
+      "query": "face moisturizer dry skin",
+      "category": "All Beauty",
+      "hits": [
+        {
+          "score": 1.5759,
+          "name": "L'Oreal Paris Skincare Hydra Genius Daily Liquid Care Oil-Free Face Moisturizer for Extra Dry Skin, Hyaluronic Acid Moisturizer for Face with Aloe Water and Hyaluronic Acid, 3.04 fl. oz.",
+          "actual_price": 13.98,
+          "discount_price": 13.98,
+          "ratings": 4.4,
+          "no_of_ratings": 917,
+          "parent_asin": "B01M9F9ROS",
+          "link": "https://www.amazon.com/dp/B01M9F9ROS",
+          "main_category": "All Beauty"
+        },
+        {
+          "score": 1.313,
+          "name": "Clean & Clear Essentials Dual Action Facial Moisturizer, 0.5% Salicylic Acid Acne Medication to Moisturize Dry Skin, Treat Acne & Help Prevent Pimples, Oil Free for Acne-Prone Skin, 4 oz (Pack of 3)",
+          "actual_price": 17.94,
+          "discount_price": 17.94,
+          "ratings": 4.7,
+          "no_of_ratings": 2879,
+          "parent_asin": "B001E96LVS",
+          "link": "https://www.amazon.com/dp/B001E96LVS",
+          "main_category": "All Beauty"
+        },
+        {
+          "score": 1.2369,
+          "name": "Tree to Tub Hydrating Face Moisturizer - Water-Based Hyaluronic Acid, Vitamin C & E, Organic Aloe, Green Tea, Natural Ginseng for Dry & Sensitive Skin",
+          "actual_price": 19.99,
+          "discount_price": 19.99,
+          "ratings": 4.5,
+          "no_of_ratings": 1278,
+          "parent_asin": "B0C537NNLN",
+          "link": "https://www.amazon.com/dp/B0C537NNLN",
+          "main_category": "All Beauty"
+        }
+      ]
+    }
+  ]
+}
