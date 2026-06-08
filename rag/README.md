@@ -155,12 +155,19 @@ python compare_fusion_report.py
 # → fusion_comparison_report.md
 ```
 
+### Scoring
+
+- **#1 relevant (max 18)** — 1 point per query where the **first** result clearly matches intent; 0 otherwise.
+- **Relevant in top-3 (max 54)** — per query, count clearly relevant hits among the top 3 (0–3); sum across 18 queries.
+
+See [`fusion_comparison_report.md`](fusion_comparison_report.md) for the full breakdown.
+
 ### Results summary (June 2025 run)
 
-| Dataset | Best fusion | Top-1 score (of 36) | Winner |
-|---------|-------------|---------------------|--------|
-| Indian | Tie RRF/DBSF | 20 | — |
-| **McAuley** | **RRF** | **32** | **McAuley overall** |
+| Dataset | Best fusion | #1 relevant (of 18) | Relevant in top-3 (of 54) |
+|---------|-------------|----------------------|---------------------------|
+| Indian | RRF (tie on #1) | 10 (RRF) / 10 (DBSF) | 32 (RRF) / 28 (DBSF) |
+| **McAuley** | **RRF** | **15** (RRF) / 14 (DBSF) | **44** (RRF) / 43 (DBSF) |
 
 **Recommended production defaults:**
 
