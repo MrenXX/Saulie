@@ -1,0 +1,9 @@
+# Large data — download / generate locally (see README)
+mccauley_meta/
+*.csv
+qdrant_storage/
+embed_models/bge-m3/onnx/
+embed_models/bge-m3/*.engine
+embed_models/bge-m3/.git/
+*.log
+download_mccauley.log
