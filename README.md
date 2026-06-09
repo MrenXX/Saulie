@@ -172,12 +172,31 @@ python remote_chat.py
 | `AGENT_PORT` | `9000` | FastAPI port |
 | `VLLM_API_KEY` | `dipshit` | vLLM auth |
 | `LLM_BASE_URL` | `http://localhost:8000/v1` | vLLM endpoint (agent) |
-| `MODEL_NAME` | `dpo-v15-trial-4` | LoRA model id |
+| `MODEL_NAME` | `dpo-v15-trial-4` | LoRA model id (also set via `SAULIE_MODEL` in `start_saulie.sh`) |
+| `SAULIE_MODEL` | `dpo-v15-trial-4` | vLLM model name passed to agent on start |
+| `SAULIE_PROMPT` | `compressed` | System prompt variant: `legacy`, `steering`, or `compressed` |
+| `SAULIE_DEPLOY_SCRIPT` | `deploy_finalist_pick.sh` | vLLM deploy script path |
+| `QDRANT_COLLECTION` | `amazon_products_v2` | McAuley US catalog (set by `start_saulie.sh`) |
+| `FUSION_METHOD` | `rrf` | RAG fusion method |
 | `NGROK_KEY` | — | ngrok authtoken (in `.env`) |
 | `SSE_KEEPALIVE_INTERVAL` | `15` | SSE ping interval (seconds) |
 | `LLM_TIMEOUT` | `300` | vLLM request timeout (seconds) |
 
+Check active model + prompt: `curl http://127.0.0.1:9000/health`
+
 Agent logs: `saulie_chat.log`, `agent_api.log`
+
+### System prompt variants
+
+`agent_chat_api.py` ships three prompts selectable via `SAULIE_PROMPT`:
+
+| Variant | Use |
+|---------|-----|
+| `compressed` | Default production prompt (~410 tokens) |
+| `steering` | Full probe-first persona prompt from steering fix plan |
+| `legacy` | Original “ALWAYS USE THE TOOL” deployment prompt |
+
+See [`SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md`](SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md) for the persona/steering patch history.
 
 ---
 
@@ -193,7 +212,8 @@ monitor.sh                     # Standalone vLLM tmux monitor
 dashboard.sh                   # Standalone RAG tmux monitor
 nginx/                         # Reverse proxy config + compose
 dpo/eval/vllm_scripts/
-  deploy_finalist_pick.sh      # vLLM + LoRA container deploy
+  deploy_finalist_pick.sh      # vLLM + LoRA container deploy (DPO w=1.0 trial-4)
+SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md  # Prompt + harness fix plan
 ```
 
 **RAG code** is expected at `/root/rag` (not in this branch). The agent imports `search_hybrid` from `query2.py` there.
