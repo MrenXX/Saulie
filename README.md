@@ -76,6 +76,29 @@ Optuna finalists (trials 4,8,16,19,20,27)
 | [`dpo/eval/JUDGE_PACKET_README.md`](dpo/eval/JUDGE_PACKET_README.md) | Blind judge handoff — what to send / not send |
 | [`dpo/eval/llm_judge_prompt_dpo.md`](dpo/eval/llm_judge_prompt_dpo.md) | Judge rubric |
 | [`dpo/eval/eval_skeletons.json`](dpo/eval/eval_skeletons.json) | 60 skeletons (52 steering + 8 ordinary) |
+| [`dpo/eval/run_model_prompt_matrix.sh`](dpo/eval/run_model_prompt_matrix.sh) | 3×3 model×prompt matrix against live agent API |
+| [`MODEL_PROMPT_MATRIX_COMPARISON.md`](MODEL_PROMPT_MATRIX_COMPARISON.md) | Matrix results: tool calling vs English quality |
+
+---
+
+## Model × prompt matrix (post-deploy A/B)
+
+After picking trial-4 for production, we ran a **3×3 grid** (SFT, DPO w=0.5, DPO w=1.0 × legacy/steering/compressed prompts) against the live `agent_chat_api.py` harness:
+
+```bash
+bash dpo/eval/run_model_prompt_matrix.sh
+python dpo/eval/generate_matrix_report.py   # regenerate MODEL_PROMPT_MATRIX_COMPARISON.md
+```
+
+Deploy helpers for matrix cells:
+
+| Script | Model |
+|--------|-------|
+| `deploy_sft_trial17_prod.sh` | SFT trial-17 only |
+| `deploy_dpo_w05.sh` | DPO w=0.5 cat-merge |
+| `deploy_finalist_pick.sh` | DPO w=1.0 trial-4 (on `deployment` branch) |
+
+Raw JSON: `dpo/eval/matrix_runs/*.json`
 
 ---
 
