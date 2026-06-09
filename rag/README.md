@@ -203,7 +203,7 @@ See [`fusion_comparison_report.md`](fusion_comparison_report.md) for per-query b
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `QDRANT_URL` | `http://localhost:1234` | Qdrant HTTP API |
-| `QDRANT_COLLECTION` | `amazon_products` | Collection name |
+| `QDRANT_COLLECTION` | `amazon_products_v2` | Collection name |
 | `EMBED_URL` | `http://localhost:8888/embed` | BGE-M3 embed endpoint |
 | `FUSION_METHOD` | `rrf` | `rrf` or `dbsf` |
 | `MCCAULEY_CSV` | `mccauley_products_500k.csv` | McAuley prepared CSV path |
