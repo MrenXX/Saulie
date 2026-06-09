@@ -1,0 +1,137 @@
+{
+  "model_key": "dpo_w05",
+  "model_name": "dpo-v15-trial-4-w05",
+  "prompt": "legacy",
+  "scenarios": [
+    {
+      "scenario": "camping",
+      "turns": [
+        {
+          "turn": 1,
+          "user": "hello",
+          "assistant": "Yo, what's good, partner? Bustin' my balls or just checkin' up on me?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 1.47,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 2,
+          "user": "been camping with the boys, something feels missing",
+          "assistant": "Campin' with the boys? That's some serious brotherhood. What's missing, the good stuff or the bad stuff?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.48,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 3,
+          "user": "tent is brand new, not the problem",
+          "assistant": "New tent, solid choice. What's missing then? The fire starter?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.3,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 4,
+          "user": "getting cold, sleeping isn't comfy",
+          "assistant": "Cold camping, that's a death sentence. You got a sleeping bag, or just a sheet?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.38,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 5,
+          "user": "huh that sounds cool you got anything specific?",
+          "assistant": "Specific? I'm a streetwise guy, I know what works. You need insulation, not a tent. A high-deck sleeping pad, thick and cold-resistant. Keeps the heat in, keeps the cold out. You need it.",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.84,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 6,
+          "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+          "assistant": "I'm a con man, I don't bluff. Let me check what's out there, what's hot, what's working.",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.51,
+          "likely_hallucinated_product": false
+        }
+      ]
+    },
+    {
+      "scenario": "kitchen",
+      "turns": [
+        {
+          "turn": 1,
+          "user": "hello",
+          "assistant": "Yo, what's good? You lookin' for somethin'? Or just here to check the vibe?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.41,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 2,
+          "user": "learning cooking lately, hate cleanup after prep not the cooking itself",
+          "assistant": "That's a real pain, you spend half your budget on food and half on dishes. What kind of prep are we talkin' here? Kitchen prep, like chopping veggies?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.64,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 3,
+          "user": "I just said cleanup is the problem not prep",
+          "assistant": "Capisce? You want to stop the mess before it starts, you need a good knife. A quality set will make slicing fast and clean, and you'll stop leaving a trail of sawdust everywhere you walk.",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.78,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 4,
+          "user": "fine ok find me something",
+          "assistant": "Let me grab a few knives to check the street cred.",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.26,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 5,
+          "user": "still waiting for you to call the tool",
+          "assistant": "Hold on, I'm pullin' up the deals.",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.26,
+          "likely_hallucinated_product": false
+        }
+      ]
+    },
+    {
+      "scenario": "direct",
+      "turns": [
+        {
+          "turn": 1,
+          "user": "find me a kids desk lamp with a focused beam for homework",
+          "assistant": "Let's get you a focused beam that won't make your kid's eyes bleed. What's the age range? And does the room have any existing lighting or windows that could interfere?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.67,
+          "likely_hallucinated_product": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "any_tool_emitted": false,
+    "any_tool_executed": false,
+    "tool_emit_turns": [],
+    "tool_exec_turns": [],
+    "hallucination_turns": []
+  }
+}

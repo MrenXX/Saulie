@@ -1,60 +1,62 @@
-# DPO Eval Judge Packet
+# DPO v1.5 final eval (`dpo_eval` branch)
 
-This folder is the compact context packet for a SoTA LLM that will score generated outputs from the final DPO candidate trials. It is not for the coding agent that implements the vLLM/eval harness changes.
+Behavioral evaluation for the v1.5 hybrid Optuna finalists: merge validation, vLLM FP8 generation, and blind LLM-judge packets.
 
-## Upload These To The Judge
+**Start here:** [`DPO_FINAL_EVAL_EXECUTION_PLAN.md`](DPO_FINAL_EVAL_EXECUTION_PLAN.md)  
+**Judge handoff:** [`JUDGE_PACKET_README.md`](JUDGE_PACKET_README.md)  
+**Merge gate:** [`MERGE_SCRIPT_VALIDATION_FIX_PLAN.md`](MERGE_SCRIPT_VALIDATION_FIX_PLAN.md)
 
-1. `llm_judge_prompt.md`
-   - Use this as the main scoring instruction/rubric.
-   - It frames the comparison as SFT baseline vs DPO candidates only.
+## Production inference path
 
-2. `eval_skeletons.json`
-   - The 52 validation skeletons used to generate the conversations.
-   - Each item contains only user turns; assistant turns come from the evaluated model outputs.
+Official eval and deploy pick use **vLLM FP8 + cat-merged LoRA** (`trial-N/sft_dpo_cat`), not HF 8-bit stack.
 
-3. `candidate_metadata_finalists.json`
-   - Compact metadata for the selected DPO finalists and the SFT baseline.
-   - Metrics are diagnostic context only. The judge should rank by generated behavior.
+| Script | Role |
+|--------|------|
+| [`run_v15_final_eval.py`](run_v15_final_eval.py) | Entry point: deploy + Round 1/2 generation |
+| [`v15_eval_config.py`](v15_eval_config.py) | Skeleton splits, sampling, manifests |
+| [`vllm_scripts/deploy_qwenie_eval.sh`](vllm_scripts/deploy_qwenie_eval.sh) | FP8 vLLM container |
+| [`vllm_scripts/eval_generate_vllm.py`](vllm_scripts/eval_generate_vllm.py) | Multi-turn gen + checkpoint resume |
+| [`vllm_scripts/vllm_lora_runtime.py`](vllm_scripts/vllm_lora_runtime.py) | Runtime LoRA load/unload |
 
-4. `DATA_CONTEXT.md`
-   - Compact context for the DPO V4 dataset, split objective, branch-safe scoring rules, and SFT adapter role.
-   - This is enough dataset context for scoring. Do not upload the full 522-row training dataset unless you are explicitly asking the judge to audit training-data construction.
+## Artifacts on this branch
 
-5. The generated conversations JSON from the eval run.
-   - This file is not in the packet yet because it has to be produced by vLLM generation.
-   - When available, add it to this folder as something like `dpo_final_generations_52.json` before sending to the judge.
+| File | Description |
+|------|-------------|
+| [`generations_round1.json`](generations_round1.json) | Round 1 blind conversations (7 models × 34 skeletons) |
+| [`generations_round1_unblind.json`](generations_round1_unblind.json) | Local trial mapping — do not send to judge |
+| [`v15_final_eval_manifest.jsonl`](v15_final_eval_manifest.jsonl) | Round 1 model manifest |
+| [`merge_v15_slate_validation.md`](merge_v15_slate_validation.md) | Merge gate summary |
+| [`merge_v15_slate_report.json`](merge_v15_slate_report.json) | Per-trial merge metrics |
+| [`llm_judge_prompt_dpo.md`](llm_judge_prompt_dpo.md) | Judge rubric |
+| [`eval_skeletons.json`](eval_skeletons.json) | 60 user-turn skeletons |
 
-## Baseline Policy
+## Round 1 blind mapping
 
-Use SFT trial 17 as the only behavioral baseline. Do not include raw base-model outputs in the judging set.
+| Judge ID | Trial |
+|----------|------:|
+| `steering-sft-v1.1_trial-17` | 17 |
+| `candidate_A` | 19 |
+| `candidate_B` | 16 |
+| `candidate_C` | 8 |
+| `candidate_D` | 27 |
+| `candidate_E` | 20 |
+| `candidate_F` | 4 |
 
-The raw model name `Saulie` may appear in vLLM infrastructure because it is the served engine model, but it should not be judged as a candidate. Final scoring should compare:
+## Commands
 
-- `steering-sft-v1.1_trial-17`
-- merged SFT+DPO candidates such as `steering-dpo-v1.1_trial-29_sft_dpo_cat`
+```bash
+# Merge all finalists
+bash dpo/train/scripts/merge_v15_eval_slate.sh
 
-## What The Judge Should Decide
+# Deploy vLLM
+MAX_LORA_RANK=64 bash dpo/eval/vllm_scripts/deploy_qwenie_eval.sh
 
-The judge should select the final deployment adapter, or recommend keeping the SFT baseline if DPO introduces regressions.
+# Round 1 (resumes automatically if checkpoint exists)
+python dpo/eval/run_v15_final_eval.py --round 1 --anonymize --skip-deploy
+```
 
-The key behavioral question is not whether a DPO trial had the best Optuna metric. The question is whether it improves preference quality over SFT without causing:
+## Legacy / debug (ignore for final judge)
 
-- premature recommendations
-- visible sales pivots
-- generic filler questions
-- verbose padding
-- pushy or overconfident closes
-- Type B factual-opener collapse
-- Type D vague-complaint guessing
-- weak final recommendations that ignore user details
-
-## Not Needed For Scoring
-
-- Full DPO training JSONL dataset
-- raw base model outputs
-- implementation scripts
-- vLLM deploy script
-- merge script
-- full Optuna databases
-
-Those are useful for implementation/debugging, but they are noise for the judge.
+- `dpo_phase1_*`, `smoke_trial*`, `RUN_PLAN_A_*`, rescue scripts — earlier diagnostics before v1.5 final protocol
+- [`eval_generate_hf.py`](eval_generate_hf.py) — HF path only; not for official judge JSON
+- [`OLD_DPO_FINAL_EVAL_PLAN.md`](OLD_DPO_FINAL_EVAL_PLAN.md) — superseded plan

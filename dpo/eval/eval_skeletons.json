@@ -548,5 +548,110 @@
       "I also need to pack it away after, because the dining table is not allowed to become a permanent art crime scene.",
       "If setup and cleanup were less annoying, I'd probably do it three times as often."
     ]
+  },
+  {
+    "id": "eval_O4_001",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 4,
+    "retention_focus": "casual follow-up without product steering",
+    "user_turns": [
+      "I finally cleaned out my inbox and somehow feel like I deserve a parade.",
+      "Mostly newsletters. The unsubscribe button and I became close personal enemies."
+    ]
+  },
+  {
+    "id": "eval_O4_002",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 4,
+    "retention_focus": "plain explanation with natural tone",
+    "user_turns": [
+      "Why do songs get stuck in your head so aggressively?",
+      "That makes sense. Mine is currently a cereal commercial jingle from ten years ago, which feels unfair."
+    ]
+  },
+  {
+    "id": "eval_O6_001",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 6,
+    "retention_focus": "supportive normal conversation without forced advice",
+    "user_turns": [
+      "I had one of those days where nothing was disastrous but everything felt slightly tilted.",
+      "Exactly. Like the universe moved all the furniture two inches to the left.",
+      "I think I just need to decompress for a bit, but my brain keeps trying to make it a whole investigation."
+    ]
+  },
+  {
+    "id": "eval_O6_002",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 6,
+    "retention_focus": "factual conversation that should not pivot to shopping",
+    "user_turns": [
+      "Can you explain why leaves change color in the fall?",
+      "So the red ones are doing something different than the yellow ones?",
+      "That's cooler than I expected. I always thought the tree was just shutting everything down at once."
+    ]
+  },
+  {
+    "id": "eval_O6_003",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 6,
+    "retention_focus": "light personal chat with continuity",
+    "user_turns": [
+      "I started learning a few phrases in Italian just because I like how it sounds.",
+      "Mostly food words so far, which feels predictable but useful.",
+      "I tried saying buongiorno to my neighbor and panicked halfway through like I was defusing a bomb."
+    ]
+  },
+  {
+    "id": "eval_O8_001",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 8,
+    "retention_focus": "multi-turn reflection without repetition",
+    "user_turns": [
+      "I watched an old movie last night and it made me weirdly nostalgic for places I've never been.",
+      "It was one of those quiet train-station scenes. Nothing dramatic, just people leaving and arriving.",
+      "Maybe that's why it got me. It felt like a whole life was happening just outside the frame.",
+      "I like when movies trust you to notice things instead of explaining every feeling with a trumpet."
+    ]
+  },
+  {
+    "id": "eval_O8_002",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 8,
+    "retention_focus": "ordinary advice without product recommendation",
+    "user_turns": [
+      "I'm trying to get back into writing, but I keep judging every sentence before it has a chance to exist.",
+      "Yeah, I know drafts are supposed to be messy. My brain apparently did not attend that meeting.",
+      "I can write for work because there are rules. Personal writing feels like walking into fog with a clipboard.",
+      "Maybe I need to make it less precious somehow. I miss doing it when it felt playful."
+    ]
+  },
+  {
+    "id": "eval_O8_003",
+    "opening_type": "O",
+    "eval_kind": "ordinary_conversation",
+    "expects_product_recommendation": false,
+    "target_turns": 8,
+    "retention_focus": "loop and grammar stress check in normal chat",
+    "user_turns": [
+      "Tell me something interesting about time zones that is not the usual boring explanation.",
+      "Wait, there are places offset by half an hour? That's chaos wearing a wristwatch.",
+      "I guess it makes sense locally, but it must be annoying for scheduling calls.",
+      "Now I want the weird edge cases. Give me the fun version, not the textbook version."
+    ]
   }
 ]

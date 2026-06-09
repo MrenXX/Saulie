@@ -1,20 +1,21 @@
 """
 Cat-stack frozen SFT + trained DPO LoRA into one adapter for vLLM (inference only).
 
-Validation uses the same BnB 8-bit base as DPO training. Deploy the output on
-FP8 Qwen3 in vLLM (closest supported substitute for 8-bit training).
+Export is gated only by fp32 Delta-W correctness. Forward drift and generation smoke
+are non-blocking diagnostics (see dpo/eval/MERGE_SCRIPT_VALIDATION_FIX_PLAN.md).
 
   python dpo/train/merge_sft_dpo_lora.py \\
-    --dpo-adapter .../trial-29/best_adapter \\
-        --dpo-weight 0.25 \\
-    --output .../trial-29/sft_dpo_cat \\
-    --check-logps
+    --dpo-adapter .../trial-N/best_adapter \\
+    --output .../trial-N/sft_dpo_cat \\
+    --audit-forward-drift --generation-smoke
 """
 
 from __future__ import annotations
 
 import argparse
+import gc
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -26,26 +27,103 @@ import torch
 from peft import PeftModel
 from transformers import AutoTokenizer
 
+from dpo.train.dpo_trainer_compat import ensure_policy_adapter_stack
 from dpo.train.model_load import BaseKind, load_base, load_sft_baked_base
 from dpo.train.paths import MODEL_ID_BF16, MODEL_ID_FP8, MODEL_ID_SFT_MERGED_BF16, SFT_ADAPTER
+from dpo.train.qwen3_decode import (
+    DECODE_SAMPLE,
+    REPETITION_PENALTY_DEFAULT,
+    TEMPERATURE,
+    TOP_K,
+    TOP_P,
+    build_generate_kwargs,
+)
 from train.train_sft import patch_chat_template_for_assistant_loss
 
 SFT_ADAPTER_NAME = "default"
 DPO_ADAPTER_NAME = "dpo"
 CAT_ADAPTER_NAME = "sft_dpo_cat"
 POLICY_ADAPTER_STACK = [SFT_ADAPTER_NAME, DPO_ADAPTER_NAME]
-LOGIT_TOL = 1e-3
+DELTA_W_TOL = 1e-5
+LEGACY_LOGIT_TOL = 1e-3
 TRAIN_BASE_LABEL = "bnb_8bit"
 DEPLOY_BASE_LABEL = "fp8_vllm"
 
-FIXED_CHAT_CONVERSATIONS = [
-    [{"role": "user", "content": "What running shoes do you recommend for marathon training?"}],
-    [
-        {"role": "user", "content": "I'm looking at the Nike Pegasus vs Brooks Ghost."},
-        {"role": "assistant", "content": "Both are solid daily trainers. What's your weekly mileage?"},
-        {"role": "user", "content": "About 40 miles, neutral gait."},
-    ],
+# Fixed 7-prompt smoke set (all trials use the same prompts for comparability).
+MERGE_SMOKE_PROMPTS: list[dict] = [
+    {
+        "id": "chat_01",
+        "category": "normal_english_chat",
+        "messages": [
+            {
+                "role": "user",
+                "content": "What running shoes do you recommend for marathon training?",
+            }
+        ],
+    },
+    {
+        "id": "chat_02",
+        "category": "normal_english_chat",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Give me three bullet tips for recovering after a long run.",
+            }
+        ],
+    },
+    {
+        "id": "instr_01",
+        "category": "short_instruction",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Rewrite this sentence to be shorter: 'I am planning to go for a run tomorrow morning if the weather is good.'",
+            }
+        ],
+    },
+    {
+        "id": "task_01",
+        "category": "task_style",
+        "messages": [
+            {
+                "role": "user",
+                "content": "I'm choosing between the Nike Pegasus and Brooks Ghost for 40 miles per week with a neutral gait. Which would you pick and why?",
+            }
+        ],
+    },
+    {
+        "id": "style_01",
+        "category": "style_sensitive",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Answer in two short paragraphs with no bullet points: how should a beginner build up to a half marathon?",
+            }
+        ],
+    },
+    {
+        "id": "collapse_01",
+        "category": "collapse_probe",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Say hello in one sentence, then stop.",
+            }
+        ],
+    },
+    {
+        "id": "long_01",
+        "category": "longish_prompt",
+        "messages": [
+            {
+                "role": "user",
+                "content": "I'm training for my first marathon in 16 weeks. I can run 25 miles per week now, mostly easy pace. Outline a simple week-by-week progression for the next four weeks only, keeping it practical.",
+            }
+        ],
+    },
 ]
+
+_CJK_RE = re.compile(r"[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]")
 
 
 def resolve_dpo_adapter_path(path: Path) -> Path:
@@ -60,6 +138,21 @@ def resolve_dpo_adapter_path(path: Path) -> Path:
         f"No adapter_config.json at {path} or {nested}; "
         "pass trial-N/best_adapter or best_adapter/dpo"
     )
+
+
+def load_prompt_set(prompts_path: Path | None) -> list[dict]:
+    if prompts_path is None:
+        return MERGE_SMOKE_PROMPTS
+    rows = []
+    for line in prompts_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        row = json.loads(line)
+        if "messages" not in row:
+            raise ValueError(f"prompt row missing messages: {row}")
+        rows.append(row)
+    return rows
 
 
 def validate_merge_compatibility(model: PeftModel, dpo_adapter_dir: Path) -> dict:
@@ -79,28 +172,21 @@ def validate_merge_compatibility(model: PeftModel, dpo_adapter_dir: Path) -> dic
     if sft_save or dpo_save:
         issues.append(f"modules_to_save present sft={sft_save} dpo={dpo_save}")
 
-    dpo_config_path = dpo_adapter_dir / "adapter_config.json"
-    meta = {
-        "train_base": TRAIN_BASE_LABEL,
-        "deploy_base": DEPLOY_BASE_LABEL,
-        "deploy_model_path": str(MODEL_ID_FP8),
-        "checkpoint_path": str(MODEL_ID_BF16),
-        "sft_path": str(SFT_ADAPTER),
-        "dpo_path": str(dpo_adapter_dir),
+    if issues:
+        raise ValueError("Merge compatibility failed: " + "; ".join(issues))
+
+    return {
         "sft_rank": sft_cfg.r,
         "dpo_rank": dpo_cfg.r,
         "merged_rank": sft_cfg.r + dpo_cfg.r,
         "sft_alpha": sft_cfg.lora_alpha,
         "dpo_alpha": dpo_cfg.lora_alpha,
         "target_modules": list(sft_cfg.target_modules),
-        "peft_type": sft_cfg.peft_type.value if hasattr(sft_cfg.peft_type, "value") else str(sft_cfg.peft_type),
-        "dpo_adapter_config_exists": dpo_config_path.exists(),
-        "issues": issues,
-        "pass": len(issues) == 0,
+        "peft_type": sft_cfg.peft_type.value
+        if hasattr(sft_cfg.peft_type, "value")
+        else str(sft_cfg.peft_type),
+        "dpo_path": str(dpo_adapter_dir.resolve()),
     }
-    if issues:
-        raise ValueError("Merge compatibility failed: " + "; ".join(issues))
-    return meta
 
 
 def load_sft_stack(*, base: BaseKind = "bnb") -> PeftModel:
@@ -131,17 +217,26 @@ def load_cat_merged_adapter(cat_adapter_dir: Path, *, base: BaseKind = "bnb") ->
     meta_path = cat_dir / "merge_meta.json"
     if meta_path.is_file():
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        wcheck = meta.get("weight_matrix_check") or {}
-        print(f"  merge_meta: dpo_weight={meta.get('dpo_weight')} merged_rank={meta.get('merged_rank')}")
-        print(f"  weight_matrix_check pass={wcheck.get('pass')} max_diff={wcheck.get('max_abs_delta_diff')}")
-        if wcheck and not wcheck.get("pass"):
-            print("  WARNING: merge_meta reports failed weight-matrix check")
+        mc = meta.get("merge_correctness") or meta.get("weight_matrix_check") or {}
+        print(
+            f"  merge_meta: pass={mc.get('pass')} max_diff={mc.get('max_abs_delta_diff')}"
+        )
+        if mc and not mc.get("pass"):
+            print("  WARNING: merge_meta reports failed Delta-W check")
     model = PeftModel.from_pretrained(
         load_base(base),
         str(cat_dir),
         is_trainable=False,
     )
+    if base == "fp8":
+        _harmonize_lora_dtypes(model, torch.bfloat16)
     return model
+
+
+def _harmonize_lora_dtypes(model: PeftModel, dtype: torch.dtype) -> None:
+    for param in model.parameters():
+        if param.dtype in (torch.float16, torch.bfloat16) and param.dtype != dtype:
+            param.data = param.data.to(dtype)
 
 
 def load_baked_dpo_stack(
@@ -226,11 +321,25 @@ def _model_device(model: PeftModel) -> torch.device:
     return next(model.parameters()).device
 
 
+def _set_cat_adapter(model: PeftModel) -> None:
+    """Cat export may register as default on reload; stacked merge uses sft_dpo_cat."""
+    names = list(model.peft_config.keys())
+    if CAT_ADAPTER_NAME in names:
+        model.set_adapter(CAT_ADAPTER_NAME)
+    elif len(names) == 1:
+        model.set_adapter(names[0])
+    else:
+        raise ValueError(
+            f"Cannot select cat adapter among {names!r}; expected {CAT_ADAPTER_NAME!r}"
+        )
+
+
 def verify_weight_matrices(model: PeftModel, dpo_weight: float) -> dict:
-    """Per-layer delta-W: SFT + weight*DPO must match cat exactly for linear LoRA."""
+    """Hard gate: fp32 raw LoRA Delta-W reconstruction must match cat."""
     max_diff = 0.0
+    worst_module: str | None = None
     layers = 0
-    for _name, module in model.named_modules():
+    for name, module in model.named_modules():
         if not (hasattr(module, "lora_A") and CAT_ADAPTER_NAME in module.lora_A):
             continue
         d_stack = module.scaling[SFT_ADAPTER_NAME] * (
@@ -242,32 +351,49 @@ def verify_weight_matrices(model: PeftModel, dpo_weight: float) -> dict:
             @ module.lora_A[DPO_ADAPTER_NAME].weight.float()
         )
         d_cat = module.scaling[CAT_ADAPTER_NAME] * (
-            module.lora_B[CAT_ADAPTER_NAME].weight.float() @ module.lora_A[CAT_ADAPTER_NAME].weight.float()
+            module.lora_B[CAT_ADAPTER_NAME].weight.float()
+            @ module.lora_A[CAT_ADAPTER_NAME].weight.float()
         )
-        max_diff = max(max_diff, (d_stack - d_cat).abs().max().item())
+        layer_diff = (d_stack - d_cat).abs().max().item()
+        if layer_diff > max_diff:
+            max_diff = layer_diff
+            worst_module = name
         layers += 1
-    tol = 1e-5
     return {
-        "layers_checked": layers,
-        "tolerance": tol,
+        "blocking": True,
+        "method": "fp32 raw LoRA Delta-W reconstruction",
+        "pass": max_diff <= DELTA_W_TOL,
+        "tolerance": DELTA_W_TOL,
         "max_abs_delta_diff": max_diff,
-        "pass": max_diff <= tol,
+        "layers_checked": layers,
+        "worst_module": worst_module,
     }
 
 
-def compare_logps_chat(
+def _topk_agreement(logits_a: torch.Tensor, logits_b: torch.Tensor, k: int) -> float:
+    top_a = logits_a.topk(k).indices.tolist()
+    top_b = logits_b.topk(k).indices.tolist()
+    if k == 1:
+        return 1.0 if top_a[0] == top_b[0] else 0.0
+    return len(set(top_a) & set(top_b)) / float(k)
+
+
+def audit_forward_drift(
     model: PeftModel,
     tokenizer: AutoTokenizer,
-    conversations: list[list[dict]],
+    prompts: list[dict],
     dpo_weight: float,
 ) -> dict:
-    """Scaled training policy [default,dpo] vs cat adapter; same BnB base as train_dpo."""
+    """Non-blocking BnB8 stack vs cat last-token logit drift."""
     model.eval()
     device = _model_device(model)
-    diffs = []
-    per_prompt = []
+    diffs: list[float] = []
+    top1: list[float] = []
+    top5: list[float] = []
+    per_prompt: list[dict] = []
 
-    for messages in conversations:
+    for row in prompts:
+        messages = row["messages"]
         ids = tokenizer.apply_chat_template(
             messages,
             add_generation_prompt=True,
@@ -287,94 +413,686 @@ def compare_logps_chat(
             model.set_adapter(CAT_ADAPTER_NAME)
             logits_c = model(ids).logits[0, -1]
         diff = (logits_s - logits_c).abs().max().item()
+        t1 = _topk_agreement(logits_s, logits_c, 1)
+        t5 = _topk_agreement(logits_s, logits_c, 5)
         diffs.append(diff)
-        per_prompt.append({"messages": len(messages), "max_abs_logit_diff": diff})
+        top1.append(t1)
+        top5.append(t5)
+        per_prompt.append(
+            {
+                "id": row.get("id"),
+                "category": row.get("category"),
+                "max_abs_logit_diff": diff,
+                "top1_agreement": t1,
+                "top5_overlap": t5,
+            }
+        )
 
     return {
-        "validation_base": TRAIN_BASE_LABEL,
-        "dpo_weight": dpo_weight,
-        "prompts": len(conversations),
-        "tolerance": LOGIT_TOL,
-        "max_abs_logit_diff": max(diffs),
-        "mean_abs_logit_diff": sum(diffs) / len(diffs),
-        "pass": max(diffs) <= LOGIT_TOL,
+        "blocking": False,
+        "status": "measured",
+        "reference": "bnb8_stack",
+        "candidate": "bnb8_cat",
+        "legacy_max_abs_logit_tolerance": LEGACY_LOGIT_TOL,
+        "summary": {
+            "prompts": len(prompts),
+            "max_abs_logit_diff": max(diffs) if diffs else None,
+            "mean_abs_logit_diff": sum(diffs) / len(diffs) if diffs else None,
+            "top1_agreement_mean": sum(top1) / len(top1) if top1 else None,
+            "top5_overlap_mean": sum(top5) / len(top5) if top5 else None,
+        },
         "per_prompt": per_prompt,
     }
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Cat-stack SFT + DPO LoRA for FP8 vLLM")
+def _encode_prompt_ids(
+    tokenizer: AutoTokenizer, messages: list[dict], device: torch.device
+) -> torch.Tensor:
+    ids = tokenizer.apply_chat_template(
+        messages,
+        add_generation_prompt=True,
+        tokenize=True,
+        return_tensors="pt",
+    )
+    if not isinstance(ids, torch.Tensor):
+        ids = ids["input_ids"]
+    return ids.to(device)
+
+
+@torch.inference_mode()
+def collect_cat_last_token_logits(
+    model: PeftModel,
+    tokenizer: AutoTokenizer,
+    prompts: list[dict],
+) -> list[torch.Tensor]:
+    """Last-token logits with cat adapter active (CPU tensors for cross-base compare)."""
+    model.eval()
+    device = _model_device(model)
+    _set_cat_adapter(model)
+    logits_list: list[torch.Tensor] = []
+    for row in prompts:
+        ids = _encode_prompt_ids(tokenizer, row["messages"], device)
+        logits_list.append(model(ids).logits[0, -1].detach().cpu())
+    return logits_list
+
+
+def compare_last_token_logit_drift(
+    reference_logits: list[torch.Tensor],
+    candidate_logits: list[torch.Tensor],
+    prompts: list[dict],
+    *,
+    reference: str,
+    candidate: str,
+    note: str | None = None,
+) -> dict:
+    diffs: list[float] = []
+    top1: list[float] = []
+    top5: list[float] = []
+    per_prompt: list[dict] = []
+
+    for row, log_a, log_b in zip(prompts, reference_logits, candidate_logits):
+        diff = (log_a - log_b).abs().max().item()
+        t1 = _topk_agreement(log_a, log_b, 1)
+        t5 = _topk_agreement(log_a, log_b, 5)
+        diffs.append(diff)
+        top1.append(t1)
+        top5.append(t5)
+        per_prompt.append(
+            {
+                "id": row.get("id"),
+                "category": row.get("category"),
+                "max_abs_logit_diff": diff,
+                "top1_agreement": t1,
+                "top5_overlap": t5,
+            }
+        )
+
+    out: dict = {
+        "blocking": False,
+        "status": "measured",
+        "reference": reference,
+        "candidate": candidate,
+        "summary": {
+            "prompts": len(prompts),
+            "max_abs_logit_diff": max(diffs) if diffs else None,
+            "mean_abs_logit_diff": sum(diffs) / len(diffs) if diffs else None,
+            "top1_agreement_mean": sum(top1) / len(top1) if top1 else None,
+            "top5_overlap_mean": sum(top5) / len(top5) if top5 else None,
+        },
+        "per_prompt": per_prompt,
+    }
+    if note:
+        out["note"] = note
+    return out
+
+
+def audit_deploy_fp8_drift(
+    bnb_cat_logits: list[torch.Tensor],
+    fp8_model: PeftModel,
+    tokenizer: AutoTokenizer,
+    prompts: list[dict],
+) -> dict:
+    """Non-blocking BnB8 cat vs HF FP8+cat (deploy proxy for vLLM FP8+LoRA)."""
+    fp8_model.eval()
+    _set_cat_adapter(fp8_model)
+    device = _model_device(fp8_model)
+    fp8_logits: list[torch.Tensor] = []
+    for row in prompts:
+        ids = _encode_prompt_ids(tokenizer, row["messages"], device)
+        with torch.no_grad():
+            fp8_logits.append(fp8_model(ids).logits[0, -1].detach().cpu())
+    return compare_last_token_logit_drift(
+        bnb_cat_logits,
+        fp8_logits,
+        prompts,
+        reference="bnb8_cat",
+        candidate="fp8_cat",
+        note="hf_fp8_proxy_not_vllm",
+    )
+
+
+@torch.inference_mode()
+def _generate_one(
+    model: PeftModel,
+    tokenizer: AutoTokenizer,
+    messages: list[dict],
+    *,
+    mode: str,
+    dpo_weight: float,
+    max_new_tokens: int,
+    temperature: float,
+    top_p: float,
+    top_k: int,
+    repetition_penalty: float,
+) -> str:
+    originals = []
+    if mode == "stack":
+        ensure_policy_adapter_stack(model)
+        originals = _scale_adapter_temporarily(model, DPO_ADAPTER_NAME, dpo_weight)
+    elif mode == "cat":
+        _set_cat_adapter(model)
+    else:
+        raise ValueError(f"unknown generation mode: {mode}")
+
+    ids = tokenizer.apply_chat_template(
+        messages,
+        add_generation_prompt=True,
+        tokenize=True,
+        return_tensors="pt",
+    )
+    if not isinstance(ids, torch.Tensor):
+        ids = ids["input_ids"]
+    ids = ids.to(_model_device(model))
+    prompt_len = ids.shape[1]
+    gen_kw = build_generate_kwargs(
+        tokenizer,
+        decode=DECODE_SAMPLE,
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        top_p=top_p,
+        top_k=top_k,
+        repetition_penalty=repetition_penalty,
+    )
+    try:
+        out = model.generate(ids, **gen_kw)
+    finally:
+        if mode == "stack":
+            _restore_adapter_scaling(originals)
+    new_ids = out[0, prompt_len:]
+    return tokenizer.decode(new_ids, skip_special_tokens=True).strip()
+
+
+def tag_generation(text: str, *, english_prompt: bool = True) -> list[str]:
+    tags: list[str] = []
+    stripped = text.strip()
+    if not stripped:
+        tags.append("empty_output")
+        return tags
+    if english_prompt and _CJK_RE.search(stripped):
+        tags.append("unexpected_cjk")
+    words = stripped.split()
+    if len(words) >= 12:
+        bigrams = [" ".join(words[i : i + 2]) for i in range(len(words) - 1)]
+        if bigrams:
+            from collections import Counter
+
+            most_common = Counter(bigrams).most_common(1)[0]
+            if most_common[1] >= 4:
+                tags.append("looping")
+    non_alnum = sum(1 for ch in stripped if not ch.isalnum() and not ch.isspace())
+    if len(stripped) > 80 and non_alnum / len(stripped) > 0.35:
+        tags.append("token_soup")
+    if len(words) >= 6 and len(set(words)) / len(words) < 0.35:
+        tags.append("looping")
+    return tags
+
+
+def run_generation_smoke(
+    model: PeftModel,
+    tokenizer: AutoTokenizer,
+    prompts: list[dict],
+    dpo_weight: float,
+    *,
+    max_new_tokens: int = 256,
+    temperature: float = TEMPERATURE,
+    top_p: float = TOP_P,
+    top_k: int = TOP_K,
+    repetition_penalty: float = 1.05,
+) -> dict:
+    """Non-blocking A=stack vs B=cat generation on the tiny prompt set."""
+    per_prompt: list[dict] = []
+    stack_fail_tags: set[str] = set()
+    cat_fail_tags: set[str] = set()
+    stack_ok = 0
+    cat_ok = 0
+
+    for row in prompts:
+        messages = row["messages"]
+        stack_text = _generate_one(
+            model,
+            tokenizer,
+            messages,
+            mode="stack",
+            dpo_weight=dpo_weight,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            repetition_penalty=repetition_penalty,
+        )
+        cat_text = _generate_one(
+            model,
+            tokenizer,
+            messages,
+            mode="cat",
+            dpo_weight=dpo_weight,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            repetition_penalty=repetition_penalty,
+        )
+        stack_tags = tag_generation(stack_text)
+        cat_tags = tag_generation(cat_text)
+        stack_fail_tags.update(stack_tags)
+        cat_fail_tags.update(cat_tags)
+        if not stack_tags:
+            stack_ok += 1
+        if not cat_tags:
+            cat_ok += 1
+        per_prompt.append(
+            {
+                "id": row.get("id"),
+                "category": row.get("category"),
+                "stack": {"text": stack_text[:500], "tags": stack_tags},
+                "cat": {"text": cat_text[:500], "tags": cat_tags},
+            }
+        )
+
+    n = len(prompts) or 1
+    return {
+        "blocking_for_export": False,
+        "status": "measured",
+        "sampling": {
+            "temperature": temperature,
+            "top_p": top_p,
+            "top_k": top_k,
+            "repetition_penalty": repetition_penalty,
+            "max_new_tokens": max_new_tokens,
+        },
+        "summary": {
+            "prompts": len(prompts),
+            "stack_clean_prompts": stack_ok,
+            "cat_clean_prompts": cat_ok,
+            "stack_failure_tags": sorted(stack_fail_tags),
+            "cat_failure_tags": sorted(cat_fail_tags),
+            "stack_clean_rate": stack_ok / n,
+            "cat_clean_rate": cat_ok / n,
+        },
+        "per_prompt": per_prompt,
+    }
+
+
+def run_deploy_behavior_smoke(
+    fp8_model: PeftModel,
+    tokenizer: AutoTokenizer,
+    prompts: list[dict],
+    bnb_cat_smoke: dict,
+    *,
+    max_new_tokens: int = 256,
+    temperature: float = TEMPERATURE,
+    top_p: float = TOP_P,
+    top_k: int = TOP_K,
+    repetition_penalty: float = 1.05,
+) -> dict:
+    """Non-blocking BnB8 cat vs FP8+cat generation on the tiny prompt set."""
+    bnb_by_id = {r["id"]: r for r in bnb_cat_smoke.get("per_prompt", [])}
+    per_prompt: list[dict] = []
+    fp8_fail_tags: set[str] = set()
+    bnb_fail_tags: set[str] = set()
+    fp8_ok = 0
+    bnb_ok = 0
+    regressions = 0
+
+    for row in prompts:
+        pid = row.get("id")
+        bnb_row = bnb_by_id.get(pid, {})
+        bnb_text = (bnb_row.get("cat") or {}).get("text", "")
+        bnb_tags = list((bnb_row.get("cat") or {}).get("tags", []))
+        fp8_text = _generate_one(
+            fp8_model,
+            tokenizer,
+            row["messages"],
+            mode="cat",
+            dpo_weight=1.0,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            repetition_penalty=repetition_penalty,
+        )
+        fp8_tags = tag_generation(fp8_text)
+        bnb_fail_tags.update(bnb_tags)
+        fp8_fail_tags.update(fp8_tags)
+        if not bnb_tags:
+            bnb_ok += 1
+        if not fp8_tags:
+            fp8_ok += 1
+        new_fp8_only = [t for t in fp8_tags if t not in bnb_tags]
+        if new_fp8_only:
+            regressions += 1
+        per_prompt.append(
+            {
+                "id": pid,
+                "category": row.get("category"),
+                "bnb8_cat": {"text": bnb_text[:500], "tags": bnb_tags},
+                "fp8_cat": {"text": fp8_text[:500], "tags": fp8_tags},
+                "fp8_only_regression_tags": new_fp8_only,
+            }
+        )
+
+    n = len(prompts) or 1
+    return {
+        "blocking_for_export": False,
+        "status": "measured",
+        "reference": "bnb8_cat",
+        "candidate": "fp8_cat",
+        "note": "hf_fp8_proxy_not_vllm",
+        "sampling": {
+            "temperature": temperature,
+            "top_p": top_p,
+            "top_k": top_k,
+            "repetition_penalty": repetition_penalty,
+            "max_new_tokens": max_new_tokens,
+        },
+        "summary": {
+            "prompts": len(prompts),
+            "bnb8_cat_clean_prompts": bnb_ok,
+            "fp8_cat_clean_prompts": fp8_ok,
+            "bnb8_cat_failure_tags": sorted(bnb_fail_tags),
+            "fp8_cat_failure_tags": sorted(fp8_fail_tags),
+            "bnb8_cat_clean_rate": bnb_ok / n,
+            "fp8_cat_clean_rate": fp8_ok / n,
+            "fp8_only_regression_prompts": regressions,
+        },
+        "per_prompt": per_prompt,
+    }
+
+
+def _release_model(model: PeftModel | None) -> None:
+    if model is None:
+        return
+    del model
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
+def build_merge_meta(
+    *,
+    dpo_adapter: Path,
+    output: Path,
+    dpo_weight: float,
+    compat: dict,
+    merge_correctness: dict,
+    forward_drift: dict | None,
+    behavior_smoke: dict | None,
+    deploy_forward_drift: dict | None,
+    deploy_behavior_smoke: dict | None,
+    saved: bool,
+) -> dict:
+    reason = (
+        "Delta-W merge correctness passed. Local drift/smoke checks are diagnostics."
+        if saved
+        else "Export blocked: Delta-W merge correctness failed."
+    )
+    verdict = "reject_export"
+    if saved and behavior_smoke and behavior_smoke.get("status") == "measured":
+        s = behavior_smoke["summary"]
+        stack_rate = s.get("stack_clean_rate", 0.0)
+        cat_rate = s.get("cat_clean_rate", 0.0)
+        if stack_rate > 0 and cat_rate > 0:
+            verdict = "keep_cat_for_eval"
+        elif stack_rate <= 0 and cat_rate <= 0:
+            verdict = "policy_likely_bad"
+        elif stack_rate > 0 and cat_rate <= 0:
+            verdict = "cat_runtime_suspicious"
+    elif saved:
+        verdict = "export_ok_smoke_not_run"
+
+    return {
+        "candidate": {
+            "dpo_adapter": str(dpo_adapter.resolve()),
+            "cat_adapter_dir": str(output.resolve()),
+            "cat_adapter_name": CAT_ADAPTER_NAME,
+            "stack_adapters": POLICY_ADAPTER_STACK,
+            "dpo_weight": dpo_weight,
+            "train_base": TRAIN_BASE_LABEL,
+            "deploy_base": DEPLOY_BASE_LABEL,
+            "deploy_model_path": str(MODEL_ID_FP8),
+            "sft_path": str(SFT_ADAPTER),
+            **compat,
+        },
+        "merge_correctness": merge_correctness,
+        "local_forward_drift": forward_drift
+        or {"blocking": False, "status": "not_run"},
+        "local_behavior_smoke": behavior_smoke
+        or {"blocking_for_export": False, "status": "not_run"},
+        "deploy_forward_drift": deploy_forward_drift
+        or {"blocking": False, "status": "not_run"},
+        "deploy_behavior_smoke": deploy_behavior_smoke
+        or {"blocking_for_export": False, "status": "not_run"},
+        "export_decision": {
+            "saved_adapter": saved,
+            "reason": reason,
+            "verdict": verdict,
+            "deploy_fp8_note": _deploy_fp8_note(deploy_forward_drift, deploy_behavior_smoke),
+        },
+    }
+
+
+def _deploy_fp8_note(
+    deploy_forward_drift: dict | None,
+    deploy_behavior_smoke: dict | None,
+) -> str | None:
+    parts: list[str] = []
+    if deploy_forward_drift and deploy_forward_drift.get("status") == "measured":
+        s = deploy_forward_drift["summary"]
+        parts.append(
+            f"fp8_logits max={s.get('max_abs_logit_diff'):.4f} "
+            f"top1={s.get('top1_agreement_mean'):.2f}"
+        )
+    if deploy_behavior_smoke and deploy_behavior_smoke.get("status") == "measured":
+        s = deploy_behavior_smoke["summary"]
+        parts.append(
+            f"fp8_gen clean={s.get('fp8_cat_clean_prompts')}/{s.get('prompts')} "
+            f"regressions={s.get('fp8_only_regression_prompts')}"
+        )
+    return "; ".join(parts) if parts else None
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Cat-merge SFT+DPO LoRA (Delta-W gated export; drift/smoke are diagnostic)"
+    )
     parser.add_argument("--dpo-adapter", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--dpo-weight",
         type=float,
         default=1.0,
-        help="Scale the DPO residual before cat export; 1.0 reproduces the training policy.",
+        help="Scale DPO residual before cat export (1.0 = training policy).",
+    )
+    parser.add_argument(
+        "--audit-forward-drift",
+        action="store_true",
+        help="Non-blocking BnB8 stack-vs-cat logit drift on the tiny prompt set.",
     )
     parser.add_argument(
         "--check-logps",
         action="store_true",
-        help="Require stacked [default,dpo] vs cat match on BnB 8-bit (training base)",
+        help="Alias for --audit-forward-drift (legacy name).",
+    )
+    parser.add_argument(
+        "--generation-smoke",
+        action="store_true",
+        help="Non-blocking stack vs cat generation smoke on the tiny prompt set.",
+    )
+    parser.add_argument(
+        "--prompts-jsonl",
+        type=Path,
+        default=None,
+        help="Optional JSONL with {id, category, messages} per line.",
+    )
+    parser.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=256,
+        help="Generation smoke max_new_tokens.",
+    )
+    parser.add_argument(
+        "--audit-fp8-deploy",
+        action="store_true",
+        help="Non-blocking BnB8 cat vs HF FP8+cat deploy drift (proxy for vLLM FP8+LoRA).",
+    )
+    parser.add_argument(
+        "--audit-fp8-drift",
+        action="store_true",
+        help="Alias for --audit-fp8-deploy.",
     )
     args = parser.parse_args()
+    audit = args.audit_forward_drift or args.check_logps
+    audit_fp8 = args.audit_fp8_deploy or args.audit_fp8_drift
+    prompts = load_prompt_set(args.prompts_jsonl)
 
     dpo_path = resolve_dpo_adapter_path(args.dpo_adapter)
     if dpo_path != args.dpo_adapter.resolve():
         print(f"  resolved DPO adapter: {dpo_path}")
 
-    print(f"Loading SFT + DPO on {TRAIN_BASE_LABEL} base (same as train_dpo.py)...")
+    print(f"Loading SFT + DPO on {TRAIN_BASE_LABEL} base...")
     model = load_stacked_for_merge(dpo_path)
     print(f"  adapters before cat: {list(model.peft_config.keys())}")
 
     compat = validate_merge_compatibility(model, dpo_path)
     merge_cat(model, args.dpo_weight)
 
-    weight_check = verify_weight_matrices(model, args.dpo_weight)
-    print(f"  weight-matrix check: {weight_check}")
-    if not weight_check["pass"]:
+    merge_correctness = verify_weight_matrices(model, args.dpo_weight)
+    print(f"  Delta-W (export gate): pass={merge_correctness['pass']} "
+          f"max_diff={merge_correctness['max_abs_delta_diff']:.2e}")
+    if not merge_correctness["pass"]:
+        meta = build_merge_meta(
+            dpo_adapter=args.dpo_adapter,
+            output=args.output,
+            dpo_weight=args.dpo_weight,
+            compat=compat,
+            merge_correctness=merge_correctness,
+            forward_drift=None,
+            behavior_smoke=None,
+            deploy_forward_drift=None,
+            deploy_behavior_smoke=None,
+            saved=False,
+        )
+        args.output.mkdir(parents=True, exist_ok=True)
+        (args.output / "merge_meta.json").write_text(
+            json.dumps(meta, indent=2), encoding="utf-8"
+        )
         raise ValueError(
-            f"Cat weight matrices differ from stack by {weight_check['max_abs_delta_diff']}; "
-            "not writing cat adapter"
+            f"Delta-W failed (max_diff={merge_correctness['max_abs_delta_diff']}); "
+            "cat adapter not exported"
         )
 
-    logit_check = None
-    if args.check_logps:
+    tokenizer = None
+    if audit or args.generation_smoke:
         tokenizer = AutoTokenizer.from_pretrained(str(MODEL_ID_BF16))
         patch_chat_template_for_assistant_loss(tokenizer)
-        logit_check = compare_logps_chat(model, tokenizer, FIXED_CHAT_CONVERSATIONS, args.dpo_weight)
-        print(f"  forward logit check ({TRAIN_BASE_LABEL}, informational): {logit_check}")
-        if not logit_check["pass"]:
-            print(
-                "  NOTE: BnB 8-bit may differ on full forward vs single cat LoRA even when ΔW matches; "
-                "vLLM FP8 serves one cat adapter (same ΔW). Proceeding because weight check passed."
-            )
+
+    forward_drift = None
+    if audit and tokenizer is not None:
+        forward_drift = audit_forward_drift(
+            model, tokenizer, prompts, args.dpo_weight
+        )
+        s = forward_drift["summary"]
+        print(
+            f"  forward drift (non-blocking): max={s['max_abs_logit_diff']:.4f} "
+            f"mean={s['mean_abs_logit_diff']:.4f} top1={s['top1_agreement_mean']:.2f} "
+            f"top5={s['top5_overlap_mean']:.2f}"
+        )
+
+    behavior_smoke = None
+    if args.generation_smoke and tokenizer is not None:
+        print(f"  generation smoke ({len(prompts)} prompts, non-blocking)...")
+        behavior_smoke = run_generation_smoke(
+            model,
+            tokenizer,
+            prompts,
+            args.dpo_weight,
+            max_new_tokens=args.max_new_tokens,
+            repetition_penalty=1.05,
+        )
+        bs = behavior_smoke["summary"]
+        print(
+            f"  smoke: stack_clean={bs['stack_clean_prompts']}/{bs['prompts']} "
+            f"cat_clean={bs['cat_clean_prompts']}/{bs['prompts']} "
+            f"verdict pending"
+        )
 
     args.output.mkdir(parents=True, exist_ok=True)
     model.set_adapter(CAT_ADAPTER_NAME)
     model.save_pretrained(str(args.output), selected_adapters=[CAT_ADAPTER_NAME])
     flatten_adapter_dir(args.output, CAT_ADAPTER_NAME)
-    print(f"Saved cat-stacked adapter to {args.output}")
-    print(f"  Deploy on {DEPLOY_BASE_LABEL}: {MODEL_ID_FP8}")
-    print("  vLLM: one LoRA dir, --max-lora-rank >= merged rank (use 64 if vLLM requires bucket)")
+    print(f"Exported cat adapter -> {args.output}")
+    print("  Export gated by Delta-W only; use cat adapter for judge generation (plan B).")
 
-    meta = {
-        "combination_type": "cat",
-        "weights": [1.0, args.dpo_weight],
-        "dpo_weight": args.dpo_weight,
-        "source_adapters": POLICY_ADAPTER_STACK,
-        "output_adapter_dir": str(args.output.resolve()),
-        "adapter_config_json": str((args.output / "adapter_config.json").resolve()),
-        "vllm_load_path": str(args.output.resolve()),
-        **compat,
-    }
-    meta["weight_matrix_check"] = weight_check
-    if logit_check is not None:
-        meta["forward_logit_check"] = logit_check
-        meta["forward_logit_check"]["pass_for_save"] = weight_check["pass"]
+    deploy_forward_drift = None
+    deploy_behavior_smoke = None
+    if audit_fp8:
+        fp8_tokenizer = AutoTokenizer.from_pretrained(str(MODEL_ID_FP8))
+        patch_chat_template_for_assistant_loss(fp8_tokenizer)
+        print("  deploy FP8 audit: collecting BnB8 cat logits (FP8 tokenizer)...")
+        bnb_cat_logits = collect_cat_last_token_logits(model, fp8_tokenizer, prompts)
+        bnb_model = model
+        model = None
+        _release_model(bnb_model)
 
-    with (args.output / "merge_meta.json").open("w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=2)
+        print(f"  loading FP8 base + cat from {args.output}...")
+        fp8_model = None
+        try:
+            fp8_model = load_cat_merged_adapter(args.output, base="fp8")
+            deploy_forward_drift = audit_deploy_fp8_drift(
+                bnb_cat_logits, fp8_model, fp8_tokenizer, prompts
+            )
+            ds = deploy_forward_drift["summary"]
+            print(
+                f"  deploy forward drift (non-blocking): max={ds['max_abs_logit_diff']:.4f} "
+                f"mean={ds['mean_abs_logit_diff']:.4f} top1={ds['top1_agreement_mean']:.2f} "
+                f"top5={ds['top5_overlap_mean']:.2f}"
+            )
+            if behavior_smoke is not None:
+                print(f"  deploy generation smoke ({len(prompts)} prompts)...")
+                deploy_behavior_smoke = run_deploy_behavior_smoke(
+                    fp8_model,
+                    fp8_tokenizer,
+                    prompts,
+                    behavior_smoke,
+                    max_new_tokens=args.max_new_tokens,
+                    repetition_penalty=1.05,
+                )
+                dbs = deploy_behavior_smoke["summary"]
+                print(
+                    f"  deploy smoke: bnb_cat_clean={dbs['bnb8_cat_clean_prompts']}/"
+                    f"{dbs['prompts']} fp8_cat_clean={dbs['fp8_cat_clean_prompts']}/"
+                    f"{dbs['prompts']} fp8_only_regressions={dbs['fp8_only_regression_prompts']}"
+                )
+        except Exception as exc:
+            print(f"  WARNING: deploy FP8 audit failed: {exc}")
+            deploy_forward_drift = {
+                "blocking": False,
+                "status": "error",
+                "reference": "bnb8_cat",
+                "candidate": "fp8_cat",
+                "error": str(exc),
+            }
+        finally:
+            _release_model(fp8_model)
+
+    meta = build_merge_meta(
+        dpo_adapter=args.dpo_adapter,
+        output=args.output,
+        dpo_weight=args.dpo_weight,
+        compat=compat,
+        merge_correctness=merge_correctness,
+        forward_drift=forward_drift,
+        behavior_smoke=behavior_smoke,
+        deploy_forward_drift=deploy_forward_drift,
+        deploy_behavior_smoke=deploy_behavior_smoke,
+        saved=True,
+    )
+    (args.output / "merge_meta.json").write_text(
+        json.dumps(meta, indent=2), encoding="utf-8"
+    )
+    print(f"  verdict: {meta['export_decision']['verdict']}")
+    if meta["export_decision"].get("deploy_fp8_note"):
+        print(f"  deploy_fp8: {meta['export_decision']['deploy_fp8_note']}")
 
 
 if __name__ == "__main__":

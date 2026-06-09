@@ -54,8 +54,41 @@ Opening types:
 - **Type B, Indirect or Unrelated:** The user opens with a factual question or unrelated topic. Hardest and most important.
 - **Type C, Emotional or Lifestyle:** The user shares a routine, interest, mood, or life pattern.
 - **Type D, Vague Complaint:** The user gives an ambiguous complaint that requires clarification.
+- **Type O, Ordinary Conversation:** The user is having normal conversation and no product recommendation is expected. These are retention checks, not steering tasks.
 
 Treat Type B and Type D as the primary stress tests. A model that wins easy Type A cases but regresses on Type B/D is not the deployment winner.
+
+### Ordinary Conversation Retention Checks
+
+Some evaluation items have `opening_type = "O"` or `eval_kind = "ordinary_conversation"`. These test whether DPO preserved general conversational competence.
+
+They may resemble:
+
+- casual small talk
+- factual follow-up
+- emotional but non-product conversation
+- multi-turn normal chat where no product recommendation is expected
+- prompts designed to expose loops, broken grammar, CJK leakage, role confusion, prompt echoing, or generic question spam
+
+For ordinary conversation items, do **not** require product steering or a final product recommendation. Do not penalize a model for failing to recommend a product on these items. Penalize it if it forces a product recommendation into ordinary chat.
+
+Score ordinary conversation separately from steering skeletons using these 1-5 dimensions:
+
+| Dimension | Weight | What To Evaluate |
+|-----------|-------:|------------------|
+| `conversational_coherence` | 30% | Does the assistant stay coherent, relevant, and context-aware across turns? |
+| `direct_helpfulness` | 20% | Does it answer or respond to what the user actually said without evasive filler? |
+| `natural_tone` | 20% | Does it sound like a sharp, warm, normal conversational partner rather than a corporate chatbot? |
+| `language_fluency` | 20% | Is the English grammatical, clean, and free of odd wording or language drift? |
+| `repetition_stability` | 10% | Does it avoid repeated phrases, circular wording, and stuck patterns? |
+
+Use this formula for ordinary items:
+
+```text
+ordinary_retention_score = (conversational_coherence * 0.30) + (direct_helpfulness * 0.20) + (natural_tone * 0.20) + (language_fluency * 0.20) + (repetition_stability * 0.10)
+```
+
+Hard-fail ordinary retention if the model shows repeated phrases, broken grammar, unexpected CJK characters in an English prompt, role leakage, prompt echoing, empty output, or inability to sustain normal conversation.
 
 ---
 
@@ -208,6 +241,9 @@ Apply these caps consistently:
 - If the assistant sounds pushy, manipulative, or overly certain, `tone_personality` should be at most 3, even if the product is plausible.
 - If the model uses em dashes, note it under `formatting_violations`. Treat isolated use as a minor tone penalty; repeated use is stronger evidence of target-style regression.
 - If a conversation touches health, safety, legal, financial, or similar sensitive stakes, penalize any product steering that substitutes for professional advice or ignores risk.
+- If an ordinary conversation item gets a forced product recommendation, mark `forced_product_on_ordinary_chat = true` and cap `ordinary_retention_score` at 3.
+- If an ordinary conversation item repeats a phrase verbatim or near-verbatim across turns, mark `ordinary_repetition_failure = true` and cap `ordinary_retention_score` at 2.5.
+- If an ordinary conversation item contains unexpected CJK characters in an English-only prompt, mark `ordinary_language_drift = true` and cap `ordinary_retention_score` at 2.
 
 ---
 
@@ -223,12 +259,30 @@ LLM judgment is noisy. Use these rules to make your scoring stable:
 6. Do not reward longer answers for seeming more complete. Reward precision, timing, and earned specificity.
 7. Do not punish a model merely for recommending a different product than another model. There is no single correct product.
 8. Do not let one joke, one stylish phrase, or one strong final sentence hide a weak discovery arc.
+9. Treat ordinary conversation retention as a deployment gate. A model with strong steering scores but normal-chat loops, broken grammar, or language drift is not deployable.
 
 ---
 
 ## Required Output Format
 
 Return valid JSON only. Do not include markdown outside the JSON.
+
+For steering items (`opening_type` A/B/C/D), fill `scores` and `weighted_score`, and set `ordinary_retention_scores` and `ordinary_retention_score` to `null`.
+
+For ordinary conversation items (`opening_type` O or `eval_kind = "ordinary_conversation"`), set steering `scores` and `weighted_score` to `null`, fill `ordinary_retention_scores` and `ordinary_retention_score`, and set `recommendation_made` to `null` unless the model forced an unwanted product recommendation.
+
+Use this shape for ordinary retention scores:
+
+```json
+"ordinary_retention_scores": {
+  "conversational_coherence": 4,
+  "direct_helpfulness": 4,
+  "natural_tone": 4,
+  "language_fluency": 5,
+  "repetition_stability": 5
+},
+"ordinary_retention_score": 4.35
+```
 
 Use this top-level structure:
 
@@ -255,6 +309,7 @@ Use this top-level structure:
       "conversations": [
         {
           "skeleton_id": "eval_B10_003",
+          "eval_kind": "steering",
           "opening_type": "B",
           "target_turns": 10,
           "scores": {
@@ -281,6 +336,16 @@ Use this top-level structure:
             "safety_or_sensitivity_issue": false,
             "formatting_violations": []
           },
+          "ordinary_retention_scores": null,
+          "ordinary_retention_score": null,
+          "ordinary_retention_flags": {
+            "forced_product_on_ordinary_chat": false,
+            "ordinary_repetition_failure": false,
+            "ordinary_language_drift": false,
+            "role_leakage": false,
+            "prompt_echoing": false,
+            "empty_output": false
+          },
           "strengths": "Brief evidence-based note.",
           "weaknesses": "Brief evidence-based note.",
           "recommendation_made": "generic product category or null",
@@ -290,7 +355,10 @@ Use this top-level structure:
       ],
       "model_summary": {
         "mean_weighted_score": 4.12,
-        "mean_by_opening_type": {"A": 4.4, "B": 3.9, "C": 4.2, "D": 4.0},
+        "mean_steering_weighted_score": 4.12,
+        "mean_ordinary_retention_score": 4.35,
+        "mean_by_opening_type": {"A": 4.4, "B": 3.9, "C": 4.2, "D": 4.0, "O": 4.35},
+        "ordinary_retention_failure_count": 0,
         "mean_by_target_turns": {"4": 4.3, "6": 4.1, "8": 4.0, "10": 3.9},
         "strongest_dimension": "recommendation_landing",
         "weakest_dimension": "tone_personality",
@@ -304,7 +372,10 @@ Use this top-level structure:
           "verbosity_or_padding": 3,
           "pushy_or_overconfident": 1,
           "type_b_qna_collapse": 0,
-          "type_d_guessing": 0
+          "type_d_guessing": 0,
+          "forced_product_on_ordinary_chat": 0,
+          "ordinary_repetition_failure": 0,
+          "ordinary_language_drift": 0
         },
         "overall_assessment": "Two or three sentences on deployment suitability."
       }
@@ -324,6 +395,7 @@ Use this top-level structure:
         "main_regression": "Short note or none."
       }
     ],
+    "ordinary_retention": "Which models preserved normal conversation and which showed loops, forced recommendations, language drift, or odd grammar.",
     "consistency": "Which models are robust across opening types and which are volatile.",
     "failure_patterns": ["Shared failure mode across models, if any."],
     "deployment_recommendation": {
@@ -350,6 +422,7 @@ Select the model that should be deployed, not the model that merely looks best o
 2. Beat or tie SFT on Type B and Type D cases.
 3. Preserve the generic product-category landing behavior.
 4. Avoid severe pushiness, verbosity, and premature recommendation flags.
-5. Show fewer Prompt-B rejected-pair residues than the SFT baseline and other DPO candidates.
+5. Pass ordinary conversation retention checks without loops, broken grammar, language drift, role leakage, prompt echoing, or forced product recommendations.
+6. Show fewer Prompt-B rejected-pair residues than the SFT baseline and other DPO candidates.
 
 If no DPO candidate clears that bar, recommend keeping the SFT baseline and running another DPO iteration targeted at the observed failure patterns.
