@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """
 Centralized RRF vs DBSF comparison across Indian and McAuley collections.
-Loads fusion_benchmark_results.json (Indian) and fusion_benchmark_results_v2.json (McAuley).
+
+Scoring (18 queries, same keyword rubric for all runs):
+  #1 relevant     — 1 if the top result clearly matches the query, else 0  (max 18)
+  Relevant top-3  — count of clearly relevant hits in positions 1–3       (max 54)
 """
 import json
-import re
 from pathlib import Path
 
-INDIAN_PATH = Path("/root/rag/fusion_benchmark_results.json")
-MCCAULEY_PATH = Path("/root/rag/fusion_benchmark_results_v2.json")
-REPORT_PATH = Path("/root/rag/fusion_comparison_report.md")
+INDIAN_PATH = Path(__file__).parent / "fusion_benchmark_results.json"
+MCCAULEY_PATH = Path(__file__).parent / "fusion_benchmark_results_v2.json"
+REPORT_PATH = Path(__file__).parent / "fusion_comparison_report.md"
 
-# Manual relevance rubric: (top1_grade, top3_good_count, rrf_top1_short, dbsf_top1_short, note)
-# Grades: G=good P=partial B=bad
+NUM_QUERIES = 18
+MAX_TOP1 = NUM_QUERIES  # 18
+MAX_TOP3 = NUM_QUERIES * 3  # 54
+
 RUBRIC = {
     "wireless earbuds noise cancelling": {
         "keywords": ["earbud", "earphone", "headphone", "airpod", "buds"],
@@ -24,7 +28,7 @@ RUBRIC = {
     },
     "gaming laptop RTX": {
         "keywords": ["laptop", "notebook", "gaming pc"],
-        "anti": ["jeans", "keychain", "thermal", "motherboard", "ram"],
+        "anti": ["jeans", "keychain", "thermal", "motherboard", "ram", "graphics card"],
     },
     "32 inch smart TV 4K": {
         "keywords": ["tv", "television", "smart tv", "led tv"],
@@ -36,14 +40,14 @@ RUBRIC = {
     },
     "women's winter coat warm": {
         "keywords": ["coat", "jacket", "winter", "parka", "puffer"],
-        "anti": ["kurti", "salwar", "lab coat", "palazzo"],
+        "anti": ["kurti", "salwar", "lab coat", "palazzo", "socks"],
     },
     "cotton bed sheets king size": {
         "keywords": ["bedsheet", "bed sheet", "sheet", "bedding"],
         "anti": ["jewellery", "organiser", "mortar", "stone"],
     },
-"stainless steel cookware set": {
-        "keywords": ["cookware", "stainless", "pot", "pan", "dinnerware"],
+    "stainless steel cookware set": {
+        "keywords": ["cookware", "stainless", "pot", "pan", "dinnerware", "flatware"],
         "anti": ["lunch box"],
     },
     "yoga mat non slip thick": {
@@ -94,30 +98,23 @@ def load_results(path: Path) -> dict:
         return json.load(f)
 
 
-def hit_text(hit: dict) -> str:
-    return (hit.get("name") or "").lower()
-
-
-def score_hit(query: str, name: str) -> str:
+def is_relevant(query: str, name: str) -> bool:
     rub = RUBRIC.get(query, {"keywords": [], "anti": []})
     n = name.lower()
     for anti in rub["anti"]:
         if anti in n:
-            return "B"
-    for kw in rub["keywords"]:
-        if kw in n:
-            return "G"
-    return "P" if rub["keywords"] else "B"
+            return False
+    return any(kw in n for kw in rub["keywords"])
 
 
-def grade_top1(query: str, hits: list) -> str:
+def top1_relevant(query: str, hits: list) -> int:
     if not hits:
-        return "B"
-    return score_hit(query, hits[0].get("name", ""))
+        return 0
+    return 1 if is_relevant(query, hits[0].get("name", "")) else 0
 
 
-def count_good_top3(query: str, hits: list) -> int:
-    return sum(1 for h in hits[:3] if score_hit(query, h.get("name", "")) == "G")
+def count_relevant_top3(query: str, hits: list) -> int:
+    return sum(1 for h in hits[:3] if is_relevant(query, h.get("name", "")))
 
 
 def top1_name(hits: list) -> str:
@@ -127,13 +124,27 @@ def top1_name(hits: list) -> str:
 
 
 def aggregate_block(data: dict, fusion: str) -> tuple[int, int]:
-    score_map = {"G": 2, "P": 1, "B": 0}
     top1_total = top3_total = 0
     for row in data[fusion]:
-        g = grade_top1(row["query"], row["hits"])
-        top1_total += score_map[g]
-        top3_total += count_good_top3(row["query"], row["hits"])
+        q = row["query"]
+        top1_total += top1_relevant(q, row["hits"])
+        top3_total += count_relevant_top3(q, row["hits"])
     return top1_total, top3_total
+
+
+def fusion_score(data: dict, fusion: str, query: str) -> tuple[int, int]:
+    row = next(r for r in data[fusion] if r["query"] == query)
+    return top1_relevant(query, row["hits"]), count_relevant_top3(query, row["hits"])
+
+
+def best_fusion_label(data: dict) -> str:
+    rrf1, rrf3 = aggregate_block(data, "rrf")
+    dbsf1, dbsf3 = aggregate_block(data, "dbsf")
+    if (rrf1, rrf3) > (dbsf1, dbsf3):
+        return "RRF"
+    if (dbsf1, dbsf3) > (rrf1, rrf3):
+        return "DBSF"
+    return "Tie"
 
 
 def build_report() -> str:
@@ -143,20 +154,30 @@ def build_report() -> str:
     lines = [
         "# Fusion & Dataset Comparison Report",
         "",
-        "## Aggregate scores (18 queries)",
+        "## How scoring works",
         "",
-        "| Dataset | Fusion | Top-1 score (max 36) | Top-3 good hits (max 54) |",
-        "|---------|--------|----------------------|--------------------------|",
+        f"- **{NUM_QUERIES} test queries** (same intents; category filters differ per dataset).",
+        f"- **#1 relevant (max {MAX_TOP1})** — For each query, **1** if the **first** result clearly matches "
+        "the product intent (keyword rubric), **0** otherwise. Summed across all queries.",
+        f"- **Relevant in top-3 (max {MAX_TOP3})** — For each query, count how many of the **3** results are "
+        "clearly relevant (**0**, **1**, **2**, or **3**). Summed across all queries.",
+        "- Both metrics use the **same** relevance rule; they are not weighted differently.",
+        "- **Fusion winner** per dataset: higher #1 relevant wins; tie-break on relevant-in-top-3.",
+        "",
+        "## Aggregate scores",
+        "",
+        f"| Dataset | Fusion | #1 relevant (/{MAX_TOP1}) | Relevant in top-3 (/{MAX_TOP3}) |",
+        "|---------|--------|-------------------------|-------------------------------|",
     ]
 
+    aggregates = {}
     for label, data in [("Indian", indian), ("McAuley", mccauley)]:
         for fusion in ("rrf", "dbsf"):
             t1, t3 = aggregate_block(data, fusion)
+            aggregates[(label, fusion)] = (t1, t3)
             lines.append(f"| {label} | {fusion.upper()} | {t1} | {t3} |")
 
     lines += [
-        "",
-        "_Top-1: G=2, P=1, B=0. Top-3: count of clearly relevant products (keyword rubric)._",
         "",
         "## Per-query comparison",
         "",
@@ -170,8 +191,9 @@ def build_report() -> str:
     mc_dbsf = {r["query"]: r for r in mccauley["dbsf"]}
 
     indian_wins = mccauley_wins = ties = 0
-    rrf_wins_indian = dbsf_wins_indian = 0
-    rrf_wins_mc = dbsf_wins_mc = 0
+
+    def esc(s):
+        return s.replace("|", "/")
 
     for query in RUBRIC:
         ir = indian_rrf[query]["hits"]
@@ -179,78 +201,64 @@ def build_report() -> str:
         mr = mc_rrf[query]["hits"]
         md = mc_dbsf[query]["hits"]
 
-        best_indian = max(
-            grade_top1(query, ir) + str(count_good_top3(query, ir)),
-            grade_top1(query, id_) + str(count_good_top3(query, id_)),
+        ind_best = max(
+            (top1_relevant(query, ir), count_relevant_top3(query, ir)),
+            (top1_relevant(query, id_), count_relevant_top3(query, id_)),
         )
-        best_mc = max(
-            grade_top1(query, mr) + str(count_good_top3(query, mr)),
-            grade_top1(query, md) + str(count_good_top3(query, md)),
+        mc_best = max(
+            (top1_relevant(query, mr), count_relevant_top3(query, mr)),
+            (top1_relevant(query, md), count_relevant_top3(query, md)),
         )
 
-        gi = grade_top1(query, ir)
-        gd_i = grade_top1(query, id_)
-        gm_r = grade_top1(query, mr)
-        gm_d = grade_top1(query, md)
-
-        score_map = {"G": 2, "P": 1, "B": 0}
-        ind_score = max(score_map[gi] + count_good_top3(query, ir), score_map[gd_i] + count_good_top3(query, id_))
-        mc_score = max(score_map[gm_r] + count_good_top3(query, mr), score_map[gm_d] + count_good_top3(query, md))
-
-        if ind_score > mc_score:
+        if ind_best > mc_best:
             indian_wins += 1
             note = "Indian better"
-        elif mc_score > ind_score:
+        elif mc_best > ind_best:
             mccauley_wins += 1
             note = "McAuley better"
         else:
             ties += 1
             note = "Tie"
 
-        if score_map[gi] + count_good_top3(query, ir) > score_map[gd_i] + count_good_top3(query, id_):
-            rrf_wins_indian += 1
-        elif score_map[gd_i] + count_good_top3(query, id_) > score_map[gi] + count_good_top3(query, ir):
-            dbsf_wins_indian += 1
-
-        if score_map[gm_r] + count_good_top3(query, mr) > score_map[gm_d] + count_good_top3(query, md):
-            rrf_wins_mc += 1
-        elif score_map[gm_d] + count_good_top3(query, md) > score_map[gm_r] + count_good_top3(query, mr):
-            dbsf_wins_mc += 1
-
-        def esc(s):
-            return s.replace("|", "/")
-
         lines.append(
             f"| {query[:40]} | {esc(top1_name(ir))} | {esc(top1_name(id_))} | "
             f"{esc(top1_name(mr))} | {esc(top1_name(md))} | {note} |"
         )
 
-    irrf_t1, irrf_t3 = aggregate_block(indian, "rrf")
-    idbsf_t1, idbsf_t3 = aggregate_block(indian, "dbsf")
-    mrrf_t1, mrrf_t3 = aggregate_block(mccauley, "rrf")
-    mdbsf_t1, mdbsf_t3 = aggregate_block(mccauley, "dbsf")
+    best_indian = best_fusion_label(indian)
+    best_mc = best_fusion_label(mccauley)
 
-    best_indian_fusion = "DBSF" if idbsf_t1 > irrf_t1 else ("RRF" if irrf_t1 > idbsf_t1 else "Tie")
-    best_mc_fusion = "DBSF" if mdbsf_t1 > mrrf_t1 else ("RRF" if mrrf_t1 > mdbsf_t1 else "Tie")
+    irrf1, irrf3 = aggregates[("Indian", "rrf")]
+    idbsf1, idbsf3 = aggregates[("Indian", "dbsf")]
+    mrrf1, mrrf3 = aggregates[("McAuley", "rrf")]
+    mdbsf1, mdbsf3 = aggregates[("McAuley", "dbsf")]
 
-    indian_total = max(irrf_t1 + irrf_t3, idbsf_t1 + idbsf_t3)
-    mc_total = max(mrrf_t1 + mrrf_t3, mdbsf_t1 + mdbsf_t3)
-    best_dataset = "McAuley" if mc_total > indian_total else ("Indian" if indian_total > mc_total else "Tie")
+    indian_best = max((irrf1, irrf3), (idbsf1, idbsf3))
+    mc_best = max((mrrf1, mrrf3), (mdbsf1, mdbsf3))
+    best_dataset = "McAuley" if mc_best > indian_best else ("Indian" if indian_best > mc_best else "Tie")
+
+    rec_fusion = best_mc.lower() if best_dataset == "McAuley" else best_indian.lower()
+    if rec_fusion == "tie":
+        rec_fusion = "rrf"
 
     lines += [
         "",
         "## Verdict",
         "",
         f"- **Per-query dataset wins:** Indian {indian_wins}, McAuley {mccauley_wins}, ties {ties}",
-        f"- **Best fusion on Indian:** {best_indian_fusion} (RRF top-1={irrf_t1}, DBSF top-1={idbsf_t1})",
-        f"- **Best fusion on McAuley:** {best_mc_fusion} (RRF top-1={mrrf_t1}, DBSF top-1={mdbsf_t1})",
+        f"- **Best fusion on Indian:** {best_indian} "
+        f"(RRF: {irrf1}/{MAX_TOP1} #1, {irrf3}/{MAX_TOP3} top-3 | "
+        f"DBSF: {idbsf1}/{MAX_TOP1} #1, {idbsf3}/{MAX_TOP3} top-3)",
+        f"- **Best fusion on McAuley:** {best_mc} "
+        f"(RRF: {mrrf1}/{MAX_TOP1} #1, {mrrf3}/{MAX_TOP3} top-3 | "
+        f"DBSF: {mdbsf1}/{MAX_TOP1} #1, {mdbsf3}/{MAX_TOP3} top-3)",
         f"- **Overall dataset winner:** {best_dataset}",
         "",
         "### Recommended defaults",
         "",
-        f"- `QDRANT_COLLECTION=amazon_products_v2` if using McAuley ({best_mc_fusion})",
-        f"- `QDRANT_COLLECTION=amazon_products` if keeping Indian ({best_indian_fusion})",
-        f"- `FUSION_METHOD={best_mc_fusion.lower() if best_dataset == 'McAuley' else best_indian_fusion.lower()}`",
+        f"- `QDRANT_COLLECTION=amazon_products_v2` when using McAuley",
+        f"- `QDRANT_COLLECTION=amazon_products` when using Indian CSV",
+        f"- `FUSION_METHOD={rec_fusion}`",
     ]
 
     return "\n".join(lines) + "\n"

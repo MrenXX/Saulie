@@ -1,15 +1,21 @@
 # Fusion & Dataset Comparison Report
 
-## Aggregate scores (18 queries)
+## How scoring works
 
-| Dataset | Fusion | Top-1 score (max 36) | Top-3 good hits (max 54) |
-|---------|--------|----------------------|--------------------------|
-| Indian | RRF | 20 | 32 |
-| Indian | DBSF | 20 | 28 |
-| McAuley | RRF | 32 | 46 |
-| McAuley | DBSF | 31 | 44 |
+- **18 test queries** (same intents; category filters differ per dataset).
+- **#1 relevant (max 18)** — For each query, **1** if the **first** result clearly matches the product intent (keyword rubric), **0** otherwise. Summed across all queries.
+- **Relevant in top-3 (max 54)** — For each query, count how many of the **3** results are clearly relevant (**0**, **1**, **2**, or **3**). Summed across all queries.
+- Both metrics use the **same** relevance rule; they are not weighted differently.
+- **Fusion winner** per dataset: higher #1 relevant wins; tie-break on relevant-in-top-3.
 
-_Top-1: G=2, P=1, B=0. Top-3: count of clearly relevant products (keyword rubric)._
+## Aggregate scores
+
+| Dataset | Fusion | #1 relevant (/18) | Relevant in top-3 (/54) |
+|---------|--------|-------------------------|-------------------------------|
+| Indian | RRF | 10 | 32 |
+| Indian | DBSF | 10 | 28 |
+| McAuley | RRF | 15 | 44 |
+| McAuley | DBSF | 14 | 43 |
 
 ## Per-query comparison
 
@@ -37,12 +43,12 @@ _Top-1: G=2, P=1, B=0. Top-3: count of clearly relevant products (keyword rubric
 ## Verdict
 
 - **Per-query dataset wins:** Indian 1, McAuley 10, ties 7
-- **Best fusion on Indian:** Tie (RRF top-1=20, DBSF top-1=20)
-- **Best fusion on McAuley:** RRF (RRF top-1=32, DBSF top-1=31)
+- **Best fusion on Indian:** RRF (RRF: 10/18 #1, 32/54 top-3 | DBSF: 10/18 #1, 28/54 top-3)
+- **Best fusion on McAuley:** RRF (RRF: 15/18 #1, 44/54 top-3 | DBSF: 14/18 #1, 43/54 top-3)
 - **Overall dataset winner:** McAuley
 
 ### Recommended defaults
 
-- `QDRANT_COLLECTION=amazon_products_v2` if using McAuley (RRF)
-- `QDRANT_COLLECTION=amazon_products` if keeping Indian (Tie)
+- `QDRANT_COLLECTION=amazon_products_v2` when using McAuley
+- `QDRANT_COLLECTION=amazon_products` when using Indian CSV
 - `FUSION_METHOD=rrf`

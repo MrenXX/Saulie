@@ -7,7 +7,7 @@ from qdrant_client.http import models
 # --- CONFIGURATION ---
 EMBED_URL = os.getenv("EMBED_URL", "http://localhost:8888/embed")
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:1234")
-COLLECTION = os.getenv("QDRANT_COLLECTION", "amazon_products")
+COLLECTION = os.getenv("QDRANT_COLLECTION", "amazon_products_v2")
 FUSION_METHOD = os.getenv("FUSION_METHOD", "rrf").lower()  # rrf | dbsf
 DEFAULT_PREFETCH = int(os.getenv("PREFETCH_LIMIT", "50"))
 
