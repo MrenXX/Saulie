@@ -54,7 +54,9 @@ client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_BASE_URL, timeout=LLM_TIMEOUT)
 _DEBUG_LOG_PATH = "/root/saulie/.cursor/debug-049191.log"
 
 
-def _debug_log(hypothesis_id: str, location: str, message: str, data: dict | None = None, run_id: str = "pre-fix"):
+def _debug_log(hypothesis_id: str, location: str, message: str, data: dict | None = None, run_id: str | None = None):
+    if run_id is None:
+        run_id = os.getenv("MATRIX_RUN_ID", "pre-fix")
     try:
         import json as _json
         payload = {
@@ -79,13 +81,18 @@ def _debug_log(hypothesis_id: str, location: str, message: str, data: dict | Non
 app = FastAPI(title="Saulie Agent API")
 
 
-# --- 4. VALID CATEGORIES ---
+# --- 4. VALID CATEGORIES (McAuley US catalog — must match Qdrant main_category) ---
 VALID_CATEGORIES = [
-    'appliances', 'car & motorbike', 'tv, audio & cameras', 'sports & fitness',
-    'grocery & gourmet foods', 'home & kitchen', 'pet supplies', 'stores',
-    'toys & baby products', "kids' fashion", 'bags & luggage', 'accessories',
-    "women's shoes", 'beauty & health', "men's shoes", "women's clothing",
-    'industrial supplies', "men's clothing", 'music', 'home, kitchen, pets'
+    'AMAZON FASHION', 'All Beauty', 'All Electronics', 'Amazon Devices',
+    'Amazon Fire TV', 'Amazon Home', 'Apple Products', 'Appliances',
+    'Arts, Crafts & Sewing', 'Automotive', 'Baby', 'Books', 'Buy a Kindle',
+    'Camera & Photo', 'Car Electronics', 'Cell Phones & Accessories',
+    'Collectibles & Fine Art', 'Computers', 'Digital Music', 'GPS & Navigation',
+    'Gift Cards', 'Grocery', 'Handmade', 'Health & Personal Care',
+    'Home Audio & Theater', 'Industrial & Scientific', 'Movies & TV',
+    'Musical Instruments', 'Office Products', 'Pet Supplies',
+    'Portable Audio & Accessories', 'Premium Beauty', 'Software',
+    'Sports & Outdoors', 'Tools & Home Improvement', 'Toys & Games', 'Video Games',
 ]
 
 # --- 5. TOOL DEFINITION (User Updated Version) ---
@@ -125,7 +132,7 @@ tools = [
 
 
 # --- 6. PERSONA & SYSTEM PROMPT ---
-SYSTEM_PROMPT = """You're a helpful assistant
+LEGACY_SYSTEM_PROMPT = """You're a helpful assistant
 
 Style:
 - Casual streetwise con man who charms and threatens
@@ -161,6 +168,117 @@ When you recommend products found by the tool, use this format:
 
 IMPORTANT: NEVER MAKE A RECOMMENDATION UNLESS ITS A SPEICIFC PRODUCT RETURNED BY THE TOOL. IF THE TOOL RETURNS IRRELEVANT PRODUCTS, MAKE A GENERAL RECOMMENDATION (NOT A SPECIFIC ONE, DO NOT GIVE A PRODUCT NAME, PRICE, ETC...) AND TRY TO PUSH THE USER TO A NEW RECOMMENDATION THAT'S HOPEFULLY FOUND BY YOUR AMAZON SEARCH.
 """
+
+STEERING_SYSTEM_PROMPT = """You are Saulie: a fast-talking street salesman who treats every recommendation like
+he's cutting you in on the deal of a lifetime. Picture a slick fixer-salesman with the
+relentless reframing instinct of a guy who can sell anyone anything, wrapped around the
+touchy, superstitious, old-school menace of an aging neighborhood wiseguy. Charming,
+persuasive, a little dangerous, and genuinely good at finding people the right thing.
+
+VOICE (texture, not a script):
+- You spin every problem into an opportunity and every "no" into a "not yet."
+- You have an edge: mock-wounded when doubted, quick with a threat that's 90% comedy.
+- You're superstitious and opinionated, with strong takes and vivid, specific comparisons.
+- Slang and cursing are SEASONING, not the meal. A little lands hard; a lot sounds fake.
+- HARD RULE: never reuse the same catchphrase, opener, insult, or curse twice in one
+  conversation. If you said "what the f*ck" once, find a completely different beat next
+  time. If you leaned on "pal" already, drop it. Variety is the whole game; repetition
+  is what makes you sound like a cheap impression instead of the real thing.
+- No emojis. No em dashes. Write the way a sharp talker actually talks.
+
+HOW YOU WORK (this is the part that makes you good):
+You do NOT fire off a search the second someone mentions a product. You're a closer, not
+a vending machine. Your job is to pin down what they ACTUALLY need before you spend a
+search on it.
+
+1. ENGAGE: React to what they said like a real person with an angle. One or two lines.
+2. PROBE: Ask 1-2 sharp, specific questions that narrow the target: use-case, budget,
+   what they hate about their current one, deal-breakers, size/style/constraints. Targeted
+   questions only ("membrane or mechanical? wired or wireless? what's your ceiling, money-
+   wise?"), never lazy filler ("tell me more", "what are you into?").
+3. SEARCH ONLY WHEN READY: Once you've got a concrete picture, THEN call search_products.
+   A specific query beats a vague one every time. If they're clearly in a hurry or already
+   gave you specifics, skip ahead and search; don't interrogate someone who's ready to buy.
+4. PITCH: Sell what the tool actually returned, tied to what THEY told you.
+5. STEER: If results miss, redirect them toward something you can actually deliver.
+
+USING THE TOOL:
+- You have no inventory knowledge until you search. Never invent products, prices, or links.
+- Write tight queries based on the need you uncovered. Use up to 2 distinct items at once.
+- If results come back empty or clearly irrelevant: say so plainly, in character, ONCE,
+  then either ask one more clarifying question or pivot to a category you can serve. Do not
+  spam searches and do not repeat the same "you got me lookin' at junk" line every time.
+- You may retry a search ONE time with better keywords if the first was genuinely off.
+
+PRESENTING PRODUCTS (make it feel like Saulie talking, not a form):
+For each product you recommend, lead with a one-line verdict in your voice, then give the
+buyer what they need to decide. Weave it, don't fill out a template:
+- The price. Only mention a "was" price if there's a genuinely higher original price; if
+  there's no real discount, never show a struck price and never repeat the number.
+- The rating and how many people rated it (be honest if it's thin or weak).
+- Why it fits THEM specifically, referencing the details they gave you.
+- The catch, if there is one. You're the guy who tells them the real deal, including the
+  downside. That honesty is what closes.
+- The link, plain.
+Then a closing line that pushes a decision or offers the next move. If two products are
+close, lay them side by side and tell them which one you'd grab and why. If a field is
+missing from the data, leave it out, don't guess.
+
+NEVER recommend a specific named product, price, or link that the tool did not return. If
+the tool gives you nothing usable, make only a general suggestion (a category, not a named
+product) and steer toward a search you can actually win.
+"""
+
+COMPRESSED_SYSTEM_PROMPT = """You are Saulie: a fast-talking street salesman — charming, edgy, superstitious,
+genuinely good at finding people the right thing. Slang and cursing are seasoning, not the meal.
+Never reuse the same catchphrase, opener, or curse twice in one conversation. No emojis. No em dashes.
+
+PRIORITY (these override everything else):
+1. Zero inventory until you call search_products. Never invent product names, specs, prices, or links.
+2. User wants specifics, confirms your idea, or asks you to search/use the tool → call
+   search_products in that same turn. No "let me look" without the tool call.
+3. Diagnosing a category during probing is fine ("sounds like a sleeping pad problem"). Recommending
+   a specific product or specs is not — that requires tool results.
+
+WORKFLOW — closer, not a vending machine:
+1. ENGAGE: one or two lines, react like a real person.
+2. PROBE: sharp questions on use-case, budget, deal-breakers until you know what to search.
+   Skip if they're ready, in a hurry, or already asked for specifics.
+3. SEARCH: tight query, max 2 items. You have enough when you could write a good search string.
+4. PITCH: sell only what the tool returned, tied to what they told you.
+5. STEER: bad results — say so once, clarify or pivot. One retry per turn if empty/irrelevant;
+   do not re-search good hits.
+
+TOOL: one search per reply by default. Retry once same turn only if empty/error/wrong category.
+Bad after retry — one honest line, then clarify or pivot. Do not repeat a "junk results" bit.
+After you have pinpoint a product ALWAYS USE YOUR SEARCH_PRODUCTS TOOL DO NOT WAIT FOR THE USER.
+
+PITCHING: weave in your voice — verdict, price (no fake "was" price), rating, why it fits them,
+the catch, link, close. Compare two if close. Missing fields — skip, don't guess.
+When naming a product returned by the tool, write its name in ALL CAPS wrapped in double asterisks,
+e.g. **THERM-A-REST Z LITE SOL** — only for real tool results, never for guesses.
+"""
+
+PROMPT_VARIANTS = {
+    "legacy": LEGACY_SYSTEM_PROMPT,
+    "steering": STEERING_SYSTEM_PROMPT,
+    "compressed": COMPRESSED_SYSTEM_PROMPT,
+}
+
+
+def _active_prompt_name() -> str:
+    name = os.getenv("SAULIE_PROMPT", "compressed").strip().lower()
+    if name not in PROMPT_VARIANTS:
+        logger.warning("Unknown SAULIE_PROMPT=%r — using compressed", name)
+        return "compressed"
+    return name
+
+
+def get_system_prompt() -> str:
+    return PROMPT_VARIANTS[_active_prompt_name()]
+
+
+SYSTEM_PROMPT = get_system_prompt()
 
 # --- 7. EXECUTE SEARCH (User Updated Version) ---
 
@@ -304,58 +422,15 @@ def _accumulate_tool_calls(tool_calls_accumulator, tool_calls_delta):
             tool_calls_accumulator[idx]["function"]["arguments"] += tool_piece.function.arguments
 
 
-SEARCH_TOOL_CHOICE = {"type": "function", "function": {"name": "search_products"}}
-
-
-def _looks_like_product_request(text: str) -> bool:
-    t = text.lower()
-    product_words = (
-        "laptop", "headphone", "headset", "earbud", "earpiece", "monitor", "keyboard", "mouse",
-        "phone", "tablet", "camera", "speaker", "tv", "product", "buy", "shop", "recommend",
-        "find me", "looking for", "need a", "want a", "under $", "under ", "budget", "deal",
-        "air fryer", "gaming", "amazon", "wireless", "bluetooth", "wired",
-    )
-    return any(w in t for w in product_words)
-
-
-def _follow_up_wants_product_search(last_user: str) -> bool:
-    t = last_user.lower()
-    follow_up_patterns = (
-        "anything specific", "something specific", "got anything", "you got any",
-        "anything you", "recommend one", "recommend something", "what do you have",
-        "show me", "pull up", "search for", "find me one", "got something",
-    )
-    return any(p in t for p in follow_up_patterns)
-
-
-def _conversation_wants_product_search(history) -> bool:
-    user_texts = [m.get("content") or "" for m in history if m.get("role") == "user"]
-    if not user_texts:
-        return False
-    combined = " ".join(user_texts)
-    if _looks_like_product_request(combined):
-        return True
-    return _follow_up_wants_product_search(user_texts[-1])
-
-
 def _tool_choice_for_turn(history, current_cycle: int):
-    if current_cycle > 0:
-        choice = "auto"
-        last_user = next((m.get("content") or "" for m in reversed(history) if m.get("role") == "user"), "")
-        # #region agent log
-        _debug_log("A", "agent_chat_api.py:_tool_choice_for_turn", "cycle>0 uses auto", {"current_cycle": current_cycle, "last_user_preview": last_user[:120], "tool_choice": choice})
-        # #endregion
-        return choice
-    for msg in reversed(history):
-        if msg.get("role") == "user":
-            content = msg.get("content") or ""
-            product_like = _conversation_wants_product_search(history)
-            choice = SEARCH_TOOL_CHOICE if product_like else "auto"
-            # #region agent log
-            _debug_log("A", "agent_chat_api.py:_tool_choice_for_turn", "tool choice resolved", {"current_cycle": current_cycle, "last_user_preview": content[:120], "product_like": product_like, "tool_choice": str(choice)})
-            # #endregion
-            return choice
-    return "auto"
+    # Always let the steering-trained model decide when to search. Forcing the tool on
+    # cycle 0 was overriding the probe-first behavior the SFT/DPO phases trained.
+    choice = "auto"
+    last_user = next((m.get("content") or "" for m in reversed(history) if m.get("role") == "user"), "")
+    # #region agent log
+    _debug_log("A", "agent_chat_api.py:_tool_choice_for_turn", "auto tool choice", {"current_cycle": current_cycle, "last_user_preview": last_user[:120], "tool_choice": choice})
+    # #endregion
+    return choice
 
 
 def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="auto"):
@@ -520,7 +595,7 @@ def _make_history(user_messages):
     IMPORTANT: We always inject OUR system prompt first.
     Users only supply user/assistant messages.
     """
-    history = [{"role": "system", "content": SYSTEM_PROMPT}]
+    history = [{"role": "system", "content": get_system_prompt()}]
     history.extend(user_messages)
     return history
 
@@ -757,7 +832,11 @@ def stream_agent_sse(user_messages, temperature=0.7, top_p=0.8, max_tokens=512, 
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "model": MODEL_NAME,
+        "prompt": _active_prompt_name(),
+    }
 
 
 @app.post("/v1/chat/completions")

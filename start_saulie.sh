@@ -31,7 +31,10 @@ AGENT_LOG="${REPO}/saulie_chat.log"
 AGENT_STDLOG="${REPO}/agent_api.log"
 AGENT_PIDFILE="${REPO}/.agent_api.pid"
 NGROK_LOG="${REPO}/ngrok.log"
-DEPLOY_SCRIPT="${REPO}/dpo/eval/vllm_scripts/deploy_finalist_pick.sh"
+DEPLOY_SCRIPT="${SAULIE_DEPLOY_SCRIPT:-${REPO}/dpo/eval/vllm_scripts/deploy_finalist_pick.sh}"
+SAULIE_MODEL="${SAULIE_MODEL:-dpo-v15-trial-4}"
+SAULIE_PROMPT="${SAULIE_PROMPT:-compressed}"
+SAULIE_NO_DASHBOARD="${SAULIE_NO_DASHBOARD:-0}"
 
 # --- colors ---
 G=$'\033[0;32m'
@@ -72,6 +75,9 @@ if [[ -f "${REPO}/.env" ]]; then
   source "${REPO}/.env"
   set +a
 fi
+
+export QDRANT_COLLECTION="${QDRANT_COLLECTION:-amazon_products_v2}"
+export FUSION_METHOD="${FUSION_METHOD:-rrf}"
 
 http_ok() {
   curl -sf --max-time 3 "$1" >/dev/null 2>&1
@@ -176,32 +182,42 @@ agent_running() {
   http_ok "http://127.0.0.1:${AGENT_PORT}/health"
 }
 
+stop_agent_quick() {
+  local pid=""
+  pid="$(cat "$AGENT_PIDFILE" 2>/dev/null || true)"
+  if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+    kill "$pid" 2>/dev/null || true
+    for _ in $(seq 1 10); do
+      kill -0 "$pid" 2>/dev/null || break
+      sleep 1
+    done
+    kill -9 "$pid" 2>/dev/null || true
+  elif pgrep -f "agent_chat_api.py api" >/dev/null 2>&1; then
+    pkill -f "agent_chat_api.py api" 2>/dev/null || true
+    sleep 1
+  fi
+  rm -f "$AGENT_PIDFILE"
+}
+
 start_agent() {
-  if agent_running; then
-    ok "Agent API already listening on :${AGENT_PORT}"
-    return 0
-  fi
-
-  if [[ -f "$AGENT_PIDFILE" ]]; then
-    local old_pid
-    old_pid="$(cat "$AGENT_PIDFILE" 2>/dev/null || true)"
-    if [[ -n "$old_pid" ]] && kill -0 "$old_pid" 2>/dev/null; then
-      warn "Agent PID $old_pid exists but /health not up yet — waiting..."
-      wait_for "Agent API" "http://127.0.0.1:${AGENT_PORT}/health" 30 && return 0
-    fi
-  fi
-
   if [[ ! -x "$PYTHON" ]]; then
     err "Python not found: $PYTHON (set SAULIE_PYTHON)"
     return 1
   fi
 
-  log "Starting agent API on :${AGENT_PORT}..."
+  if agent_running || [[ -f "$AGENT_PIDFILE" ]]; then
+    log "Restarting agent API (RAG: ${QDRANT_COLLECTION} / ${FUSION_METHOD})..."
+    stop_agent_quick
+  fi
+
+  log "Starting agent API on :${AGENT_PORT} (model=${SAULIE_MODEL} prompt=${SAULIE_PROMPT})..."
   mkdir -p "$REPO"
   touch "$AGENT_LOG" "$AGENT_STDLOG"
   (
     cd "$REPO"
-    nohup "$PYTHON" agent_chat_api.py api >>"$AGENT_STDLOG" 2>&1 &
+    nohup env QDRANT_COLLECTION="$QDRANT_COLLECTION" FUSION_METHOD="$FUSION_METHOD" \
+      MODEL_NAME="$SAULIE_MODEL" SAULIE_PROMPT="$SAULIE_PROMPT" \
+      "$PYTHON" agent_chat_api.py api >>"$AGENT_STDLOG" 2>&1 &
     echo $! >"$AGENT_PIDFILE"
   )
   wait_for "Agent API" "http://127.0.0.1:${AGENT_PORT}/health" 45
@@ -238,11 +254,46 @@ ensure_docker_container() {
   fi
   if docker_exists "$name"; then
     log "Starting container $name..."
-    docker start "$name" >/dev/null
-    ok "Container $name started"
-    return 0
+    if docker start "$name" >/dev/null 2>&1 && docker_running "$name"; then
+      ok "Container $name started"
+      return 0
+    fi
+    err "Container $name failed to start — check: docker logs $name"
+    return 1
   fi
   warn "Container $name not found — create/deploy it first"
+  return 1
+}
+
+ensure_nginx() {
+  if docker_running "$NGINX_CONTAINER"; then
+    ok "Container $NGINX_CONTAINER already running"
+    return 0
+  fi
+
+  if docker_exists "$NGINX_CONTAINER"; then
+    log "Starting existing nginx container..."
+    if docker start "$NGINX_CONTAINER" >/dev/null 2>&1 && sleep 1 && docker_running "$NGINX_CONTAINER"; then
+      ok "Container $NGINX_CONTAINER started"
+      return 0
+    fi
+    warn "nginx container has stale/broken bind mounts — recreating..."
+    docker rm -f "$NGINX_CONTAINER" >/dev/null 2>&1 || true
+  fi
+
+  if [[ ! -f "${REPO}/nginx/nginx.conf" ]]; then
+    err "Missing ${REPO}/nginx/nginx.conf — cannot create nginx container"
+    return 1
+  fi
+
+  log "Creating nginx container via docker compose..."
+  docker compose -f "${REPO}/nginx/docker-compose.nginx.yml" up -d
+  sleep 1
+  if docker_running "$NGINX_CONTAINER"; then
+    ok "Container $NGINX_CONTAINER created and running"
+    return 0
+  fi
+  err "nginx failed to start after recreate"
   return 1
 }
 
@@ -415,11 +466,13 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
 fi
 
 printf "\n%sStarting Saulie stack%s\n\n" "$G" "$N"
+log "RAG defaults: QDRANT_COLLECTION=${QDRANT_COLLECTION} FUSION_METHOD=${FUSION_METHOD}"
+log "Model: ${SAULIE_MODEL}  Prompt: ${SAULIE_PROMPT}  Deploy: ${DEPLOY_SCRIPT}"
 
 ensure_docker_container "$QDRANT_CONTAINER" || true
 ensure_bge
 ensure_vllm || warn "vLLM not ready — agent will start but LLM calls may fail"
-ensure_docker_container "$NGINX_CONTAINER" || true
+ensure_nginx || warn "nginx not ready — use agent directly on :${AGENT_PORT}"
 start_agent || warn "Agent failed to start — check agent window in dashboard"
 start_ngrok
 
@@ -431,4 +484,8 @@ else
 fi
 
 ok "Stack startup complete"
+if [[ "$SAULIE_NO_DASHBOARD" == "1" ]]; then
+  ok "SAULIE_NO_DASHBOARD=1 — skipping tmux dashboard"
+  exit 0
+fi
 open_dashboard
