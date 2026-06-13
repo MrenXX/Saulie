@@ -9,6 +9,9 @@ Qwen*/
 **/best_adapter/
 **/checkpoint-*/
 
+# Local secrets (use .env.example as template)
+.env
+
 # Archives & junk
 *.rar
 *.zip

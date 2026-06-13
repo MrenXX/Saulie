@@ -1,7 +1,7 @@
 #!/bin/bash
-# Production deploy: FP8 Qwen3 + SFT trial-17 LoRA only (no DPO).
+# Deploy FP8 Qwen3 base only (no LoRA) for prod-ladder eval.
 #
-#   bash dpo/eval/vllm_scripts/deploy_sft_trial17_prod.sh
+#   bash dpo/eval/vllm_scripts/deploy_base_fp8.sh
 
 set -euo pipefail
 
@@ -11,16 +11,13 @@ source "${REPO}/docker/versions.env"
 
 CONTAINER_NAME="eval_deploy_qwenie"
 MODEL_PATH="/root/saulie/Qwen3-4B-Instruct-2507-FP8"
-LORA_ADAPTER_PATH="/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter"
-CONTAINER_LORA_PATH="/models/lora/steering-sft-trial-17"
-MODEL_NAME="steering-sft-trial-17"
-MAX_LORA_RANK=16
+MODEL_NAME="qwen3-4b-instruct-fp8"
 GPU_DEVICE="0"
 PORT="8000"
 VLLM_API_KEY="${VLLM_API_KEY:-dipshit}"
 
 echo "╔═════════════════════════════════════════════════════════════════════════╗"
-echo "║  SFT Trial-17 — FP8 Qwen3 + SFT LoRA only (matrix baseline)             ║"
+echo "║  Base FP8 Qwen3 — no LoRA (prod-ladder eval)                            ║"
 echo "╚═════════════════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -29,13 +26,7 @@ if [ ! -d "$MODEL_PATH" ]; then
   exit 1
 fi
 
-if [ ! -d "$LORA_ADAPTER_PATH" ]; then
-  echo "LoRA adapter not found: $LORA_ADAPTER_PATH"
-  exit 1
-fi
-
 echo " Base model:  $MODEL_PATH"
-echo " LoRA:        $LORA_ADAPTER_PATH (r=16 SFT only)"
 echo " Served as:   $MODEL_NAME"
 echo ""
 
@@ -52,12 +43,11 @@ docker run -d \
   --restart unless-stopped \
   -p "${PORT}:8000" \
   -v "${MODEL_PATH}:/models/model:ro" \
-  -v "${LORA_ADAPTER_PATH}:${CONTAINER_LORA_PATH}:ro" \
   -e "VLLM_API_KEY=${VLLM_API_KEY}" \
   -e NCCL_P2P_DISABLE=1 \
   "${VLLM_IMAGE}" \
   --model /models/model \
-  --served-model-name "Saulie" \
+  --served-model-name "${MODEL_NAME}" \
   --gpu-memory-utilization 0.5 \
   --max-model-len 4096 \
   --max-num-batched-tokens 2048 \
@@ -65,12 +55,6 @@ docker run -d \
   --host 0.0.0.0 \
   --port 8000 \
   --api-key "${VLLM_API_KEY}" \
-  --enable-auto-tool-choice \
-  --tool-call-parser hermes \
-  --enable-lora \
-  --lora-modules "${MODEL_NAME}=${CONTAINER_LORA_PATH}" \
-  --max-lora-rank "${MAX_LORA_RANK}" \
-  --max-loras 1 \
   --trust-remote-code \
   --enable-prefix-caching
 

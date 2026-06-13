@@ -1,0 +1,26 @@
+# Non-GPU infrastructure services for Saulie.
+# GPU services (BGE, vLLM) are managed by shell scripts — see docker/setup_containers.sh
+# and dpo/eval/vllm_scripts/deploy_*.sh
+#
+# Usage:
+#   docker compose -f docker/docker-compose.yml --env-file docker/versions.env up -d
+
+services:
+  qdrant:
+    image: ${QDRANT_IMAGE}
+    container_name: ${QDRANT_CONTAINER:-qdrant_index}
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT:-1234}:6333"
+    volumes:
+      - ${RAG_ROOT:-/root/rag}/qdrant_storage:/qdrant/storage
+
+  nginx:
+    image: ${NGINX_IMAGE:-nginx:1.25-alpine}
+    container_name: ${NGINX_CONTAINER:-nginx}
+    ports:
+      - "${NGINX_PORT:-8080}:8080"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

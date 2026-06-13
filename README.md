@@ -13,6 +13,23 @@ This is the **`main`** branch — it contains the full codebase. Branch-specific
 
 ---
 
+## Reproducible setup
+
+First-time machine setup:
+
+```bash
+cp .env.example .env          # edit secrets/paths
+conda env create -f environment.yml
+conda activate saulgman
+bash docker/setup_containers.sh
+bash dpo/eval/vllm_scripts/deploy_finalist_pick.sh   # after model weights are on disk
+bash start_saulie.sh
+```
+
+Full guide: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) — Python pins, Docker image versions, RAG layout, and what is not in git.
+
+---
+
 ## Quick start (production stack)
 
 ```bash
@@ -32,6 +49,13 @@ Full ops guide: see the [`deployment` branch README](https://github.com/MrenXX/S
 
 ```
 saulie/
+├── requirements.txt               # Pinned Python deps (saulgman env)
+├── environment.yml                # Conda recipe: one-command env setup
+├── .env.example                   # Config template (copy to .env)
+├── REPRODUCIBILITY.md             # Full setup guide
+├── docker/
+│   ├── versions.env               # Pinned Docker image tags
+│   └── setup_containers.sh        # Create Qdrant + BGE containers
 ├── agent_chat_api.py              # FastAPI agent (tool loop, SSE, prompt variants)
 ├── remote_chat.py                 # Remote CLI client
 ├── start_saulie.sh / stop_saulie.sh
@@ -69,7 +93,7 @@ python -m dpo.train.study_report \
 # HTML: dpo/results/optuna-run-20260523-041252/study_report.html
 ```
 
-**Requirements:** GPU, SFT adapter, `dpo/requirements-dpo.txt`.
+**Requirements:** GPU, SFT adapter, `requirements.txt` (or `conda env create -f environment.yml`).
 
 Key docs: `dpo/PLAN_FINAL.md`, `dpo/dataset/DATA_CONTEXT.md`, `dpo/train/HANDOFF.md`.
 

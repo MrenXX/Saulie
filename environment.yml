@@ -1,0 +1,11 @@
+# Conda recipe for the saulgman environment.
+# One-command setup:  conda env create -f environment.yml
+# Then activate:      conda activate saulgman
+name: saulgman
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11.13
+  - pip
+  - pip:
+      - -r requirements.txt

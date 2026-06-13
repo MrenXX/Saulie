@@ -16,13 +16,16 @@
 
 set -euo pipefail
 
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+# shellcheck source=docker/versions.env
+source "${REPO}/docker/versions.env"
+
 CONTAINER_NAME="eval_deploy_qwenie"
 MODEL_PATH="/root/saulie/Qwen3-4B-Instruct-2507-FP8"
 V15_RUN_HOST="/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732"
 GPU_DEVICE="0"
 PORT="8000"
 VLLM_API_KEY="${VLLM_API_KEY:-dipshit}"
-VLLM_IMAGE="vllm/vllm-openai:latest"
 
 DEPLOY_MODE="${DEPLOY_MODE:-eval_runtime}"
 CANDIDATE_MANIFEST="${CANDIDATE_MANIFEST:-}"

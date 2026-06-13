@@ -6,6 +6,10 @@
 
 set -euo pipefail
 
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+# shellcheck source=docker/versions.env
+source "${REPO}/docker/versions.env"
+
 CONTAINER_NAME="eval_deploy_qwenie"
 MODEL_PATH="/root/saulie/Qwen3-4B-Instruct-2507-FP8"
 LORA_ADAPTER_PATH="/root/saulie/dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-4/sft_dpo_cat"
@@ -15,7 +19,6 @@ MAX_LORA_RANK=32
 GPU_DEVICE="0"
 PORT="8000"
 VLLM_API_KEY="${VLLM_API_KEY:-dipshit}"
-VLLM_IMAGE="vllm/vllm-openai:latest"
 
 echo "╔═════════════════════════════════════════════════════════════════════════╗"
 echo "║  DPO v1.5 Trial-4 — FP8 Qwen3 + cat-merged LoRA (production)          ║"
