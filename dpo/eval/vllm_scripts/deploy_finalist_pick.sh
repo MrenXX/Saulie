@@ -25,6 +25,13 @@ MODEL_NAME="dpo-v15-trial-4"
 MAX_LORA_RANK=32
 GPU_DEVICE="0"
 PORT="8000"
+# WSL2/Docker Desktop may reject 127.0.0.1:PORT binds; set VLLM_BIND=0.0.0.0 in .env
+VLLM_BIND="${VLLM_BIND:-127.0.0.1}"
+if [[ "$VLLM_BIND" == "0.0.0.0" || "$VLLM_BIND" == "all" ]]; then
+  PORT_MAP="-p ${PORT}:8000"
+else
+  PORT_MAP="-p ${VLLM_BIND}:${PORT}:8000"
+fi
 
 echo "╔═════════════════════════════════════════════════════════════════════════╗"
 echo "║  DPO v1.5 Trial-4 — FP8 Qwen3 + cat-merged LoRA (production)          ║"
@@ -68,7 +75,7 @@ docker run -d \
   --ulimit memlock=-1 \
   --ulimit stack=67108864 \
   --restart unless-stopped \
-  -p "127.0.0.1:${PORT}:8000" \
+  ${PORT_MAP} \
   -v "${MODEL_PATH}:/models/model:ro" \
   -v "${LORA_ADAPTER_PATH}:${CONTAINER_LORA_PATH}:ro" \
   -e "VLLM_API_KEY=${VLLM_API_KEY}" \
