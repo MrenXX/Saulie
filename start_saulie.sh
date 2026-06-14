@@ -282,27 +282,33 @@ ensure_docker_container() {
 }
 
 ensure_nginx() {
-  if docker_running "$NGINX_CONTAINER"; then
-    ok "Container $NGINX_CONTAINER already running"
-    return 0
-  fi
-
-  if docker_exists "$NGINX_CONTAINER"; then
-    log "Starting existing nginx container..."
-    if docker start "$NGINX_CONTAINER" >/dev/null 2>&1 && sleep 1 && docker_running "$NGINX_CONTAINER"; then
-      ok "Container $NGINX_CONTAINER started"
-      return 0
-    fi
-    warn "nginx container has stale/broken bind mounts — recreating..."
-    docker rm -f "$NGINX_CONTAINER" >/dev/null 2>&1 || true
-  fi
-
   if [[ ! -f "${REPO}/nginx/nginx.conf" ]]; then
     err "Missing ${REPO}/nginx/nginx.conf — cannot create nginx container"
     return 1
   fi
 
   prepare_nginx_conf || return 1
+
+  local want_mount="${REPO}/nginx/nginx.runtime.conf"
+  if docker_exists "$NGINX_CONTAINER"; then
+    local current_mount=""
+    current_mount="$(docker inspect "$NGINX_CONTAINER" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/nginx.conf"}}{{.Source}}{{end}}{{end}}' 2>/dev/null || true)"
+    if [[ "$current_mount" != "$want_mount" ]]; then
+      warn "nginx has stale config mount — recreating..."
+      docker rm -f "$NGINX_CONTAINER" >/dev/null 2>&1 || true
+    elif docker_running "$NGINX_CONTAINER"; then
+      ok "Container $NGINX_CONTAINER already running"
+      return 0
+    else
+      log "Starting existing nginx container..."
+      if docker start "$NGINX_CONTAINER" >/dev/null 2>&1 && sleep 1 && docker_running "$NGINX_CONTAINER"; then
+        ok "Container $NGINX_CONTAINER started"
+        return 0
+      fi
+      warn "nginx container failed to start — recreating..."
+      docker rm -f "$NGINX_CONTAINER" >/dev/null 2>&1 || true
+    fi
+  fi
 
   log "Creating nginx container via docker compose..."
   docker compose -f "${REPO}/nginx/docker-compose.nginx.yml" up -d
