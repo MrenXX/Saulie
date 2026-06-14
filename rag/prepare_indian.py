@@ -17,8 +17,9 @@ from pathlib import Path
 
 import pandas as pd
 
-IN_CSV = Path(os.getenv("INDIAN_CSV_IN", "/root/rag/Amazon-Products_fixed_deduped.csv"))
-OUT_CSV = Path(os.getenv("INDIAN_CSV_OUT", "/root/rag/amazon_indian_clean.csv"))
+_RAG_ROOT = Path(os.getenv("RAG_ROOT", Path(__file__).resolve().parent))
+IN_CSV = Path(os.getenv("INDIAN_CSV_IN", _RAG_ROOT / "Amazon-Products_fixed_deduped.csv"))
+OUT_CSV = Path(os.getenv("INDIAN_CSV_OUT", _RAG_ROOT / "amazon_indian_clean.csv"))
 
 MIN_TITLE_LEN = 15
 MIN_RATINGS = 3.0

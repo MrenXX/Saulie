@@ -62,8 +62,7 @@ saulie/
 ├── nginx/                         # Reverse proxy (Bearer auth, SSE)
 ├── SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md
 │
-├── rag_symlink                      # Symlink to RAG data outside repo (local dev)
-├── rag/                           # Hybrid product search (BGE-M3 + Qdrant)
+├── rag/                           # Hybrid product search (BGE-M3 + Qdrant, code + data)
 │   ├── README.md                  # ← full RAG docs
 │   ├── query2.py                  # search_hybrid (used by agent)
 │   ├── index_mccauley.py          # McAuley US catalog → amazon_products_v2

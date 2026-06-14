@@ -58,18 +58,15 @@ pip install -r requirements.txt
 
 ## Step 3: RAG workspace layout
 
-The repo contains RAG **code** under `rag/`. Model weights, TRT engine, and Qdrant data live outside git under `RAG_ROOT` (default `/root/rag`).
+All RAG code and runtime data live under `saulie/rag/`. Heavy artifacts (Qdrant storage, model weights, TRT engine, CSVs) are gitignored — see [`rag/.gitignore`](rag/.gitignore).
+
+Set in `.env`:
 
 ```bash
-# Option A: symlink (recommended if repo is at /root/saulie)
-mkdir -p /root/rag
-ln -sfn /root/saulie/rag/embed_models /root/rag/embed_models
-
-# Option B: copy
-cp -r /root/saulie/rag/embed_models /root/rag/
+RAG_ROOT=/root/saulie/rag
 ```
 
-Download BGE-M3 model weights into `/root/rag/embed_models/bge-m3/` (HuggingFace `BAAI/bge-m3`), then build the TensorRT engine:
+Download BGE-M3 model weights into `rag/embed_models/bge-m3/` (HuggingFace `BAAI/bge-m3`), then build the TensorRT engine:
 
 ```bash
 bash docker/setup_containers.sh          # creates BGE container
@@ -175,7 +172,7 @@ curl http://127.0.0.1:9000/health
 
 - Qwen3 model weights and LoRA adapters
 - BGE-M3 model files and compiled TRT engine (`bge_m3.engine`)
-- Qdrant index data (`/root/rag/qdrant_storage`)
+- Qdrant index data (`rag/qdrant_storage/`)
 - ngrok public URL (changes on restart)
 - MLflow run artifacts and Optuna study outputs
 
@@ -205,5 +202,5 @@ docker inspect <container> --format '{{.Config.Image}}'
 |---------|-------|
 | BGE returns empty / agent says "0 products" | `curl -X POST http://127.0.0.1:8888/embed -d '{"text":"test"}'` |
 | vLLM won't start | `docker logs eval_deploy_qwenie` — usually missing model path |
-| Agent can't find RAG | Symlink `rag/` to `/root/rag` or set paths in `.env` |
+| Agent can't find RAG | Confirm `RAG_ROOT=/root/saulie/rag` in `.env` and `rag/query2.py` exists |
 | ngrok skipped | Set `NGROK_KEY` in `.env` |

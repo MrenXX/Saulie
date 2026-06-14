@@ -13,7 +13,7 @@ services:
     ports:
       - "${QDRANT_PORT:-1234}:6333"
     volumes:
-      - ${RAG_ROOT:-/root/rag}/qdrant_storage:/qdrant/storage
+      - ${RAG_ROOT:-/root/saulie/rag}/qdrant_storage:/qdrant/storage
 
   nginx:
     image: ${NGINX_IMAGE:-nginx:1.25-alpine}

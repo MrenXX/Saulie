@@ -10,14 +10,16 @@ import uuid
 import numpy as np
 import requests
 import pandas as pd
+from pathlib import Path
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest
 from tqdm import tqdm
 
 # ---------- CONFIG ----------
+_RAG_ROOT = os.getenv("RAG_ROOT", str(Path(__file__).resolve().parent))
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:1234")
 COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "amazon_products")
-CSV_PATH = os.getenv("INDIAN_CSV", "/root/rag/amazon_indian_clean.csv")
+CSV_PATH = os.getenv("INDIAN_CSV", f"{_RAG_ROOT}/amazon_indian_clean.csv")
 SERVER_URL = os.getenv("EMBED_URL", "http://localhost:8888/embed")
 TEXT_FIELD = "embed_text"
 DISTANCE = rest.Distance.COSINE
@@ -155,7 +157,7 @@ def main():
 
     info = client.get_collection(COLLECTION_NAME)
     print(f"\n[ok] Indexed {info.points_count:,} points into '{COLLECTION_NAME}'")
-    print("Run: python3 /root/rag/validate_index.py")
+    print(f"Run: python3 {_RAG_ROOT}/validate_index.py")
 
 
 if __name__ == "__main__":

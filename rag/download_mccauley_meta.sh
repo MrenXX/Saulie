@@ -3,14 +3,14 @@
 # Resume-friendly for slow/unreliable connections (WSL2).
 #
 # Usage:
-#   bash /root/rag/download_mccauley_meta.sh              # all categories
-#   bash /root/rag/download_mccauley_meta.sh All_Beauty   # single category (smoke test)
+#   bash download_mccauley_meta.sh              # all categories
+#   bash download_mccauley_meta.sh All_Beauty   # single category (smoke test)
 #
-# Files land in /root/rag/mccauley_meta/meta_{Category}.jsonl.gz
+# Files land in $RAG_ROOT/mccauley_meta/meta_{Category}.jsonl.gz
 
 set -euo pipefail
 
-OUT="${MCCAULEY_META_DIR:-/root/rag/mccauley_meta}"
+OUT="${MCCAULEY_META_DIR:-${RAG_ROOT:-/root/saulie/rag}/mccauley_meta}"
 # Verified 2025: datarepo .jsonl.gz 404; mcauleylab .jsonl.gz works; HF resolve works as fallback
 BASE_PRIMARY="https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/meta_categories"
 BASE_HF="https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/meta_categories"

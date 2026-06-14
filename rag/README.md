@@ -2,7 +2,7 @@
 
 Hybrid dense + sparse retrieval over Amazon product catalogs using **BGE-M3** (TensorRT) and **Qdrant**. This folder contains scripts to prepare data, build indexes, validate quality, query, and compare **Indian CSV** vs **McAuley 2023** datasets with **RRF** vs **DBSF** fusion.
 
-The Saulie agent (`agent_chat_api.py`) imports `search_hybrid` from `query2.py` via `sys.path.append("/root/rag")`. For local dev, symlink or copy this folder to `/root/rag`.
+The Saulie agent (`agent_chat_api.py`) imports `search_hybrid` from `query2.py` in this folder. All RAG code and runtime data live under `saulie/rag/` (heavy artifacts are gitignored).
 
 ---
 

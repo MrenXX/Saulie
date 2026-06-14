@@ -8,13 +8,15 @@ import uuid
 import numpy as np
 import requests
 import pandas as pd
+from pathlib import Path
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest
 from tqdm import tqdm
 
+_RAG_ROOT = os.getenv("RAG_ROOT", str(Path(__file__).resolve().parent))
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:1234")
 COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "amazon_products_v2")
-CSV_PATH = os.getenv("MCCAULEY_CSV", "/root/rag/mccauley_products_500k.csv")
+CSV_PATH = os.getenv("MCCAULEY_CSV", f"{_RAG_ROOT}/mccauley_products_500k.csv")
 SERVER_URL = os.getenv("EMBED_URL", "http://localhost:8888/embed")
 TEXT_FIELD = "embed_text"
 

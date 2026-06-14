@@ -4,8 +4,11 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(__file__))
+
+_RAG_ROOT = Path(os.getenv("RAG_ROOT", Path(__file__).resolve().parent))
 
 # Same 18 query intents; category filter varies by dataset
 QUERIES = [
@@ -71,10 +74,12 @@ def main():
     )
     args = parser.parse_args()
 
-    out_path = args.output or (
-        "/root/rag/fusion_benchmark_results_v2.json"
-        if args.collection == "amazon_products_v2"
-        else "/root/rag/fusion_benchmark_results.json"
+    out_path = args.output or str(
+        _RAG_ROOT / (
+            "fusion_benchmark_results_v2.json"
+            if args.collection == "amazon_products_v2"
+            else "fusion_benchmark_results.json"
+        )
     )
 
     print(f"Collection: {args.collection}")

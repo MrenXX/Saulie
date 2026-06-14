@@ -12,8 +12,9 @@ from pathlib import Path
 
 import pandas as pd
 
-META_DIR = Path(os.getenv("MCCAULEY_META_DIR", "/root/rag/mccauley_meta"))
-OUT_CSV = Path(os.getenv("MCCAULEY_CSV", "/root/rag/mccauley_products_500k.csv"))
+_RAG_ROOT = Path(os.getenv("RAG_ROOT", Path(__file__).resolve().parent))
+META_DIR = Path(os.getenv("MCCAULEY_META_DIR", _RAG_ROOT / "mccauley_meta"))
+OUT_CSV = Path(os.getenv("MCCAULEY_CSV", _RAG_ROOT / "mccauley_products_500k.csv"))
 
 # Per-category caps (sum ~455k; buffer via quality filters)
 CATEGORY_CAPS = {

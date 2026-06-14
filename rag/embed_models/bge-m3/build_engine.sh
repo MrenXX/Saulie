@@ -7,7 +7,7 @@
 # Usage (from host):
 #   docker start tensorrt_bge-m3
 #   docker exec tensorrt_bge-m3 pkill -f serve.py || true
-#   bash /root/rag/embed_models/bge-m3/build_engine.sh
+#   bash /root/saulie/rag/embed_models/bge-m3/build_engine.sh
 #
 # Or inside container:
 #   cd /workspace && bash build_engine.sh

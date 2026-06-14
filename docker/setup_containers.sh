@@ -12,10 +12,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+if [[ -f "$REPO/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$REPO/.env"
+  set +a
+fi
+
 # shellcheck source=docker/versions.env
 source "$SCRIPT_DIR/versions.env"
 
-RAG_ROOT="${RAG_ROOT:-/root/rag}"
+RAG_ROOT="${RAG_ROOT:-/root/saulie/rag}"
 QDRANT_STORAGE="${RAG_ROOT}/qdrant_storage"
 BGE_WORKSPACE="${RAG_ROOT}/embed_models/bge-m3"
 EMBED_PORT="${EMBED_PORT:-8888}"
@@ -105,6 +112,14 @@ start_bge_server() {
     -H "Content-Type: application/json" -d '{"text":"healthcheck"}' >/dev/null 2>&1; then
     ok "BGE embed server already responding"
     return 0
+  fi
+
+  if ! docker exec "$BGE_CONTAINER" python -c "import uvicorn, fastapi" >/dev/null 2>&1; then
+    log "Installing BGE serve.py dependencies in container..."
+    if ! docker exec "$BGE_CONTAINER" python -c "import torch" >/dev/null 2>&1; then
+      docker exec "$BGE_CONTAINER" pip install torch --index-url https://download.pytorch.org/whl/cu124
+    fi
+    docker exec "$BGE_CONTAINER" pip install -q uvicorn fastapi pydantic transformers
   fi
 
   log "Starting BGE serve.py inside container..."
