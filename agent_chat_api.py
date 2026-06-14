@@ -11,7 +11,9 @@ import os
 import json
 import logging
 import threading
+from pathlib import Path
 from queue import Empty, Queue
+from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
@@ -25,9 +27,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+_REPO_ROOT = Path(__file__).resolve().parent
+load_dotenv(_REPO_ROOT / ".env")
+
 # --- 2. IMPORT SEARCH FUNCTION ---
-_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_REPO_ROOT, "rag"))
+sys.path.insert(0, str(_REPO_ROOT / "rag"))
 try:
     from query2 import search_hybrid
     logger.info("Successfully imported search_hybrid")
@@ -37,8 +41,11 @@ except ImportError as e:
 
 # --- 3. CONFIGURATION ---
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://localhost:8000/v1")
-LLM_API_KEY = os.getenv("LLM_API_KEY", "dipshit")
+LLM_API_KEY = os.getenv("LLM_API_KEY")
+if not LLM_API_KEY:
+    raise RuntimeError("LLM_API_KEY not set — add it to .env (see .env.example)")
 MODEL_NAME = os.getenv("MODEL_NAME", "dpo-v15-trial-4")
+AGENT_HOST = os.getenv("AGENT_HOST", "127.0.0.1")
 SSE_KEEPALIVE_INTERVAL = float(os.getenv("SSE_KEEPALIVE_INTERVAL", "15"))
 LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "300"))
 
@@ -948,11 +955,9 @@ if __name__ == "__main__":
     # Run as an API server:
     #   python agent_chat_api.py api
     # Or with uvicorn directly (recommended):
-    #   uvicorn agent_chat_api:app --host 0.0.0.0 --port 9000
-    #   fastapi dev agent_chat_api.py --host 0.0.0.0 --port 9000
+    #   uvicorn agent_chat_api:app --host 127.0.0.1 --port 9000
     if len(sys.argv) > 1 and sys.argv[1].lower() == "api":
         import uvicorn
         port = int(os.getenv("PORT", "9000"))
-        # NOTE: updated uvicorn target to match this filename so running the script directly works.
-        uvicorn.run("agent_chat_api:app", host="0.0.0.0", port=port, log_level="info")
+        uvicorn.run("agent_chat_api:app", host=AGENT_HOST, port=port, log_level="info")
         sys.exit(0)

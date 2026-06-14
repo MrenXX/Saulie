@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPO_ROOT / ".env")
 
 V15_RUN = REPO_ROOT / "dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732"
 SFT_ADAPTER_HOST = REPO_ROOT / "train/models/steering-sft-v1.1/trial-17/best_adapter"
@@ -17,7 +21,9 @@ EVAL_INFERENCE_SYSTEM_PROMPT = REPO_ROOT / "dpo/eval/eval_inference_system_promp
 STARTUP_MANIFEST_PATH = REPO_ROOT / "dpo/eval/v15_deploy_startup_manifest.jsonl"
 
 VLLM_BASE_URL = "http://localhost:8000/v1"
-VLLM_API_KEY = "dipshit"
+VLLM_API_KEY = os.getenv("VLLM_API_KEY")
+if not VLLM_API_KEY:
+    raise RuntimeError("VLLM_API_KEY not set — add it to .env (see .env.example)")
 VLLM_LOAD_LORA_URL = "http://localhost:8000/v1/load_lora_adapter"
 VLLM_UNLOAD_LORA_URL = "http://localhost:8000/v1/unload_lora_adapter"
 

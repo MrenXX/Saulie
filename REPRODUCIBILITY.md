@@ -14,6 +14,7 @@ This document explains how to recreate the Saulie development environment from s
 | [`docker/docker-compose.yml`](docker/docker-compose.yml) | Qdrant + nginx via compose (optional) |
 | [`rag/embed_models/bge-m3/serve.py`](rag/embed_models/bge-m3/serve.py) | BGE FastAPI embed server (runs **inside** the TensorRT container) |
 | [`rag/embed_models/bge-m3/build_engine.sh`](rag/embed_models/bge-m3/build_engine.sh) | Compile BGE-M3 ONNX → TensorRT engine |
+| [`SECURITY.md`](SECURITY.md) | Demo security model (nginx auth, localhost binds, `.env` secrets) |
 
 **What is `environment.yml`?** It is not a second dependency list. It only says: "make a conda env named `saulgman` with Python 3.11, then pip-install from `requirements.txt`." One command instead of two.
 

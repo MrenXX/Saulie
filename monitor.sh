@@ -2,11 +2,14 @@
 
 # Tmux-Based Production Dashboard
 # ================================
-# Creates a multi-panel dashboard with:
-# - Top panel: Container stats & metrics
-# - Bottom panel: Live logs stream
-# 
-# Requirements: tmux (install with: apt install tmux / brew install tmux)
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${REPO}/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${REPO}/.env"
+  set +a
+fi
 
 CONTAINER_NAME="eval_deploy_qwenie"
 SESSION_NAME="saulie_dashboard"

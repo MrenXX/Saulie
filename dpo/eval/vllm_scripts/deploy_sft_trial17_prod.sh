@@ -8,6 +8,13 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 # shellcheck source=docker/versions.env
 source "${REPO}/docker/versions.env"
+if [[ -f "${REPO}/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${REPO}/.env"
+  set +a
+fi
+VLLM_API_KEY="${VLLM_API_KEY:-dipshit}"
 
 CONTAINER_NAME="eval_deploy_qwenie"
 MODEL_PATH="/root/saulie/Qwen3-4B-Instruct-2507-FP8"
@@ -17,7 +24,6 @@ MODEL_NAME="steering-sft-trial-17"
 MAX_LORA_RANK=16
 GPU_DEVICE="0"
 PORT="8000"
-VLLM_API_KEY="${VLLM_API_KEY:-dipshit}"
 
 echo "╔═════════════════════════════════════════════════════════════════════════╗"
 echo "║  SFT Trial-17 — FP8 Qwen3 + SFT LoRA only (matrix baseline)             ║"
@@ -50,7 +56,7 @@ docker run -d \
   --ulimit memlock=-1 \
   --ulimit stack=67108864 \
   --restart unless-stopped \
-  -p "${PORT}:8000" \
+  -p "127.0.0.1:${PORT}:8000" \
   -v "${MODEL_PATH}:/models/model:ro" \
   -v "${LORA_ADAPTER_PATH}:${CONTAINER_LORA_PATH}:ro" \
   -e "VLLM_API_KEY=${VLLM_API_KEY}" \

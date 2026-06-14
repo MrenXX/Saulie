@@ -78,6 +78,21 @@ fi
 
 export QDRANT_COLLECTION="${QDRANT_COLLECTION:-amazon_products_v2}"
 export FUSION_METHOD="${FUSION_METHOD:-rrf}"
+NGINX_API_KEY="${NGINX_API_KEY:-secret}"
+VLLM_API_KEY="${VLLM_API_KEY:-dipshit}"
+LLM_API_KEY="${LLM_API_KEY:-dipshit}"
+export NGINX_API_KEY VLLM_API_KEY LLM_API_KEY
+
+prepare_nginx_conf() {
+  local src="${REPO}/nginx/nginx.conf"
+  local dst="${REPO}/nginx/nginx.runtime.conf"
+  if [[ ! -f "$src" ]]; then
+    err "Missing $src"
+    return 1
+  fi
+  # Substitute NGINX_API_KEY from .env into the Bearer map (placeholder __NGINX_API_KEY__)
+  sed "s|__NGINX_API_KEY__|${NGINX_API_KEY}|g" "$src" >"$dst"
+}
 
 http_ok() {
   curl -sf --max-time 3 "$1" >/dev/null 2>&1
@@ -217,6 +232,7 @@ start_agent() {
     cd "$REPO"
     nohup env QDRANT_COLLECTION="$QDRANT_COLLECTION" FUSION_METHOD="$FUSION_METHOD" \
       MODEL_NAME="$SAULIE_MODEL" SAULIE_PROMPT="$SAULIE_PROMPT" \
+      LLM_API_KEY="$LLM_API_KEY" AGENT_HOST="127.0.0.1" \
       "$PYTHON" agent_chat_api.py api >>"$AGENT_STDLOG" 2>&1 &
     echo $! >"$AGENT_PIDFILE"
   )
@@ -285,6 +301,8 @@ ensure_nginx() {
     err "Missing ${REPO}/nginx/nginx.conf — cannot create nginx container"
     return 1
   fi
+
+  prepare_nginx_conf || return 1
 
   log "Creating nginx container via docker compose..."
   docker compose -f "${REPO}/nginx/docker-compose.nginx.yml" up -d
@@ -357,12 +375,12 @@ while true; do
   echo "══════════════════════════════════════════════════════════════"
   printf " vLLM (:${VLLM_PORT})     : "; curl -sf --max-time 2 "http://127.0.0.1:${VLLM_PORT}/health" >/dev/null && echo "UP" || echo "DOWN"
   printf " Agent (:${AGENT_PORT})   : "; curl -sf --max-time 2 "http://127.0.0.1:${AGENT_PORT}/health" >/dev/null && echo "UP" || echo "DOWN"
-  printf " nginx (:${NGINX_PORT})   : "; curl -sf --max-time 2 "http://127.0.0.1:${NGINX_PORT}/health" >/dev/null && echo "UP" || echo "DOWN"
+  printf " nginx (:${NGINX_PORT})   : "; code=\$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 -X POST "http://127.0.0.1:${NGINX_PORT}/v1/chat/completions" -H "Content-Type: application/json" -d '{}'); [[ "\$code" == "401" ]] && echo "UP" || echo "DOWN"
   printf " BGE (:${EMBED_PORT})     : "; curl -sf --max-time 3 -X POST "http://127.0.0.1:${EMBED_PORT}/embed" -H "Content-Type: application/json" -d '{"text":"ping"}' >/dev/null && echo "UP" || echo "DOWN"
   printf " Qdrant (:${QDRANT_PORT}) : "; curl -sf --max-time 2 "http://127.0.0.1:${QDRANT_PORT}/" >/dev/null && echo "UP" || echo "DOWN"
   echo "──────────────────────────────────────────────────────────────"
-  echo " Local agent : http://127.0.0.1:${AGENT_PORT}/v1/chat/completions"
-  echo " nginx proxy : http://127.0.0.1:${NGINX_PORT}/v1/chat/completions  (Bearer secret)"
+  echo " Local agent : http://127.0.0.1:${AGENT_PORT}/health  (localhost only)"
+  echo " nginx proxy : http://127.0.0.1:${NGINX_PORT}/v1/chat/completions  (Bearer ${NGINX_API_KEY})"
   URL=\$(curl -sf --max-time 2 http://127.0.0.1:4040/api/tunnels 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(next((t['public_url'] for t in d.get('tunnels',[]) if t.get('proto')=='https'), 'ngrok not running'))" 2>/dev/null || echo "ngrok not running")
   echo " Public URL  : \$URL"
   echo "──────────────────────────────────────────────────────────────"

@@ -13,6 +13,9 @@ Qwen*/
 # Local secrets (use .env.example as template)
 .env
 
+# nginx config rendered from .env at startup
+nginx/nginx.runtime.conf
+
 # Archives & junk
 *.rar
 *.zip

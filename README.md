@@ -26,7 +26,7 @@ bash dpo/eval/vllm_scripts/deploy_finalist_pick.sh   # after model weights are o
 bash start_saulie.sh
 ```
 
-Full guide: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) — Python pins, Docker image versions, RAG layout, and what is not in git.
+Full guide: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md). Security: [`SECURITY.md`](SECURITY.md).
 
 ---
 
@@ -169,10 +169,10 @@ Full pipeline docs: [`rag/README.md`](rag/README.md).
 | `SAULIE_PROMPT` | `compressed` | Deployment |
 | `QDRANT_COLLECTION` | `amazon_products_v2` | RAG |
 | `FUSION_METHOD` | `rrf` | RAG |
-| `VLLM_API_KEY` | `dipshit` | vLLM (agent → vLLM) |
-| nginx Bearer | `secret` | Public API |
+| `VLLM_API_KEY` | `dipshit` (in `.env`) | vLLM (agent → vLLM) |
+| `NGINX_API_KEY` | `secret` (in `.env`) | Public API via nginx Bearer |
 
-Agent imports RAG via `sys.path.append("/root/rag")` — symlink or copy `rag/` to `/root/rag` for local dev.
+Security details: [`SECURITY.md`](SECURITY.md). Agent listens on `127.0.0.1` only; `/health` is not exposed via nginx.
 
 ---
 
