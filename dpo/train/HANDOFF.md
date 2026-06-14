@@ -30,7 +30,7 @@ All paths are under repo root `/root/saulie` unless noted.
 | `dpo/eval/llm_judge_prompt_dpo.md` | Judge rubric (DPO final validation) |
 | `dpo/eval/candidate_metadata_finalists.json` | Pre-built metrics metadata for finalists + SFT baseline |
 
-Parallel copies (SFT-era layout): `train/sft_eval/eval_skeletons.json`, `train/sft_eval/llm_judge_prompt.md`
+Parallel copies (SFT-era layout): `sft/sft_eval/eval_skeletons.json`, `sft/sft_eval/llm_judge_prompt.md`
 
 ### Training / merge utilities
 
@@ -44,7 +44,7 @@ Parallel copies (SFT-era layout): `train/sft_eval/eval_skeletons.json`, `train/s
 
 | Path | Purpose |
 |------|---------|
-| `/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter` | SFT baseline adapter (`default` in training) |
+| `/root/saulie/sft/models/steering-sft-v1.1/trial-17/best_adapter` | SFT baseline adapter (`default` in training) |
 | `/root/saulie/Qwen3-4B-Instruct-2507` | BF16 base (`MODEL_ID_BF16`) |
 | `/root/saulie/Qwen3-4B-Instruct-2507-FP8` | FP8 base for vLLM (`MODEL_ID_FP8`) |
 
@@ -283,7 +283,7 @@ export DPO_MAX_TRIAL_WALL_S=43200
 1. Read **`dpo/eval/DPO_FINAL_EVAL_PLAN.md`** end-to-end.
 2. **Merge** all slate trials with `merge_sft_dpo_lora.py` using paths under `optuna-run-20260526-042551/trial-N/best_adapter` (not flat `steering-dpo-v1.1/trial-N`).
 3. Build **`sft_eval/dpo_final_candidate_manifest.jsonl`** (or under `dpo/eval/`) — populate from both `trial_summary.json` files listed above; see eval plan for JSONL shape.
-4. Update **`train/sft_eval/deploy_qwenie_eval.sh`** and **`eval_generate_vllm.py`** per eval plan (manifest-driven, `MAX_LORA_RANK=64`).
+4. Update **`sft/sft_eval/deploy_qwenie_eval.sh`** and **`eval_generate_vllm.py`** per eval plan (manifest-driven, `MAX_LORA_RANK=64`).
 5. Generate 52-conversation outputs; save as e.g. `dpo/eval/dpo_final_generations_52.json`.
 6. Run LLM judge with `dpo/eval/llm_judge_prompt_dpo.md` + `candidate_metadata_finalists.json` + generations.
 7. **Do not** judge raw `Saulie` base — only SFT trial-17 baseline vs merged DPO cats.

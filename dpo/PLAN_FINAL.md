@@ -7,7 +7,7 @@ This is the final coherent handoff for a new implementation agent. Treat V4 as t
 2. Validated counts: 522 rows; `prompt_a=330`, `prompt_b_repaired=92`, `prompt_b_exp500=100`; categories `style=220`, `steering=121`, `product_fit=181`; V4 validation passes.
 3. Data state: no data blockers remain. Do not train on older dataset artifacts. Do not run another repair pass unless a hard structural blocker appears.
 4. Base training model: `Qwen3-4B-Instruct-2507`. Base inference model: `Qwen3-4B-Instruct-2507-FP8`.
-5. Existing SFT behavior/reference: `train/models/steering-sft-v1.1/trial-17/best_adapter/`. The SFT adapter is frozen and must never be overwritten.
+5. Existing SFT behavior/reference: `sft/models/steering-sft-v1.1/trial-17/best_adapter/`. The SFT adapter is frozen and must never be overwritten.
 6. Policy: base + frozen SFT behavior + new trainable DPO LoRA delta. Reference: frozen SFT trial-17 behavior.
 7. Gate: run a dummy first and stop. No Optuna until the dummy succeeds and the user explicitly approves.
 
@@ -55,7 +55,7 @@ This is the final coherent handoff for a new implementation agent. Treat V4 as t
 8. Global correction pass: after per-stratum allocation, adjust only within the same `(dpo_source, category)` bucket to hit global split sizes as closely as possible. Do not move rows in a way that drops a source/category bucket entirely from validation or test.
 9. Balance diagnostics: report per-split counts and percentages for `dpo_source`, `source_family`, `category`, `dpo_source x category`, `dpo_source x category x opening_type`, `opening_type`, `total_turns`, `divergence_turn`, and `has_branch_local_user`.
 10. Branch-safety diagnostic label: compute `has_branch_local_user` as true when chosen or rejected contains any user-role message after the prompt. This is not the primary split key, but validation/test should contain branch-local-user examples if they exist in V4.
-11. Split manifest: write `train/dataset/dpo_v4_split_seed_<seed>.jsonl` or an equivalent target-workspace path with `id`, `split`, `split_seed`, `dpo_source`, `source_family`, `category`, `opening_type`, `total_turns`, `divergence_turn`, `has_branch_local_user`, final stratum key, and allocation reason. Cache keys must include this manifest hash.
+11. Split manifest: write `sft/dataset/dpo_v4_split_seed_<seed>.jsonl` or an equivalent target-workspace path with `id`, `split`, `split_seed`, `dpo_source`, `source_family`, `category`, `opening_type`, `total_turns`, `divergence_turn`, `has_branch_local_user`, final stratum key, and allocation reason. Cache keys must include this manifest hash.
 12. Split validation: fail if any V4 row is missing from the manifest, any ID appears twice, train/val/test overlap, source/category proportions drift materially from full V4, validation has zero examples for any raw `dpo_source` or category, or test has zero examples for any raw `dpo_source` or category.
 
 **Optuna Search Space**
@@ -129,11 +129,11 @@ Do not include old handoff plans, old training-stack plans, repair-audit handoff
 - `sft_eval/deploy_qwenie_eval.sh` - vLLM deploy script to adapt for merged adapters.
 
 **Planned New Implementation Files**
-- `train/dpo_data.py` - data load, deterministic split creation, tokenization, assistant-only masks, audits, diagnostics, caches.
-- `train/dpo_trainer_compat.py` - collator plus minimal TRL preservation wrapper only if installed TRL requires it.
-- `train/train_dpo.py` - dummy and Optuna entrypoint, MLflow logging, cache use, and shortlist manifest writing.
-- `train/merge_sft_dpo_lora.py` - PEFT cat merge and equivalence validation for vLLM-serving adapters.
-- `train/dataset/dpo_v4_split_seed_<seed>.jsonl` - split manifest produced by implementation.
+- `sft/dpo_data.py` - data load, deterministic split creation, tokenization, assistant-only masks, audits, diagnostics, caches.
+- `sft/dpo_trainer_compat.py` - collator plus minimal TRL preservation wrapper only if installed TRL requires it.
+- `sft/train_dpo.py` - dummy and Optuna entrypoint, MLflow logging, cache use, and shortlist manifest writing.
+- `sft/merge_sft_dpo_lora.py` - PEFT cat merge and equivalence validation for vLLM-serving adapters.
+- `sft/dataset/dpo_v4_split_seed_<seed>.jsonl` - split manifest produced by implementation.
 
 **Verification**
 1. Data validation: 522 rows, stable IDs, expected source/category counts, valid role alternation, no empty assistant branches, and no unexpected V4 schema drift.

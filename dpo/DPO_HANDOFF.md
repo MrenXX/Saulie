@@ -16,13 +16,13 @@
 | Training data (522 rows) | `dpo/dataset/DPO_522_prompt_a_and_prompt_b_V2.jsonl` |
 | Data meta / counts | `dpo/dataset/DPO_522_prompt_a_and_prompt_b_V2_meta.json` |
 
-**No DPO training code exists yet.** Only SFT: `train/train_sft.py`, eval: `train/sft_eval/`, seq analysis: `train/analyze_seq_len.py`.
+**No DPO training code exists yet.** Only SFT: `sft/train_sft.py`, eval: `sft/sft_eval/`, seq analysis: `sft/analyze_seq_len.py`.
 
 ---
 
 ## Project goal (one paragraph)
 
-Fine-tune **on top of** `steering-sft-v1.1` **trial-17** with DPO on 522 curated preference pairs (synthetic Prompt A + on-policy Prompt B). Persona: conversational steering toward **generic product recommendations** (Saul Goodman–ish cadence, no brands, no em dashes). **Do not modify** trial-17 SFT adapter files. Inference: **FP8 base** + **one merged LoRA** (SFT+DPO via PEFT `cat` merge) in vLLM; eval compares **base+sysprompt** vs **SFT-only** vs **merged SFT+DPO** via `train/sft_eval/`.
+Fine-tune **on top of** `steering-sft-v1.1` **trial-17** with DPO on 522 curated preference pairs (synthetic Prompt A + on-policy Prompt B). Persona: conversational steering toward **generic product recommendations** (Saul Goodman–ish cadence, no brands, no em dashes). **Do not modify** trial-17 SFT adapter files. Inference: **FP8 base** + **one merged LoRA** (SFT+DPO via PEFT `cat` merge) in vLLM; eval compares **base+sysprompt** vs **SFT-only** vs **merged SFT+DPO** via `sft/sft_eval/`.
 
 ---
 
@@ -58,7 +58,7 @@ Fine-tune **on top of** `steering-sft-v1.1` **trial-17** with DPO on 522 curated
 3. **STOP** — wait for explicit user **go**.
 4. Optuna **20 trials** (not 15).
 
-**Dummy hparams:** `beta=0.1`, `sigmoid`, `lr=1e-5`, `epochs=2`, `r=16`, `alpha=32`, `batch=1`, `grad_accum=4`, `precompute_ref_log_probs=True`. Output: `train/models/steering-dpo-v1.0/dummy-run/`. Record val `eval_loss` min/max for hybrid_score normalization.
+**Dummy hparams:** `beta=0.1`, `sigmoid`, `lr=1e-5`, `epochs=2`, `r=16`, `alpha=32`, `batch=1`, `grad_accum=4`, `precompute_ref_log_probs=True`. Output: `sft/models/steering-dpo-v1.0/dummy-run/`. Record val `eval_loss` min/max for hybrid_score normalization.
 
 ### Optuna
 
@@ -68,7 +68,7 @@ Fine-tune **on top of** `steering-sft-v1.1` **trial-17** with DPO on 522 curated
 
 ### Eval (final)
 
-- `train/sft_eval/eval_skeletons.json` (held out).
+- `sft/sft_eval/eval_skeletons.json` (held out).
 - `eval_generate_vllm.py` + `llm_judge_prompt.md`.
 - Arms: **base+sysprompt**, **SFT trial-17**, **merged SFT+DPO** (the product “DPO model”).
 
@@ -77,9 +77,9 @@ Fine-tune **on top of** `steering-sft-v1.1` **trial-17** with DPO on 522 curated
 ```
 Qwen3-4B-Instruct-2507/                    # BnB train base
 Qwen3-4B-Instruct-2507-FP8/                # vLLM infer base
-train/models/steering-sft-v1.1/trial-17/best_adapter/
+sft/models/steering-sft-v1.1/trial-17/best_adapter/
 deploy_sft_trial17.sh
-train/train_sft.py                           # patterns to mirror
+sft/train_sft.py                           # patterns to mirror
 train/analyze_seq_len.py                     # 704 token justification
 ```
 
@@ -143,11 +143,11 @@ Authoring spec **allows** user in continuations: `DPO_PROMPT_A_OG.md` lines 266�
 
 | File | Purpose |
 |------|---------|
-| `train/dpo_data.py` | Load JSONL, stratified split |
-| `train/train_dpo.py` | Dummy mode + Optuna + MLflow |
-| `train/merge_sft_dpo_lora.py` | Cat-merge SFT+DPO for vLLM |
+| `sft/dpo_data.py` | Load JSONL, stratified split |
+| `sft/train_dpo.py` | Dummy mode + Optuna + MLflow |
+| `sft/merge_sft_dpo_lora.py` | Cat-merge SFT+DPO for vLLM |
 
-Mirror: `train/train_sft.py` (load model, chat patch, `clear_gpu`, MLflow/Optuna patterns).
+Mirror: `sft/train_sft.py` (load model, chat patch, `clear_gpu`, MLflow/Optuna patterns).
 
 ---
 

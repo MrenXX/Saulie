@@ -15,7 +15,7 @@ MLRUNS_DIR = DPO_TRAIN_DIR / "mlruns"
 MODEL_ID_BF16 = REPO_ROOT / "Qwen3-4B-Instruct-2507"
 MODEL_ID_FP8 = REPO_ROOT / "Qwen3-4B-Instruct-2507-FP8"
 MODEL_ID_SFT_MERGED_BF16 = REPO_ROOT / "Qwen3-4B-Instruct-2507-SFT-MERGED-BF16"
-SFT_ADAPTER = REPO_ROOT / "train/models/steering-sft-v1.1/trial-17/best_adapter"
+SFT_ADAPTER = REPO_ROOT / "sft/models/steering-sft-v1.1/trial-17/best_adapter"
 
 EXPERIMENT_NAME = "steering-dpo-v1.0"
 EXPERIMENT_NAME_V1_1 = "steering-dpo-v1.1"

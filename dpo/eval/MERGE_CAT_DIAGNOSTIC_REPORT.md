@@ -60,7 +60,7 @@
 |------|------|----------|
 | Train base (BnB) | `/root/saulie/Qwen3-4B-Instruct-2507` | 8-bit via BitsAndBytes |
 | Deploy base (FP8) | `/root/saulie/Qwen3-4B-Instruct-2507-FP8` | vLLM |
-| SFT adapter | `train/models/steering-sft-v1.1/trial-17/best_adapter` | r=16, α=32, name `default` |
+| SFT adapter | `sft/models/steering-sft-v1.1/trial-17/best_adapter` | r=16, α=32, name `default` |
 | DPO adapter | `dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial-29/best_adapter/dpo` | r=32, α=64, name `dpo` |
 | Cat adapter (PEFT) | `.../trial-29/sft_dpo_cat` | r=48, α=48 (PEFT sets α=r after cat) |
 | Cat adapter (unbaked) | `.../trial-29/sft_dpo_cat_unbaked` | r=48, α=96 |
@@ -105,7 +105,7 @@ See `dpo/dataset/DPO_522_prompt_a_and_prompt_b_V2.jsonl` for row shape; `dpo/tra
 |------|------|-----------------|
 | Merge script | Cat-stack SFT+DPO for vLLM | `dpo/train/merge_sft_dpo_lora.py` |
 | Shared BnB loader | Same base as `train_dpo.py` | `dpo/train/model_load.py` → `load_bnb_8bit_base()` |
-| Deploy + gen | FP8 vLLM multi-adapter | `train/sft_eval/deploy_qwenie_eval.sh`, `train/sft_eval/eval_generate_vllm.py` |
+| Deploy + gen | FP8 vLLM multi-adapter | `sft/sft_eval/deploy_qwenie_eval.sh`, `sft/sft_eval/eval_generate_vllm.py` |
 | Eval plan | Phase 1 procedure | `dpo/eval/DPO_FINAL_EVAL_PLAN.md` |
 
 ---
@@ -162,13 +162,13 @@ python dpo/train/merge_sft_dpo_lora.py \
 ```bash
 CANDIDATE_MANIFEST=/root/saulie/dpo/eval/dpo_phase1_stack_only_manifest.jsonl \
 MAX_LORA_RANK=64 MAX_LORAS=1 \
-bash train/sft_eval/deploy_qwenie_eval.sh
+bash sft/sft_eval/deploy_qwenie_eval.sh
 ```
 
 **Gen:**
 
 ```bash
-python train/sft_eval/eval_generate_vllm.py \
+python sft/sft_eval/eval_generate_vllm.py \
   --candidate-manifest dpo/eval/dpo_phase1_stack_only_manifest.jsonl \
   --skeletons dpo/eval/eval_skeletons.json \
   --skeleton-ids eval_A4_001,eval_B8_001 \
@@ -223,7 +223,7 @@ python dpo/train/export_unbaked_cat.py
 ```bash
 CANDIDATE_MANIFEST=/root/saulie/dpo/eval/dpo_phase1_unbaked_manifest.jsonl \
 MAX_LORA_RANK=64 MAX_LORAS=1 \
-bash train/sft_eval/deploy_qwenie_eval.sh
+bash sft/sft_eval/deploy_qwenie_eval.sh
 ```
 
 **Gen:** → `dpo/eval/dpo_phase1_smoke_unbaked.json`
@@ -384,7 +384,7 @@ Paths: `sft_dpo_cat`, `sft_dpo_cat_unbaked`, `best_adapter/dpo`, `trial-17/best_
 
 ### D5 — FP8 vLLM deploy
 
-**Script:** `train/sft_eval/deploy_qwenie_eval.sh`
+**Script:** `sft/sft_eval/deploy_qwenie_eval.sh`
 
 | Env var | Typical value |
 |---------|----------------|
@@ -400,7 +400,7 @@ Paths: `sft_dpo_cat`, `sft_dpo_cat_unbaked`, `best_adapter/dpo`, `trial-17/best_
 
 ### D6 — vLLM multi-turn generation
 
-**Script:** `train/sft_eval/eval_generate_vllm.py`
+**Script:** `sft/sft_eval/eval_generate_vllm.py`
 
 | Param | Value used in smokes |
 |-------|----------------------|
@@ -412,7 +412,7 @@ Paths: `sft_dpo_cat`, `sft_dpo_cat_unbaked`, `best_adapter/dpo`, `trial-17/best_
 | IDs | `eval_A4_001`, `eval_B8_001` |
 
 ```bash
-python train/sft_eval/eval_generate_vllm.py \
+python sft/sft_eval/eval_generate_vllm.py \
   --candidate-manifest dpo/eval/dpo_phase1_stack_only_manifest.jsonl \
   --skeletons dpo/eval/eval_skeletons.json \
   --skeleton-ids eval_A4_001,eval_B8_001 \
@@ -574,8 +574,8 @@ Read in this order for full context.
 
 | File | Why |
 |------|-----|
-| `train/sft_eval/deploy_qwenie_eval.sh` | FP8 Docker vLLM |
-| `train/sft_eval/eval_generate_vllm.py` | API generation loop |
+| `sft/sft_eval/deploy_qwenie_eval.sh` | FP8 Docker vLLM |
+| `sft/sft_eval/eval_generate_vllm.py` | API generation loop |
 | `dpo/eval/eval_skeletons.json` | Skeleton prompts used in all smokes |
 
 ### 5 — Manifests (which adapter was mounted)
@@ -604,7 +604,7 @@ Read in this order for full context.
 
 | Path | Content |
 |------|---------|
-| `train/models/steering-sft-v1.1/trial-17/best_adapter/` | SFT LoRA |
+| `sft/models/steering-sft-v1.1/trial-17/best_adapter/` | SFT LoRA |
 | `dpo/train/models/.../trial-29/best_adapter/dpo/` | DPO LoRA (policy delta) |
 | `dpo/train/models/.../trial-29/sft_dpo_cat/` | Cat merged LoRA |
 | `dpo/train/models/.../trial-29/sft_dpo_cat_unbaked/` | Manual unbaked LoRA |

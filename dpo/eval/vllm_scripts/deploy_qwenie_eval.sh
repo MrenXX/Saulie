@@ -92,8 +92,8 @@ if [ -n "$CANDIDATE_MANIFEST" ]; then
   done < "$CANDIDATE_MANIFEST"
 else
   EXPERIMENT_DIRS=(
-    "/root/saulie/train/models/steering-sft-v1.1"
-    "/root/saulie/train/models/steering-sft-v1.2"
+    "/root/saulie/sft/models/steering-sft-v1.1"
+    "/root/saulie/sft/models/steering-sft-v1.2"
   )
   for exp_dir in "${EXPERIMENT_DIRS[@]}"; do
     exp_name=$(basename "$exp_dir")

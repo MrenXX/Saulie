@@ -2,13 +2,21 @@
 dpo/train/models/
 dpo/train/mlruns/
 dpo/train/cache/
-train/models/
-train/mlruns/
+sft/models/
+sft/mlruns/
+sft/SFT_DATA_V3.jsonl
+sft/eval_results/
+sft/sft_eval/*.json
+sft/sft_eval/*.jsonl
 Qwen*/
 *.npz
 *.safetensors
 **/best_adapter/
 **/checkpoint-*/
+
+# Llama-era artifacts (deleted from disk)
+Llama*/
+template/
 
 # Local secrets (use .env.example as template)
 .env

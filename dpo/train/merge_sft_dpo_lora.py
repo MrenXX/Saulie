@@ -38,7 +38,7 @@ from dpo.train.qwen3_decode import (
     TOP_P,
     build_generate_kwargs,
 )
-from train.train_sft import patch_chat_template_for_assistant_loss
+from sft.train_sft import patch_chat_template_for_assistant_loss
 
 SFT_ADAPTER_NAME = "default"
 DPO_ADAPTER_NAME = "dpo"

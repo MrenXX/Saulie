@@ -64,7 +64,7 @@ from dpo.train.paths import (
     OUTPUT_BASE,
     SFT_ADAPTER,
 )
-from train.train_sft import clear_gpu, compute_data_hash, patch_chat_template_for_assistant_loss
+from sft.train_sft import clear_gpu, compute_data_hash, patch_chat_template_for_assistant_loss
 
 SEED = 42
 N_OPTUNA_TRIALS = 20

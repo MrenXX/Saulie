@@ -120,7 +120,7 @@ If **both** v1.2 trials fail Gate 1 → **Plan B** (SFT-baked base, etc.) per `p
 | `dpo/train/train_dpo.py` | v1.2 objective = val accuracy; logs `rescue_label`, `high_margin_warning` if margin > 5 |
 | `dpo/train/scripts/preflight_plan_a_v12.py` | IPO + `ld_0.5` TRL smoke |
 | `dpo/train/scripts/run_plan_a_v12.sh` | Launch 1-worker v1.2 study |
-| `train/models/steering-sft-v1.1/trial-17/best_adapter` | Frozen SFT (`paths.SFT_ADAPTER`) |
+| `sft/models/steering-sft-v1.1/trial-17/best_adapter` | Frozen SFT (`paths.SFT_ADAPTER`) |
 | `dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl` | Training data |
 | `dpo/eval/plan_a_part1_w1_10skel.jsonl` | Part 1 HF smoke outputs |
 | `dpo/eval/dpo_phase1_smoke_fp8.json` | FP8/vLLM smoke reference |

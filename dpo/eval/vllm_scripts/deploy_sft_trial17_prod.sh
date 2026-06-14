@@ -18,7 +18,7 @@ VLLM_API_KEY="${VLLM_API_KEY:-dipshit}"
 
 CONTAINER_NAME="eval_deploy_qwenie"
 MODEL_PATH="/root/saulie/Qwen3-4B-Instruct-2507-FP8"
-LORA_ADAPTER_PATH="/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter"
+LORA_ADAPTER_PATH="/root/saulie/sft/models/steering-sft-v1.1/trial-17/best_adapter"
 CONTAINER_LORA_PATH="/models/lora/steering-sft-trial-17"
 MODEL_NAME="steering-sft-trial-17"
 MAX_LORA_RANK=16

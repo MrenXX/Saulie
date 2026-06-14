@@ -149,7 +149,7 @@ Download separately and place at:
 |------|---------|
 | `/root/saulie/Qwen3-4B-Instruct-2507` | BF16 base (training) |
 | `/root/saulie/Qwen3-4B-Instruct-2507-FP8` | FP8 base (vLLM inference) |
-| `train/models/steering-sft-v1.1/trial-17/best_adapter` | SFT LoRA |
+| `sft/models/steering-sft-v1.1/trial-17/best_adapter` | SFT LoRA |
 | `dpo/train/models/steering-dpo-v1.5/.../trial-4/sft_dpo_cat` | DPO cat-merged LoRA |
 
 These are gitignored. Copy from your training machine or HuggingFace.

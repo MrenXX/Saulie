@@ -1080,7 +1080,7 @@ def write_final_summary(
     import trl
 
     from dpo.train.dpo_diagnostics import build_study_review, build_trial_summary_record
-    from train.train_sft import compute_data_hash
+    from sft.train_sft import compute_data_hash
 
     trials_out = []
     oom_by_combo: dict[str, int] = {}

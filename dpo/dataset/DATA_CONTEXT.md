@@ -85,6 +85,6 @@ The port bundle does not include model weights or adapters. The implementation m
 
 - `Qwen3-4B-Instruct-2507`
 - `Qwen3-4B-Instruct-2507-FP8`
-- `train/models/steering-sft-v1.1/trial-17/best_adapter/`
+- `sft/models/steering-sft-v1.1/trial-17/best_adapter/`
 
 The SFT adapter is the frozen reference behavior and must not be overwritten.

@@ -62,11 +62,17 @@ saulie/
 ├── nginx/                         # Reverse proxy (Bearer auth, SSE)
 ├── SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md
 │
+├── rag_symlink                      # Symlink to RAG data outside repo (local dev)
 ├── rag/                           # Hybrid product search (BGE-M3 + Qdrant)
 │   ├── README.md                  # ← full RAG docs
 │   ├── query2.py                  # search_hybrid (used by agent)
 │   ├── index_mccauley.py          # McAuley US catalog → amazon_products_v2
 │   └── fusion_comparison_report.md
+│
+├── sft/                           # Qwen SFT training (pre-DPO)
+│   ├── README.md                  # ← SFT layout + gitignore notes
+│   ├── train_sft.py               # Optuna HPO + MLflow
+│   └── sft_eval/                  # SFT-specific eval + judge prompt
 │
 └── dpo/
     ├── train/                     # Optuna studies, merge, SFT/DPO training

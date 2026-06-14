@@ -311,7 +311,7 @@ def run_mask_audit(
     row_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     """Hard-fail mask audit on curated rows; write mask_audit.json."""
-    from train.train_sft import patch_chat_template_for_assistant_loss
+    from sft.train_sft import patch_chat_template_for_assistant_loss
 
     patch_chat_template_for_assistant_loss(tokenizer)
 
@@ -367,7 +367,7 @@ def run_mask_audit(
 
 
 def audit_masks(tokenizer, rows: list[dict], n: int = 5) -> None:
-    from train.train_sft import patch_chat_template_for_assistant_loss
+    from sft.train_sft import patch_chat_template_for_assistant_loss
 
     patch_chat_template_for_assistant_loss(tokenizer)
     print("\n--- Mask audit (sample rows) ---")
@@ -414,7 +414,7 @@ def build_datasets(
     *,
     enforce_max_length: bool = True,
 ) -> tuple[DatasetDict, dict[str, Any]]:
-    from train.train_sft import patch_chat_template_for_assistant_loss
+    from sft.train_sft import patch_chat_template_for_assistant_loss
 
     patch_chat_template_for_assistant_loss(tokenizer)
 

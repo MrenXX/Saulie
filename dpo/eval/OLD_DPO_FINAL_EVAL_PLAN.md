@@ -96,7 +96,7 @@ Create `sft_eval/dpo_final_candidate_manifest.jsonl` or `sft_eval/dpo_final_cand
 Recommended JSONL shape:
 
 ```jsonl
-{"model_name":"steering-sft-v1.1_trial-17","kind":"sft_baseline","adapter_path":"/root/saulie/train/models/steering-sft-v1.1/trial-17/best_adapter","is_sft_baseline":true,"is_dpo":false,"study_version":"sft-v1.1","trial_number":17}
+{"model_name":"steering-sft-v1.1_trial-17","kind":"sft_baseline","adapter_path":"/root/saulie/sft/models/steering-sft-v1.1/trial-17/best_adapter","is_sft_baseline":true,"is_dpo":false,"study_version":"sft-v1.1","trial_number":17}
 {"model_name":"steering-dpo-v1.1_trial-29_sft_dpo_cat","kind":"dpo_merged","adapter_path":"/root/saulie/dpo/train/models/steering-dpo-v1.1/trial-29/sft_dpo_cat","is_sft_baseline":false,"is_dpo":true,"study_version":"v1.1","trial_number":29}
 ```
 
@@ -123,7 +123,7 @@ Current script scans only SFT directories and assumes rank 32. Update it to supp
 
 Required behavior:
 
-1. Accept `CANDIDATE_MANIFEST`, defaulting to `/root/saulie/train/sft_eval/dpo_final_candidate_manifest.jsonl` or the final chosen path.
+1. Accept `CANDIDATE_MANIFEST`, defaulting to `/root/saulie/sft/sft_eval/dpo_final_candidate_manifest.jsonl` or the final chosen path.
 2. Mount every `adapter_path` from the manifest into `/models/lora/<model_name>`.
 3. Build `--lora-modules` from the manifest `model_name=container_path` pairs.
 4. Keep the engine model served as `Saulie` for LoRA hosting, but do not include raw `Saulie` in the eval manifest or generation list.
@@ -135,7 +135,7 @@ Required behavior:
 Suggested command after update:
 
 ```bash
-CANDIDATE_MANIFEST=/root/saulie/train/sft_eval/dpo_final_candidate_manifest.jsonl \
+CANDIDATE_MANIFEST=/root/saulie/sft/sft_eval/dpo_final_candidate_manifest.jsonl \
 MAX_LORA_RANK=64 \
 MAX_LORAS=2 \
 bash sft_eval/deploy_qwenie_eval.sh
