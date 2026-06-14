@@ -3,6 +3,7 @@ dpo/train/models/
 dpo/train/mlruns/
 dpo/train/cache/
 train/models/
+train/mlruns/
 Qwen*/
 *.npz
 *.safetensors

@@ -1,0 +1,658 @@
+{
+  "benchmark": "prod_e2e",
+  "generated_at": "2026-06-11T01:18:28.687329",
+  "agent_url": "http://127.0.0.1:9000",
+  "health": {
+    "status": "ok",
+    "model": "dpo-v15-trial-4",
+    "prompt": "compressed"
+  },
+  "summary": {
+    "probe_turn_ms": {
+      "n": 5,
+      "mean_ms": 413.05,
+      "p50_ms": 429.75,
+      "p95_ms": 801.53,
+      "min_ms": 116.71,
+      "max_ms": 884.33
+    },
+    "tool_turn_total_ms": {
+      "n": 6,
+      "mean_ms": 2252.44,
+      "p50_ms": 2213.87,
+      "p95_ms": 2489.61,
+      "min_ms": 2016.19,
+      "max_ms": 2540.5
+    },
+    "tool_llm1_ms": {
+      "n": 6,
+      "mean_ms": 687.5,
+      "p50_ms": 679.91,
+      "p95_ms": 781.23,
+      "min_ms": 590.78,
+      "max_ms": 798.67
+    },
+    "tool_rag_ms": {
+      "n": 6,
+      "mean_ms": 73.78,
+      "p50_ms": 85.58,
+      "p95_ms": 100.21,
+      "min_ms": 26.23,
+      "max_ms": 100.56
+    },
+    "tool_llm2_ms": {
+      "n": 6,
+      "mean_ms": 1490.33,
+      "p50_ms": 1485.73,
+      "p95_ms": 1722.89,
+      "min_ms": 1264.16,
+      "max_ms": 1784.59
+    },
+    "tool_embed_ms": {
+      "n": 6,
+      "mean_ms": 12.09,
+      "p50_ms": 11.27,
+      "p95_ms": 15.51,
+      "min_ms": 9.98,
+      "max_ms": 16.06
+    },
+    "tool_qdrant_ms": {
+      "n": 6,
+      "mean_ms": 61.5,
+      "p50_ms": 71.22,
+      "p95_ms": 89.8,
+      "min_ms": 15.96,
+      "max_ms": 90.07
+    },
+    "tool_hit_rate": {
+      "attempts": 6,
+      "successes": 6,
+      "rate": 1.0
+    }
+  },
+  "rows": [
+    {
+      "assistant": "Two things that fit what you said, but the best one is the Therm-a-Rest Z Lite Sol Sleeping Pad. It's a foam pad, 10 inches thick, 16 square feet, rated for minus 20 degrees, and it costs about fifty-eight dollars. It keeps you from being an ice sculpture and stops you from being a statue.",
+      "wall_ms": 2194.53,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 709.28,
+            "prompt_tokens": 1263,
+            "completion_tokens": 47,
+            "total_tokens": 1310,
+            "tool_call_count": 1
+          },
+          {
+            "name": "tool",
+            "embed_ms": 9.98,
+            "qdrant_ms": 89.0,
+            "total_ms": 99.15,
+            "query_count": 2
+          },
+          {
+            "name": "llm2",
+            "elapsed_ms": 1383.97,
+            "prompt_tokens": 2552,
+            "completion_tokens": 75,
+            "total_tokens": 2627,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 709.28,
+            "prompt_tokens": 1263,
+            "completion_tokens": 47,
+            "total_tokens": 1310,
+            "tool_call_count": 1
+          },
+          {
+            "elapsed_ms": 1383.97,
+            "prompt_tokens": 2552,
+            "completion_tokens": 75,
+            "total_tokens": 2627,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 2193.29,
+        "llm_total_ms": 2093.25,
+        "tool_total_ms": 99.15,
+        "tool_executed": true
+      },
+      "tool_executed": true,
+      "llm1_ms": 709.28,
+      "llm2_ms": 1383.97,
+      "tool_ms": 99.15,
+      "tool_embed_ms": 9.98,
+      "tool_qdrant_ms": 89.0,
+      "turn_total_ms": 2193.29,
+      "scenario": "camping_warm",
+      "turn": 6,
+      "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+      "is_tool_turn": true,
+      "run": 1
+    },
+    {
+      "assistant": "The Night Cat Sleeping Air Pad with Pillow, 75x25 inches, is the one that matches what you said about the cold and the lack of grip. It's rated for minus 20 degrees, it's 10 inches thick, and it's a good size for a couple. Four-point-three ratings from five hundred people who've survived cold nights, and it's thirty-nine dollars.",
+      "wall_ms": 2338.2,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 798.67,
+            "prompt_tokens": 1263,
+            "completion_tokens": 52,
+            "total_tokens": 1315,
+            "tool_call_count": 1
+          },
+          {
+            "name": "tool",
+            "embed_ms": 13.85,
+            "qdrant_ms": 31.52,
+            "total_ms": 45.6,
+            "query_count": 2
+          },
+          {
+            "name": "llm2",
+            "elapsed_ms": 1491.8,
+            "prompt_tokens": 2494,
+            "completion_tokens": 84,
+            "total_tokens": 2578,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 798.67,
+            "prompt_tokens": 1263,
+            "completion_tokens": 52,
+            "total_tokens": 1315,
+            "tool_call_count": 1
+          },
+          {
+            "elapsed_ms": 1491.8,
+            "prompt_tokens": 2494,
+            "completion_tokens": 84,
+            "total_tokens": 2578,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 2336.92,
+        "llm_total_ms": 2290.47,
+        "tool_total_ms": 45.6,
+        "tool_executed": true
+      },
+      "tool_executed": true,
+      "llm1_ms": 798.67,
+      "llm2_ms": 1491.8,
+      "tool_ms": 45.6,
+      "tool_embed_ms": 13.85,
+      "tool_qdrant_ms": 31.52,
+      "turn_total_ms": 2336.92,
+      "scenario": "camping_warm",
+      "turn": 6,
+      "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+      "is_tool_turn": true,
+      "run": 2
+    },
+    {
+      "assistant": "**KLYMIT Static V Sleeping Pad** keeps you from being an ice sculpture and stops you from being a statue. Rated for minus 20 degrees, ten inches thick, sixteen square feet. Sixty-five dollars, four-point-five average ratings, and you get to sleep through the night instead of pretending you're still warm.",
+      "wall_ms": 2017.4,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 650.55,
+            "prompt_tokens": 1263,
+            "completion_tokens": 43,
+            "total_tokens": 1306,
+            "tool_call_count": 1
+          },
+          {
+            "name": "tool",
+            "embed_ms": 10.3,
+            "qdrant_ms": 90.07,
+            "total_ms": 100.56,
+            "query_count": 2
+          },
+          {
+            "name": "llm2",
+            "elapsed_ms": 1264.16,
+            "prompt_tokens": 2593,
+            "completion_tokens": 68,
+            "total_tokens": 2661,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 650.55,
+            "prompt_tokens": 1263,
+            "completion_tokens": 43,
+            "total_tokens": 1306,
+            "tool_call_count": 1
+          },
+          {
+            "elapsed_ms": 1264.16,
+            "prompt_tokens": 2593,
+            "completion_tokens": 68,
+            "total_tokens": 2661,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 2016.19,
+        "llm_total_ms": 1914.71,
+        "tool_total_ms": 100.56,
+        "tool_executed": true
+      },
+      "tool_executed": true,
+      "llm1_ms": 650.55,
+      "llm2_ms": 1264.16,
+      "tool_ms": 100.56,
+      "tool_embed_ms": 10.3,
+      "tool_qdrant_ms": 90.07,
+      "turn_total_ms": 2016.19,
+      "scenario": "camping_warm",
+      "turn": 6,
+      "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+      "is_tool_turn": true,
+      "run": 3
+    },
+    {
+      "assistant": "**THERM-A-REST Z LITE SOL CAMPING AND BACKPACKING SLEEPING PAD** keeps the ground out and stops you from being an ice sculpture. It's rated for minus 20 degrees, which is exactly what you need for cold camping trips. The foam keeps the ground out and stops you from being a statue. You get the temperature rating you need, the size you need, and a pad that actually works without being an ice sculpture. It's not the tent being wrong, it's the sleeping surface being wrong.",
+      "wall_ms": 2541.7,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 728.93,
+            "prompt_tokens": 1263,
+            "completion_tokens": 48,
+            "total_tokens": 1311,
+            "tool_call_count": 1
+          },
+          {
+            "name": "tool",
+            "embed_ms": 10.14,
+            "qdrant_ms": 15.96,
+            "total_ms": 26.23,
+            "query_count": 1
+          },
+          {
+            "name": "llm2",
+            "elapsed_ms": 1784.59,
+            "prompt_tokens": 1901,
+            "completion_tokens": 113,
+            "total_tokens": 2014,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 728.93,
+            "prompt_tokens": 1263,
+            "completion_tokens": 48,
+            "total_tokens": 1311,
+            "tool_call_count": 1
+          },
+          {
+            "elapsed_ms": 1784.59,
+            "prompt_tokens": 1901,
+            "completion_tokens": 113,
+            "total_tokens": 2014,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 2540.5,
+        "llm_total_ms": 2513.52,
+        "tool_total_ms": 26.23,
+        "tool_executed": true
+      },
+      "tool_executed": true,
+      "llm1_ms": 728.93,
+      "llm2_ms": 1784.59,
+      "tool_ms": 26.23,
+      "tool_embed_ms": 10.14,
+      "tool_qdrant_ms": 15.96,
+      "turn_total_ms": 2540.5,
+      "scenario": "camping_warm",
+      "turn": 6,
+      "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+      "is_tool_turn": true,
+      "run": 4
+    },
+    {
+      "assistant": "You don't need a baby canopy or a mop pad. The sleeping pad you need is right here, a KLYMIT Static V Sleeping Pad, 10 inches thick, 16 square feet, rated for minus 20 degrees. You stop being an ice sculpture and you sleep through the night without being a statue. Four stars, 600 reviews, and it's 64 bucks.",
+      "wall_ms": 2203.05,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 646.77,
+            "prompt_tokens": 1263,
+            "completion_tokens": 42,
+            "total_tokens": 1305,
+            "tool_call_count": 1
+          },
+          {
+            "name": "tool",
+            "embed_ms": 16.06,
+            "qdrant_ms": 58.38,
+            "total_ms": 74.67,
+            "query_count": 2
+          },
+          {
+            "name": "llm2",
+            "elapsed_ms": 1479.66,
+            "prompt_tokens": 2537,
+            "completion_tokens": 85,
+            "total_tokens": 2622,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 646.77,
+            "prompt_tokens": 1263,
+            "completion_tokens": 42,
+            "total_tokens": 1305,
+            "tool_call_count": 1
+          },
+          {
+            "elapsed_ms": 1479.66,
+            "prompt_tokens": 2537,
+            "completion_tokens": 85,
+            "total_tokens": 2622,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 2201.92,
+        "llm_total_ms": 2126.43,
+        "tool_total_ms": 74.67,
+        "tool_executed": true
+      },
+      "tool_executed": true,
+      "llm1_ms": 646.77,
+      "llm2_ms": 1479.66,
+      "tool_ms": 74.67,
+      "tool_embed_ms": 16.06,
+      "tool_qdrant_ms": 58.38,
+      "turn_total_ms": 2201.92,
+      "scenario": "camping_warm",
+      "turn": 6,
+      "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+      "is_tool_turn": true,
+      "run": 5
+    },
+    {
+      "assistant": "What you got, friend?",
+      "wall_ms": 117.95,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 116.43,
+            "prompt_tokens": 948,
+            "completion_tokens": 7,
+            "total_tokens": 955,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 116.43,
+            "prompt_tokens": 948,
+            "completion_tokens": 7,
+            "total_tokens": 955,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 116.71,
+        "llm_total_ms": 116.43,
+        "tool_total_ms": 0,
+        "tool_executed": false
+      },
+      "tool_executed": false,
+      "llm1_ms": 116.43,
+      "llm2_ms": null,
+      "tool_ms": 0,
+      "tool_embed_ms": null,
+      "tool_qdrant_ms": null,
+      "turn_total_ms": 116.71,
+      "scenario": "camping_full",
+      "turn": 1,
+      "user": "hello",
+      "is_tool_turn": false,
+      "run": 1
+    },
+    {
+      "assistant": "Missing piece, or missing sleep?",
+      "wall_ms": 165.24,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 163.96,
+            "prompt_tokens": 973,
+            "completion_tokens": 8,
+            "total_tokens": 981,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 163.96,
+            "prompt_tokens": 973,
+            "completion_tokens": 8,
+            "total_tokens": 981,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 164.14,
+        "llm_total_ms": 163.96,
+        "tool_total_ms": 0,
+        "tool_executed": false
+      },
+      "tool_executed": false,
+      "llm1_ms": 163.96,
+      "llm2_ms": null,
+      "tool_ms": 0,
+      "tool_embed_ms": null,
+      "tool_qdrant_ms": null,
+      "turn_total_ms": 164.14,
+      "scenario": "camping_full",
+      "turn": 2,
+      "user": "been camping with the boys, something feels missing",
+      "is_tool_turn": false,
+      "run": 1
+    },
+    {
+      "assistant": "Then it's not the tent, it's not the gear, it's the ground. What you got, a sleeping pad?",
+      "wall_ms": 430.75,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 429.51,
+            "prompt_tokens": 998,
+            "completion_tokens": 27,
+            "total_tokens": 1025,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 429.51,
+            "prompt_tokens": 998,
+            "completion_tokens": 27,
+            "total_tokens": 1025,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 429.75,
+        "llm_total_ms": 429.51,
+        "tool_total_ms": 0,
+        "tool_executed": false
+      },
+      "tool_executed": false,
+      "llm1_ms": 429.51,
+      "llm2_ms": null,
+      "tool_ms": 0,
+      "tool_embed_ms": null,
+      "tool_qdrant_ms": null,
+      "turn_total_ms": 429.75,
+      "scenario": "camping_full",
+      "turn": 3,
+      "user": "tent is brand new, not the problem",
+      "is_tool_turn": false,
+      "run": 1
+    },
+    {
+      "assistant": "Cold floor is a sleeping pad problem, not a tent problem. What kind of cold, bone-deep cold, or just drafty?",
+      "wall_ms": 471.33,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 470.13,
+            "prompt_tokens": 1041,
+            "completion_tokens": 29,
+            "total_tokens": 1070,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 470.13,
+            "prompt_tokens": 1041,
+            "completion_tokens": 29,
+            "total_tokens": 1070,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 470.32,
+        "llm_total_ms": 470.13,
+        "tool_total_ms": 0,
+        "tool_executed": false
+      },
+      "tool_executed": false,
+      "llm1_ms": 470.13,
+      "llm2_ms": null,
+      "tool_ms": 0,
+      "tool_embed_ms": null,
+      "tool_qdrant_ms": null,
+      "turn_total_ms": 470.32,
+      "scenario": "camping_full",
+      "turn": 4,
+      "user": "getting cold, sleeping isn't comfy",
+      "is_tool_turn": false,
+      "run": 1
+    },
+    {
+      "assistant": "Got it — cold floor, bone-deep, and you're looking at a pad that actually does the job. Not a cheap throw, not a foam thing that just moves air, you need something that holds heat. Let me pull up the sleepers that actually keep you warm.",
+      "wall_ms": 885.44,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 884.1,
+            "prompt_tokens": 1089,
+            "completion_tokens": 58,
+            "total_tokens": 1147,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 884.1,
+            "prompt_tokens": 1089,
+            "completion_tokens": 58,
+            "total_tokens": 1147,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 884.33,
+        "llm_total_ms": 884.1,
+        "tool_total_ms": 0,
+        "tool_executed": false
+      },
+      "tool_executed": false,
+      "llm1_ms": 884.1,
+      "llm2_ms": null,
+      "tool_ms": 0,
+      "tool_embed_ms": null,
+      "tool_qdrant_ms": null,
+      "turn_total_ms": 884.33,
+      "scenario": "camping_full",
+      "turn": 5,
+      "user": "huh that sounds cool you got anything specific?",
+      "is_tool_turn": false,
+      "run": 1
+    },
+    {
+      "assistant": "Two hits, but one's for a baby pack-n-play cover, one's for a jacket, and the other one's a pad that actually keeps heat down. You want the pad, not the jacket, not the crib cover. This here, **KLYMIT STATIC V SLEEPING PAD**, holds heat, not just moves air, keeps you warm on cold ground, four and a half stars from six hundred ratings, sixty-five bucks, link goes straight to it.",
+      "wall_ms": 2226.99,
+      "latency": {
+        "phases": [
+          {
+            "name": "llm1",
+            "elapsed_ms": 590.78,
+            "prompt_tokens": 1169,
+            "completion_tokens": 38,
+            "total_tokens": 1207,
+            "tool_call_count": 1
+          },
+          {
+            "name": "tool",
+            "embed_ms": 12.23,
+            "qdrant_ms": 84.07,
+            "total_ms": 96.48,
+            "query_count": 2
+          },
+          {
+            "name": "llm2",
+            "elapsed_ms": 1537.79,
+            "prompt_tokens": 1788,
+            "completion_tokens": 97,
+            "total_tokens": 1885,
+            "tool_call_count": 0
+          }
+        ],
+        "llm_calls": [
+          {
+            "elapsed_ms": 590.78,
+            "prompt_tokens": 1169,
+            "completion_tokens": 38,
+            "total_tokens": 1207,
+            "tool_call_count": 1
+          },
+          {
+            "elapsed_ms": 1537.79,
+            "prompt_tokens": 1788,
+            "completion_tokens": 97,
+            "total_tokens": 1885,
+            "tool_call_count": 0
+          }
+        ],
+        "turn_total_ms": 2225.82,
+        "llm_total_ms": 2128.57,
+        "tool_total_ms": 96.48,
+        "tool_executed": true
+      },
+      "tool_executed": true,
+      "llm1_ms": 590.78,
+      "llm2_ms": 1537.79,
+      "tool_ms": 96.48,
+      "tool_embed_ms": 12.23,
+      "tool_qdrant_ms": 84.07,
+      "turn_total_ms": 2225.82,
+      "scenario": "camping_full",
+      "turn": 6,
+      "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+      "is_tool_turn": true,
+      "run": 1
+    }
+  ]
+}

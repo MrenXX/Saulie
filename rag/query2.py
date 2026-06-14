@@ -25,12 +25,15 @@ def _fusion_mode():
     return models.Fusion.RRF
 
 
-def get_server_embeddings(text: str):
+def get_server_embeddings(text: str, timing_out: dict | None = None):
     """Calls the BGE-M3 TensorRT server for dense + sparse embeddings."""
     try:
+        t0 = time.perf_counter()
         response = requests.post(EMBED_URL, json={"text": text}, timeout=30)
         response.raise_for_status()
         data = response.json()
+        if timing_out is not None:
+            timing_out["embed_ms"] = round((time.perf_counter() - t0) * 1000, 2)
         return {"dense": data["dense"], "sparse": data["sparse"]}
     except Exception as e:
         print(f"Error calling embedding server: {e}")
@@ -53,15 +56,17 @@ def _format_hit(hit) -> dict:
     }
 
 
-def search_hybrid(query_text, top_k=5, main_category=None, prefetch_limit=None):
+def search_hybrid(query_text, top_k=5, main_category=None, prefetch_limit=None, timing_out: dict | None = None):
     """Hybrid search (dense + sparse) with RRF or DBSF fusion."""
+    total_t0 = time.perf_counter()
     prefetch_limit = prefetch_limit or DEFAULT_PREFETCH
     queries = query_text if isinstance(query_text, list) else [query_text]
     queries = queries[:2]
     if not queries:
         return []
 
-    embs = get_server_embeddings(queries)
+    embed_timing: dict = {}
+    embs = get_server_embeddings(queries, timing_out=embed_timing)
     if not embs:
         return []
 
@@ -76,6 +81,7 @@ def search_hybrid(query_text, top_k=5, main_category=None, prefetch_limit=None):
             ]
         )
 
+    qdrant_ms = 0.0
     out = []
     for q, dense_vec, sparse in zip(queries, embs["dense"], embs["sparse"]):
         sparse_vec = models.SparseVector(
@@ -96,6 +102,7 @@ def search_hybrid(query_text, top_k=5, main_category=None, prefetch_limit=None):
                 filter=query_filter,
             ),
         ]
+        t_q = time.perf_counter()
         resp = client.query_points(
             collection_name=COLLECTION,
             prefetch=prefetch,
@@ -106,10 +113,17 @@ def search_hybrid(query_text, top_k=5, main_category=None, prefetch_limit=None):
                 "ratings", "no_of_ratings", "discount_price", "actual_price",
             ],
         )
+        qdrant_ms += (time.perf_counter() - t_q) * 1000
         out.append({
             "query": q,
             "results": [_format_hit(hit) for hit in resp.points],
         })
+
+    if timing_out is not None:
+        timing_out["embed_ms"] = embed_timing.get("embed_ms", 0.0)
+        timing_out["qdrant_ms"] = round(qdrant_ms, 2)
+        timing_out["total_ms"] = round((time.perf_counter() - total_t0) * 1000, 2)
+        timing_out["query_count"] = len(queries)
 
     return out
 

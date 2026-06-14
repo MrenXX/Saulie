@@ -13,7 +13,7 @@ import logging
 import threading
 from queue import Empty, Queue
 from openai import OpenAI
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
 import time
 
@@ -26,7 +26,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- 2. IMPORT SEARCH FUNCTION ---
-sys.path.append("/root/rag")
+_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(_REPO_ROOT, "rag"))
 try:
     from query2 import search_hybrid
     logger.info("Successfully imported search_hybrid")
@@ -309,7 +310,7 @@ def _tool_status_text(phase: str) -> str:
     return messages.get(phase, "")
 
 
-def execute_search(tool_call, verbose=True):
+def execute_search(tool_call, verbose=True, timing_out: dict | None = None):
     """Execute search and return (result_json, outcome) where outcome is ok|no_results|failed."""
     try:
         args = json.loads(tool_call.function.arguments)
@@ -337,7 +338,15 @@ def execute_search(tool_call, verbose=True):
         if category and category not in VALID_CATEGORIES:
             category = None
         
-        results = search_hybrid(query_text=query_input, main_category=category, top_k=top_k)
+        rag_timing: dict = {}
+        results = search_hybrid(
+            query_text=query_input,
+            main_category=category,
+            top_k=top_k,
+            timing_out=rag_timing,
+        )
+        if timing_out is not None:
+            timing_out.update(rag_timing)
         
         print(f"\033[93m [RESULTS]\033[0m Found {len(results)} products\n")
         # #region agent log
@@ -435,6 +444,7 @@ def _tool_choice_for_turn(history, current_cycle: int):
 
 def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="auto"):
     """Single vLLM call (non-streaming). Tool calls only work with stream=False on this stack."""
+    t0 = time.perf_counter()
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=history,
@@ -446,9 +456,18 @@ def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="
         extra_body=VLLM_EXTRA_BODY,
         stream=False,
     )
+    elapsed_ms = round((time.perf_counter() - t0) * 1000, 2)
     msg = response.choices[0].message
     tool_calls = msg.tool_calls or []
     content = msg.content or ""
+    usage = getattr(response, "usage", None)
+    llm_meta = {
+        "elapsed_ms": elapsed_ms,
+        "prompt_tokens": getattr(usage, "prompt_tokens", None) if usage else None,
+        "completion_tokens": getattr(usage, "completion_tokens", None) if usage else None,
+        "total_tokens": getattr(usage, "total_tokens", None) if usage else None,
+        "tool_call_count": len(tool_calls),
+    }
     # #region agent log
     _debug_log(
         "B",
@@ -463,7 +482,7 @@ def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="
         },
     )
     # #endregion
-    return content, tool_calls
+    return content, tool_calls, llm_meta
 
 
 def stream_llm_once(
@@ -475,7 +494,7 @@ def stream_llm_once(
     tool_choice="auto",
 ):
     """Single LLM call; emits final text via `emit_token` when there are no tool calls."""
-    full_content, final_tool_calls = _llm_once(
+    full_content, final_tool_calls, llm_meta = _llm_once(
         history,
         temperature=temperature,
         top_p=top_p,
@@ -486,7 +505,7 @@ def stream_llm_once(
     if emit_token and full_content and not final_tool_calls:
         emit_token(full_content)
 
-    return full_content, final_tool_calls
+    return full_content, final_tool_calls, llm_meta
 
 
 def agent_loop(
@@ -499,6 +518,7 @@ def agent_loop(
     max_tokens=512,
     max_tool_cycles=2,
     verbose_tools=True,
+    latency_out: dict | None = None,
 ):
     """Your original agent loop, but reusable.
 
@@ -507,13 +527,18 @@ def agent_loop(
     - `emit_token` lets us stream tokens to console or to an API client
     """
     current_cycle = 0
+    turn_t0 = time.perf_counter()
+    if latency_out is not None:
+        latency_out.clear()
+        latency_out["phases"] = []
+        latency_out["llm_calls"] = []
 
     while True:
         if on_cycle_start:
             on_cycle_start()
 
         # 1) Model call + tool call reconstruction
-        full_content, final_tool_calls = stream_llm_once(
+        full_content, final_tool_calls, llm_meta = stream_llm_once(
             history,
             emit_token=emit_token,
             temperature=temperature,
@@ -521,6 +546,10 @@ def agent_loop(
             max_tokens=max_tokens,
             tool_choice=_tool_choice_for_turn(history, current_cycle),
         )
+        if latency_out is not None:
+            phase_name = "llm1" if current_cycle == 0 else f"llm{current_cycle + 1}"
+            latency_out["phases"].append({"name": phase_name, **llm_meta})
+            latency_out["llm_calls"].append(llm_meta)
 
         if on_cycle_end:
             on_cycle_end()
@@ -542,7 +571,10 @@ def agent_loop(
 
             is_retry = current_cycle > 1
             for tool_call, result_json, _outcome in _run_tool_calls(
-                final_tool_calls, verbose_tools=verbose_tools, is_retry=is_retry
+                final_tool_calls,
+                verbose_tools=verbose_tools,
+                is_retry=is_retry,
+                timing_out=latency_out,
             ):
                 history.append(
                     {
@@ -560,6 +592,13 @@ def agent_loop(
         _debug_log("C", "agent_chat_api.py:agent_loop", "loop exit no tool path", {"current_cycle": current_cycle, "had_tool_calls": bool(final_tool_calls), "content_preview": (full_content or "")[:160]})
         # #endregion
         # Done (no tool calls OR max cycles reached)
+        if latency_out is not None:
+            latency_out["turn_total_ms"] = round((time.perf_counter() - turn_t0) * 1000, 2)
+            llm_ms = sum(p.get("elapsed_ms", 0) for p in latency_out.get("phases", []) if p["name"].startswith("llm"))
+            tool_ms = sum(p.get("total_ms", 0) for p in latency_out.get("phases", []) if p["name"] == "tool")
+            latency_out["llm_total_ms"] = round(llm_ms, 2)
+            latency_out["tool_total_ms"] = round(tool_ms, 2)
+            latency_out["tool_executed"] = tool_ms > 0
         return full_content
 
 def sanitize_messages(messages):
@@ -617,7 +656,7 @@ def _sse_content_chunk(stream_id, created, content: str):
     )
 
 
-def _run_tool_calls(tool_calls, *, verbose_tools: bool, is_retry: bool):
+def _run_tool_calls(tool_calls, *, verbose_tools: bool, is_retry: bool, timing_out: dict | None = None):
     """Execute tool calls; yield (tool_call, result_json, outcome)."""
     for tool_call in tool_calls:
         if verbose_tools:
@@ -628,7 +667,12 @@ def _run_tool_calls(tool_calls, *, verbose_tools: bool, is_retry: bool):
             result_json = json.dumps({"error": f"Unknown tool: {tool_call.function.name}"})
             outcome = "failed"
         else:
-            result_json, outcome = execute_search(tool_call, verbose=verbose_tools)
+            tool_timing: dict = {}
+            result_json, outcome = execute_search(
+                tool_call, verbose=verbose_tools, timing_out=tool_timing
+            )
+            if timing_out is not None and tool_timing:
+                timing_out["phases"].append({"name": "tool", **tool_timing})
 
         if verbose_tools and outcome == "no_results":
             print(_tool_status_text("no_results").rstrip())
@@ -727,7 +771,7 @@ def _stream_agent_sse_inner(
             else:
                 llm_result = payload
 
-        full_content, final_tool_calls = llm_result
+        full_content, final_tool_calls, _llm_meta = llm_result
 
         # Add assistant message to history
         history.append(
@@ -840,14 +884,14 @@ def health():
 
 
 @app.post("/v1/chat/completions")
-def chat_completions(body: dict = Body(...)):
+async def chat_completions(request: Request):
     """OpenAI SDK compatible (subset).
 
     Conversation support:
     - Same as OpenAI: the client sends the full `messages` history each request.
     - We always inject our own SYSTEM prompt first.
     """
-    # body = await request.json()
+    body = await request.json()
 
     messages = sanitize_messages(body.get("messages", []))
 
@@ -877,6 +921,8 @@ def chat_completions(body: dict = Body(...)):
         )
 
     history = _make_history(messages)
+    collect_latency = bool(body.get("_saulie_latency") or body.get("saulie_latency"))
+    latency_out: dict = {}
     content = agent_loop(
         history,
         emit_token=None,
@@ -885,14 +931,18 @@ def chat_completions(body: dict = Body(...)):
         max_tokens=max_tokens,
         max_tool_cycles=2,
         verbose_tools=True,
+        latency_out=latency_out if collect_latency else None,
     )
-    return {
+    payload = {
         "id": f"chatcmpl-{int(time.time())}",
         "object": "chat.completion",
         "created": int(time.time()),
         "model": MODEL_NAME,
         "choices": [{"index": 0, "message": {"role": "assistant", "content": content}, "finish_reason": "stop"}],
     }
+    if collect_latency:
+        payload["saulie_latency"] = latency_out
+    return payload
 
 if __name__ == "__main__":
     # Run as an API server:

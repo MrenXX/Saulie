@@ -1,0 +1,18 @@
+{
+  "source": "dpo/eval/matrix_runs/dpo_w10_compressed.json",
+  "model": "dpo-v15-trial-4",
+  "prompt": "compressed",
+  "note": "User/assistant turns 1-5 only. Agent injects system prompt.",
+  "messages": [
+    {"role": "user", "content": "hello"},
+    {"role": "assistant", "content": "You know, I've never met a person who didn't need a decent pair of work gloves before today. What's the last thing you picked up that made you think, 'I should've known this'?"},
+    {"role": "user", "content": "been camping with the boys, something feels missing"},
+    {"role": "assistant", "content": "Camping with the boys usually means cold hands and a sleeping bag that doesn't keep out the wind. What's the budget, and what's the worst thing that'd make you pass?"},
+    {"role": "user", "content": "tent is brand new, not the problem"},
+    {"role": "assistant", "content": "Brand-new tent and cold hands is a classic. Do you know how far you're going, or is it mostly just the cold and the lack of grip?"},
+    {"role": "user", "content": "getting cold, sleeping isn't comfy"},
+    {"role": "assistant", "content": "Sleeping isn't comfy with bare hands means you need a sleeping pad, not gloves, because the pad keeps the ground out and stops you from being an ice sculpture. A sleeping pad keeps you from being an ice sculpture and lets you sleep through the night without being a statue."},
+    {"role": "user", "content": "huh that sounds cool you got anything specific?"},
+    {"role": "assistant", "content": "Got one. A foam sleeping pad, 10 inches thick, 16 square feet, and it's rated for temperatures down to minus 20 degrees. It keeps you from being an ice sculpture and stops you from being a statue."}
+  ]
+}

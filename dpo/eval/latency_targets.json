@@ -1,0 +1,19 @@
+{
+  "description": "Initial SLO targets for Saulie prod stack latency benchmarks. Tune after baseline run.",
+  "vllm": {
+    "ttft_short_prompt": {"stat": "p95_ms", "op": "lte", "value": 800, "unit": "ms", "note": "TTFT, ~50 tok user message"},
+    "ttft_long_prompt": {"stat": "p95_ms", "op": "lte", "value": 2500, "unit": "ms", "note": "TTFT, ~1500 tok history"},
+    "decode_tokens_per_s": {"stat": "p50_tps", "op": "gte", "value": 25, "unit": "tokens/s"}
+  },
+  "rag": {
+    "embed_ms": {"stat": "p95_ms", "op": "lte", "value": 150, "unit": "ms"},
+    "qdrant_ms": {"stat": "p95_ms", "op": "lte", "value": 200, "unit": "ms"},
+    "search_total_ms": {"stat": "p95_ms", "op": "lte", "value": 400, "unit": "ms"}
+  },
+  "e2e": {
+    "probe_turn_ms": {"stat": "p95_ms", "op": "lte", "value": 2000, "unit": "ms", "note": "camping turns 1-5, no tool"},
+    "tool_turn_total_ms": {"stat": "p95_ms", "op": "lte", "value": 5000, "unit": "ms", "note": "camping turn 6 full agent turn"},
+    "tool_rag_ms": {"stat": "p95_ms", "op": "lte", "value": 500, "unit": "ms", "note": "search_products execute_search"},
+    "tool_hit_rate": {"stat": "rate", "op": "gte", "value": 1.0, "unit": "ratio", "note": "must be 1.0 on reliable scenarios"}
+  }
+}

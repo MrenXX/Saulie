@@ -11,6 +11,9 @@ V15_RUN = REPO_ROOT / "dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-05
 SFT_ADAPTER_HOST = REPO_ROOT / "train/models/steering-sft-v1.1/trial-17/best_adapter"
 DEFAULT_SKELETONS = REPO_ROOT / "dpo/eval/eval_skeletons.json"
 MANIFEST_PATH = REPO_ROOT / "dpo/eval/v15_final_eval_manifest.jsonl"
+PROD_LADDER_MANIFEST_PATH = REPO_ROOT / "dpo/eval/prod_ladder_manifest.jsonl"
+PROD_LADDER_OUTPUT = REPO_ROOT / "dpo/eval/generations_prod_ladder.json"
+EVAL_INFERENCE_SYSTEM_PROMPT = REPO_ROOT / "dpo/eval/eval_inference_system_prompt.md"
 STARTUP_MANIFEST_PATH = REPO_ROOT / "dpo/eval/v15_deploy_startup_manifest.jsonl"
 
 VLLM_BASE_URL = "http://localhost:8000/v1"
@@ -73,7 +76,11 @@ def skeleton_eval_kind(skeleton: dict) -> str:
 
 def vllm_extra_body() -> dict:
     """vLLM-only sampling params (not in standard OpenAI client kwargs)."""
-    return {"top_k": EVAL_TOP_K, "repetition_penalty": EVAL_REPETITION_PENALTY}
+    return {
+        "top_k": EVAL_TOP_K,
+        "repetition_penalty": EVAL_REPETITION_PENALTY,
+        "chat_template_kwargs": {"enable_thinking": False},
+    }
 
 
 def generation_metadata() -> dict:
@@ -85,7 +92,8 @@ def generation_metadata() -> dict:
         "repetition_penalty": EVAL_REPETITION_PENALTY,
         "max_tokens": EVAL_MAX_TOKENS,
         "base_url": VLLM_BASE_URL,
-        "note": "repetition_penalty and top_k sent via OpenAI extra_body for vLLM",
+        "enable_thinking": False,
+        "note": "top_k, repetition_penalty, chat_template_kwargs via OpenAI extra_body for vLLM",
     }
 
 

@@ -1,0 +1,276 @@
+{
+  "benchmark": "rag_isolated",
+  "generated_at": "2026-06-11T01:12:44.808083",
+  "collection": "amazon_products_v2",
+  "fusion_method": "rrf",
+  "queries": 8,
+  "runs_per_query": 3,
+  "summary": {
+    "embed_ms": {
+      "n": 24,
+      "mean_ms": 23.98,
+      "p50_ms": 21.12,
+      "p95_ms": 45.35,
+      "min_ms": 16.87,
+      "max_ms": 50.65
+    },
+    "qdrant_ms": {
+      "n": 24,
+      "mean_ms": 11.89,
+      "p50_ms": 10.82,
+      "p95_ms": 24.11,
+      "min_ms": 4.39,
+      "max_ms": 27.82
+    },
+    "search_total_ms": {
+      "n": 24,
+      "mean_ms": 36.03,
+      "p50_ms": 31.62,
+      "p95_ms": 56.52,
+      "min_ms": 22.14,
+      "max_ms": 78.64
+    }
+  },
+  "rows": [
+    {
+      "query": "sleeping pad cold camping insulated",
+      "category": "Sports & Outdoors",
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 50.65,
+      "qdrant_ms": 27.82,
+      "total_ms": 78.64,
+      "wall_ms": 78.66
+    },
+    {
+      "query": "sleeping pad cold camping insulated",
+      "category": "Sports & Outdoors",
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 43.68,
+      "qdrant_ms": 10.84,
+      "total_ms": 54.7,
+      "wall_ms": 54.72
+    },
+    {
+      "query": "sleeping pad cold camping insulated",
+      "category": "Sports & Outdoors",
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 45.65,
+      "qdrant_ms": 11.02,
+      "total_ms": 56.84,
+      "wall_ms": 56.85
+    },
+    {
+      "query": "kids desk lamp focused beam homework",
+      "category": "All Electronics",
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 22.95,
+      "qdrant_ms": 24.25,
+      "total_ms": 47.38,
+      "wall_ms": 47.4
+    },
+    {
+      "query": "kids desk lamp focused beam homework",
+      "category": "All Electronics",
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 20.89,
+      "qdrant_ms": 10.81,
+      "total_ms": 31.87,
+      "wall_ms": 31.89
+    },
+    {
+      "query": "kids desk lamp focused beam homework",
+      "category": "All Electronics",
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 22.36,
+      "qdrant_ms": 11.07,
+      "total_ms": 33.58,
+      "wall_ms": 33.6
+    },
+    {
+      "query": "wireless earbuds noise cancelling",
+      "category": null,
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 21.76,
+      "qdrant_ms": 23.35,
+      "total_ms": 45.26,
+      "wall_ms": 45.28
+    },
+    {
+      "query": "wireless earbuds noise cancelling",
+      "category": null,
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 21.22,
+      "qdrant_ms": 11.38,
+      "total_ms": 32.75,
+      "wall_ms": 32.77
+    },
+    {
+      "query": "wireless earbuds noise cancelling",
+      "category": null,
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 20.83,
+      "qdrant_ms": 11.31,
+      "total_ms": 32.29,
+      "wall_ms": 32.31
+    },
+    {
+      "query": "kitchen prep cleanup mat cutting board",
+      "category": "Amazon Home",
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 21.31,
+      "qdrant_ms": 19.34,
+      "total_ms": 40.8,
+      "wall_ms": 40.81
+    },
+    {
+      "query": "kitchen prep cleanup mat cutting board",
+      "category": "Amazon Home",
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 22.7,
+      "qdrant_ms": 8.48,
+      "total_ms": 31.38,
+      "wall_ms": 31.4
+    },
+    {
+      "query": "kitchen prep cleanup mat cutting board",
+      "category": "Amazon Home",
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 20.73,
+      "qdrant_ms": 7.52,
+      "total_ms": 28.41,
+      "wall_ms": 28.42
+    },
+    {
+      "query": "yoga mat non slip thick",
+      "category": "Sports & Outdoors",
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 23.29,
+      "qdrant_ms": 13.69,
+      "total_ms": 37.15,
+      "wall_ms": 37.17
+    },
+    {
+      "query": "yoga mat non slip thick",
+      "category": "Sports & Outdoors",
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 20.7,
+      "qdrant_ms": 7.95,
+      "total_ms": 28.87,
+      "wall_ms": 28.89
+    },
+    {
+      "query": "yoga mat non slip thick",
+      "category": "Sports & Outdoors",
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 21.18,
+      "qdrant_ms": 8.67,
+      "total_ms": 30.04,
+      "wall_ms": 30.05
+    },
+    {
+      "query": "air fryer large capacity",
+      "category": "Appliances",
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 21.8,
+      "qdrant_ms": 8.82,
+      "total_ms": 30.78,
+      "wall_ms": 30.79
+    },
+    {
+      "query": "air fryer large capacity",
+      "category": "Appliances",
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 17.61,
+      "qdrant_ms": 4.39,
+      "total_ms": 22.14,
+      "wall_ms": 22.15
+    },
+    {
+      "query": "air fryer large capacity",
+      "category": "Appliances",
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 19.46,
+      "qdrant_ms": 4.46,
+      "total_ms": 24.06,
+      "wall_ms": 24.07
+    },
+    {
+      "query": "mechanical keyboard RGB gaming",
+      "category": "All Electronics",
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 19.11,
+      "qdrant_ms": 11.51,
+      "total_ms": 30.79,
+      "wall_ms": 30.8
+    },
+    {
+      "query": "mechanical keyboard RGB gaming",
+      "category": "All Electronics",
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 19.84,
+      "qdrant_ms": 8.15,
+      "total_ms": 28.16,
+      "wall_ms": 28.17
+    },
+    {
+      "query": "mechanical keyboard RGB gaming",
+      "category": "All Electronics",
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 20.5,
+      "qdrant_ms": 7.22,
+      "total_ms": 27.87,
+      "wall_ms": 27.88
+    },
+    {
+      "query": "face moisturizer dry skin",
+      "category": "All Beauty",
+      "run": 1,
+      "hit_count": 4,
+      "embed_ms": 21.06,
+      "qdrant_ms": 17.97,
+      "total_ms": 39.2,
+      "wall_ms": 39.21
+    },
+    {
+      "query": "face moisturizer dry skin",
+      "category": "All Beauty",
+      "run": 2,
+      "hit_count": 4,
+      "embed_ms": 19.37,
+      "qdrant_ms": 7.42,
+      "total_ms": 26.95,
+      "wall_ms": 26.96
+    },
+    {
+      "query": "face moisturizer dry skin",
+      "category": "All Beauty",
+      "run": 3,
+      "hit_count": 4,
+      "embed_ms": 16.87,
+      "qdrant_ms": 7.89,
+      "total_ms": 24.91,
+      "wall_ms": 24.92
+    }
+  ]
+}

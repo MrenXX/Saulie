@@ -1,0 +1,26 @@
+{
+  "version": "1",
+  "description": "Reliable tool-call scenarios for prod E2E latency (dpo-v15-trial-4 + compressed).",
+  "scenarios": {
+    "camping_full": {
+      "kind": "multi_turn",
+      "tool_turn": 6,
+      "user_turns": [
+        "hello",
+        "been camping with the boys, something feels missing",
+        "tent is brand new, not the problem",
+        "getting cold, sleeping isn't comfy",
+        "huh that sounds cool you got anything specific?",
+        "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT"
+      ],
+      "expects_tool_on_turn": 6,
+      "source": "model_prompt_matrix_eval.py camping scenario"
+    },
+    "camping_warm": {
+      "kind": "warm_start",
+      "fixture": "dpo/eval/latency_fixtures/camping_turn5_history.json",
+      "user_turn": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+      "expects_tool": true
+    }
+  }
+}

@@ -107,8 +107,11 @@ def build_payload(
     eval_round: int | None,
     total_start: float,
     complete: bool,
+    study: str | None = None,
+    system_prompt_file: str | None = None,
+    system_prompt_scope: str | None = None,
 ) -> dict:
-    return {
+    payload = {
         "generated_at": datetime.now().isoformat(),
         "backend": "vllm_fp8",
         "checkpoint_complete": complete,
@@ -126,6 +129,12 @@ def build_payload(
         "models_total": None,  # filled by caller if known
         "wall_seconds": round(time.time() - total_start, 2),
     }
+    if study:
+        payload["study"] = study
+    if system_prompt_file:
+        payload["system_prompt_file"] = system_prompt_file
+        payload["system_prompt_scope"] = system_prompt_scope
+    return payload
 
 
 def save_checkpoint(
@@ -202,8 +211,16 @@ def generate_response(client: OpenAI, model_name: str, messages: list[dict]) -> 
     return (response.choices[0].message.content or "").strip()
 
 
-def run_skeleton(client: OpenAI, model_name: str, skeleton: dict) -> list[dict]:
+def run_skeleton(
+    client: OpenAI,
+    model_name: str,
+    skeleton: dict,
+    *,
+    system_prompt: str | None = None,
+) -> list[dict]:
     messages: list[dict] = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
     for i, user_msg in enumerate(skeleton["user_turns"]):
         messages.append({"role": "user", "content": user_msg})
         response = generate_response(client, model_name, messages)
@@ -219,15 +236,25 @@ def parse_model_keys(keys_arg: str | None, entries: list[dict]) -> list[dict]:
         return entries
     by_key: dict[str, dict] = {}
     for e in entries:
-        if e.get("kind") == "sft_baseline":
+        mk = e.get("manifest_key")
+        if mk:
+            by_key[mk] = e
+        kind = e.get("kind")
+        if kind == "sft_baseline":
             by_key["sft"] = e
             by_key["baseline"] = e
-        else:
+        elif kind == "base_fp8":
+            by_key["base"] = e
+        elif kind == "prod_dpo":
+            by_key["prod"] = e
+        elif e.get("trial_number") is not None:
             by_key[f"trial-{e['trial_number']}"] = e
     out = []
     for k in [x.strip() for x in keys_arg.split(",") if x.strip()]:
         if k not in by_key:
-            raise SystemExit(f"Unknown model key {k!r}; use sft, trial-16, ...")
+            raise SystemExit(
+                f"Unknown model key {k!r}; use base, sft, prod, or trial-N"
+            )
         out.append(by_key[k])
     return out
 
@@ -258,6 +285,10 @@ def run_eval(
     eval_round: int | None,
     resume: bool,
     fresh: bool,
+    system_prompt_text: str | None = None,
+    system_prompt_file: Path | None = None,
+    study: str | None = None,
+    models_total: int | None = None,
 ) -> None:
     client = OpenAI(base_url=VLLM_BASE_URL, api_key=VLLM_API_KEY)
     print(f"\n{Fore.CYAN}vLLM @ {VLLM_BASE_URL}{Style.RESET_ALL}")
@@ -292,6 +323,9 @@ def run_eval(
     total_start = time.time()
     expected_n = len(skeletons)
 
+    sys_prompt_file_str = str(system_prompt_file.resolve()) if system_prompt_file else None
+    sys_prompt_scope = "base_only" if system_prompt_text else None
+
     def flush_checkpoint(*, complete: bool) -> None:
         payload = build_payload(
             all_results=all_results,
@@ -301,8 +335,11 @@ def run_eval(
             eval_round=eval_round,
             total_start=total_start,
             complete=complete,
+            study=study,
+            system_prompt_file=sys_prompt_file_str,
+            system_prompt_scope=sys_prompt_scope,
         )
-        payload["models_total"] = len(entries)
+        payload["models_total"] = models_total if models_total is not None else len(entries)
         save_checkpoint(
             output_path,
             payload,
@@ -323,26 +360,63 @@ def run_eval(
                 f"{Fore.GREEN}  SKIP: checkpoint already has {expected_n} conversations{Style.RESET_ALL}"
             )
             continue
-        if existing:
+        use_sys = bool(entry.get("use_system_prompt") and system_prompt_text)
+        if existing and not model_is_complete(existing, expected_n):
             got = len(existing.get("conversations") or [])
             print(
-                f"{Fore.YELLOW}  INCOMPLETE checkpoint ({got}/{expected_n} skeletons) — regenerating{Style.RESET_ALL}"
+                f"{Fore.YELLOW}  RESUME incomplete checkpoint ({got}/{expected_n} skeletons){Style.RESET_ALL}"
             )
-            del all_results[public_name]
+        elif existing:
+            got = 0
 
         if entry.get("runtime_load") and not skip_runtime_load:
             ensure_dpo_adapter_loaded(entry)
             wait_for_model(client, api_name)
 
         model_start = time.time()
-        conversations = []
+        conversations: list[dict] = []
+        done_ids: set[str] = set()
+        if existing and not model_is_complete(existing, expected_n):
+            conversations = list(existing.get("conversations") or [])
+            done_ids = {c["skeleton_id"] for c in conversations}
+
+        all_results[public_name] = {
+            "model": public_name,
+            "api_model_name": api_name,
+            "is_baseline": entry.get("kind") == "sft_baseline",
+            "kind": entry.get("kind"),
+            "system_prompt_used": use_sys,
+            "conversations": conversations,
+            "elapsed_seconds": existing.get("elapsed_seconds", 0) if existing else 0,
+        }
+        if not anonymize or entry.get("kind") in ("sft_baseline", "base_fp8", "prod_dpo"):
+            all_results[public_name]["manifest"] = {
+                k: entry.get(k)
+                for k in (
+                    "manifest_key",
+                    "trial_number",
+                    "lora_rank",
+                    "adapter_path",
+                    "container_path",
+                    "deploy_script",
+                )
+                if entry.get(k) is not None
+            }
+
         for sk_idx, skeleton in enumerate(skeletons):
+            if skeleton["id"] in done_ids:
+                continue
             ek = skeleton_eval_kind(skeleton)
             print(
                 f"\n  {Fore.YELLOW}[{sk_idx + 1}/{len(skeletons)}] {skeleton['id']} "
                 f"type={skeleton['opening_type']} eval_kind={ek}{Style.RESET_ALL}"
             )
-            messages = run_skeleton(client, api_name, skeleton)
+            messages = run_skeleton(
+                client,
+                api_name,
+                skeleton,
+                system_prompt=system_prompt_text if use_sys else None,
+            )
             conversations.append(
                 {
                     "skeleton_id": skeleton["id"],
@@ -353,20 +427,11 @@ def run_eval(
                     "messages": messages,
                 }
             )
-
-        all_results[public_name] = {
-            "model": public_name,
-            "api_model_name": api_name,
-            "is_baseline": entry.get("kind") == "sft_baseline",
-            "kind": entry.get("kind"),
-            "conversations": conversations,
-            "elapsed_seconds": round(time.time() - model_start, 2),
-        }
-        if not anonymize or entry.get("kind") == "sft_baseline":
-            all_results[public_name]["manifest"] = {
-                k: entry.get(k)
-                for k in ("trial_number", "lora_rank", "adapter_path", "container_path")
-            }
+            all_results[public_name]["conversations"] = conversations
+            all_results[public_name]["elapsed_seconds"] = round(
+                time.time() - model_start, 2
+            )
+            flush_checkpoint(complete=False)
 
         if entry.get("runtime_load") and not skip_runtime_load:
             ensure_dpo_adapter_unloaded(entry)
@@ -383,8 +448,22 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="vLLM FP8 DPO final eval generation")
     parser.add_argument("--candidate-manifest", type=Path, default=MANIFEST_PATH)
     parser.add_argument("--skeletons", type=Path, default=DEFAULT_SKELETONS)
-    parser.add_argument("--round", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--round", type=int, choices=(1, 2), default=None)
+    parser.add_argument("--all-skeletons", action="store_true")
     parser.add_argument("--skeleton-ids", type=str, default=None)
+    parser.add_argument("--study", type=str, default=None)
+    parser.add_argument(
+        "--models-total",
+        type=int,
+        default=None,
+        help="Total models in full study (when running one model at a time)",
+    )
+    parser.add_argument(
+        "--system-prompt-file",
+        type=Path,
+        default=None,
+        help="Steering system prompt applied when manifest entry has use_system_prompt=true",
+    )
     parser.add_argument("--models", type=str, default=None, help="sft,trial-16,...")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--unblind-output", type=Path, default=None)
@@ -409,13 +488,23 @@ def main() -> None:
     if args.skeleton_ids:
         wanted = [s.strip() for s in args.skeleton_ids.split(",") if s.strip()]
         eval_round = None
-    else:
+    elif args.all_skeletons:
+        wanted = None
+        eval_round = None
+    elif args.round is not None:
         wanted = round_skeleton_ids(args.round)
         eval_round = args.round
+    else:
+        wanted = round_skeleton_ids(1)
+        eval_round = 1
 
     skeletons = load_skeletons(args.skeletons, wanted)
     entries = load_candidate_manifest(args.candidate_manifest)
     entries = parse_model_keys(args.models, entries)
+
+    system_prompt_text = None
+    if args.system_prompt_file:
+        system_prompt_text = args.system_prompt_file.read_text(encoding="utf-8").strip()
 
     run_eval(
         entries=entries,
@@ -428,6 +517,10 @@ def main() -> None:
         eval_round=eval_round,
         resume=not args.no_resume,
         fresh=args.fresh,
+        system_prompt_text=system_prompt_text,
+        system_prompt_file=args.system_prompt_file,
+        study=args.study,
+        models_total=args.models_total,
     )
 
 
