@@ -54,12 +54,27 @@ The original index used `SERVER_BATCH_SIZE=128` while the TensorRT BGE-M3 engine
 - Python env with `qdrant-client`, `pandas`, `requests`, `tqdm` (e.g. `saulgman` conda env)
 - GPU for BGE-M3 TensorRT inference during indexing
 
-Start BGE inside the container if needed:
+### BGE embed server (`serve.py`)
+
+Hybrid search calls a **FastAPI server** that runs inside the TensorRT Docker container — not in `saulgman`.
+
+| Item | Detail |
+|------|--------|
+| File | [`embed_models/bge-m3/serve.py`](embed_models/bge-m3/serve.py) |
+| Container | `tensorrt_bge-m3` (`nvcr.io/nvidia/tensorrt:24.12-py3`) |
+| Mount | `RAG_ROOT/embed_models/bge-m3` → `/workspace` |
+| Endpoint | `POST /embed` at `http://localhost:8888/embed` (used by `query2.py`) |
+| TRT engine | `/workspace/onnx/bge_m3.engine` — build with [`build_engine.sh`](embed_models/bge-m3/build_engine.sh) |
+| Max batch | 2 (hard limit; must match engine profile and indexing scripts) |
+
+Start the server inside the container:
 
 ```bash
 docker start tensorrt_bge-m3 qdrant_index
 docker exec -d tensorrt_bge-m3 sh -c "cd /workspace && python -u serve.py"
 ```
+
+Or use `bash docker/setup_containers.sh` from the repo root (creates container + starts `serve.py`).
 
 ---
 
@@ -194,6 +209,7 @@ See [`fusion_comparison_report.md`](fusion_comparison_report.md) for per-query b
 | `benchmark_fusion.py` | RRF vs DBSF A/B on 18 queries |
 | `compare_fusion_report.py` | Indian vs McAuley × fusion comparison report |
 | `smoke_hybrid.py` | Quick manual smoke tests |
+| `embed_models/bge-m3/serve.py` | FastAPI embed server (runs inside `tensorrt_bge-m3` container) |
 | `embed_models/bge-m3/build_engine.sh` | Rebuild TRT engine (batch max 2) |
 
 ---
