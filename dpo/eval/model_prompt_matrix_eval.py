@@ -26,6 +26,14 @@ SCENARIOS: dict[str, list[str]] = {
         "huh that sounds cool you got anything specific?",
         "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
     ],
+    "camping_force_turn6": [
+        "hello",
+        "been camping with the boys, something feels missing",
+        "tent is brand new, not the problem",
+        "getting cold, sleeping isn't comfy",
+        "huh that sounds cool you got anything specific?",
+        "alright just show me what you've got",
+    ],
     "kitchen": [
         "hello",
         "learning cooking lately, hate cleanup after prep not the cooking itself",

@@ -5,6 +5,10 @@
 # Shared helpers are duplicated so the file is self-contained.
 # NOTE: uvicorn.run target adjusted to this filename so running `python agent_chat_api.py api`
 # will work as expected.
+#
+# Streaming (stream=true clients): see AGENT_STREAMING.md
+# - vLLM stream=True; forward delta.content to SSE; buffer delta.tool_calls internally
+# - stream=false uses agent_loop + _llm_once (non-stream) for benchmarks
 
 import sys
 import os
@@ -55,6 +59,27 @@ VLLM_EXTRA_BODY = {
     "repetition_penalty": 1.05,
     "chat_template_kwargs": {"enable_thinking": False},
 }
+
+# Tool pressure harness (custom vLLM logits processor; see vllm_plugins/saulie_tool_pressure.py)
+_TOOL_BIAS_JSON = _REPO_ROOT / "dpo/eval/tool_token_bias.json"
+_TOOL_OPENER_TOKEN_ID = 151657
+if _TOOL_BIAS_JSON.is_file():
+    try:
+        with open(_TOOL_BIAS_JSON, encoding="utf-8") as _f:
+            _tool_bias_cfg = json.load(_f)
+        _ids = _tool_bias_cfg.get("opener_token_ids_for_pressure")
+        if _ids:
+            _TOOL_OPENER_TOKEN_ID = int(_ids[0])
+    except (json.JSONDecodeError, TypeError, ValueError, IndexError):
+        pass
+
+TOOL_BIAS_START_TURN = int(os.getenv("SAULIE_TOOL_BIAS_START_TURN", "3"))
+TOOL_FORCE_TURN = int(os.getenv("SAULIE_TOOL_FORCE_TURN", "6"))
+TOOL_BIAS_PER_TURN = int(os.getenv("SAULIE_TOOL_BIAS_PER_TURN", "8"))
+TOOL_PRESSURE_MOD = int(os.getenv("SAULIE_TOOL_PRESSURE_MOD", "0"))
+TOOL_FORCE_MODE = os.getenv("SAULIE_TOOL_FORCE_MODE", "off").strip().lower()
+TOOL_PRESSURE_ENABLED = os.getenv("SAULIE_TOOL_PRESSURE_ENABLED", "1") == "1"
+TOOL_PRESSURE_BACKEND = os.getenv("SAULIE_TOOL_PRESSURE_BACKEND", "processor").strip().lower()
 
 client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_BASE_URL, timeout=LLM_TIMEOUT)
 
@@ -259,7 +284,6 @@ WORKFLOW — closer, not a vending machine:
 
 TOOL: one search per reply by default. Retry once same turn only if empty/error/wrong category.
 Bad after retry — one honest line, then clarify or pivot. Do not repeat a "junk results" bit.
-After you have pinpoint a product ALWAYS USE YOUR SEARCH_PRODUCTS TOOL DO NOT WAIT FOR THE USER.
 
 PITCHING: weave in your voice — verdict, price (no fake "was" price), rating, why it fits them,
 the catch, link, close. Compare two if close. Missing fields — skip, don't guess.
@@ -438,19 +462,84 @@ def _accumulate_tool_calls(tool_calls_accumulator, tool_calls_delta):
             tool_calls_accumulator[idx]["function"]["arguments"] += tool_piece.function.arguments
 
 
+def _pressure_turn(history) -> int:
+    """User messages since the last tool result (1-indexed episode counter)."""
+    last_tool_idx = -1
+    for i, m in enumerate(history):
+        if m.get("role") == "tool":
+            last_tool_idx = i
+    return sum(1 for m in history[last_tool_idx + 1 :] if m.get("role") == "user")
+
+
+def _effective_pressure_turn(pressure_turn: int) -> int:
+    if TOOL_PRESSURE_MOD <= 0:
+        return pressure_turn
+    return ((pressure_turn - 1) % TOOL_PRESSURE_MOD) + 1
+
+
+def _tool_pressure_tier(history, current_cycle: int) -> tuple[str, int]:
+    """Return (mode, bias). mode: off | nudge | force | required."""
+    if not TOOL_PRESSURE_ENABLED:
+        return "off", 0
+    if current_cycle > 0:
+        return "off", 0
+
+    effective_turn = _effective_pressure_turn(_pressure_turn(history))
+    if effective_turn < TOOL_BIAS_START_TURN:
+        return "off", 0
+    if TOOL_FORCE_MODE == "required" and effective_turn >= TOOL_FORCE_TURN:
+        return "required", 0
+    if effective_turn >= TOOL_FORCE_TURN:
+        return "force", 0
+    bias = min(effective_turn * TOOL_BIAS_PER_TURN, 100)
+    return "nudge", bias
+
+
+def _build_vllm_extra_body(history, current_cycle: int) -> dict:
+    body = dict(VLLM_EXTRA_BODY)
+    mode, bias = _tool_pressure_tier(history, current_cycle)
+    if mode in ("off", "required"):
+        return body
+
+    if TOOL_PRESSURE_BACKEND == "logit_bias":
+        if mode == "nudge":
+            body["logit_bias"] = {str(_TOOL_OPENER_TOKEN_ID): bias}
+        return body
+
+    body["vllm_xargs"] = {
+        "tool_pressure_enabled": 1,
+        "tool_pressure_mode": mode,
+        "tool_pressure_bias": int(bias),
+        "tool_pressure_opener_ids": str(_TOOL_OPENER_TOKEN_ID),
+    }
+    return body
+
+
 def _tool_choice_for_turn(history, current_cycle: int):
-    # Always let the steering-trained model decide when to search. Forcing the tool on
-    # cycle 0 was overriding the probe-first behavior the SFT/DPO phases trained.
-    choice = "auto"
+    mode, bias = _tool_pressure_tier(history, current_cycle)
+    if mode == "required":
+        choice = {"type": "function", "function": {"name": "search_products"}}
+    else:
+        choice = "auto"
     last_user = next((m.get("content") or "" for m in reversed(history) if m.get("role") == "user"), "")
-    # #region agent log
-    _debug_log("A", "agent_chat_api.py:_tool_choice_for_turn", "auto tool choice", {"current_cycle": current_cycle, "last_user_preview": last_user[:120], "tool_choice": choice})
-    # #endregion
+    _debug_log(
+        "A",
+        "agent_chat_api.py:_tool_choice_for_turn",
+        "tool choice",
+        {
+            "current_cycle": current_cycle,
+            "pressure_turn": _pressure_turn(history),
+            "pressure_mode": mode,
+            "pressure_bias": bias,
+            "last_user_preview": last_user[:120],
+            "tool_choice": str(choice),
+        },
+    )
     return choice
 
 
-def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="auto"):
-    """Single vLLM call (non-streaming). Tool calls only work with stream=False on this stack."""
+def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="auto", current_cycle=0):
+    """Single vLLM call (non-streaming). Used by agent_loop / stream:false API path."""
     t0 = time.perf_counter()
     response = client.chat.completions.create(
         model=MODEL_NAME,
@@ -460,7 +549,7 @@ def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="
         temperature=temperature,
         top_p=top_p,
         max_tokens=max_tokens,
-        extra_body=VLLM_EXTRA_BODY,
+        extra_body=_build_vllm_extra_body(history, current_cycle),
         stream=False,
     )
     elapsed_ms = round((time.perf_counter() - t0) * 1000, 2)
@@ -492,6 +581,120 @@ def _llm_once(history, temperature=0.7, top_p=0.8, max_tokens=512, tool_choice="
     return content, tool_calls, llm_meta
 
 
+# vLLM stream=True + tools validated on Qwen3-4B FP8 + hermes parser (probe + camping turn 6).
+def _stream_vllm_turn(
+    history,
+    stream_id,
+    *,
+    temperature=0.7,
+    top_p=0.8,
+    max_tokens=512,
+    tool_choice="auto",
+    tools_enabled=True,
+    current_cycle=0,
+):
+    """Stream one vLLM turn; yield keepalive pings and content SSE chunks.
+
+    Distinction between tool vs text is per-chunk from vLLM, not a upfront guess:
+      - delta.content      -> stream to client immediately
+      - delta.tool_calls   -> buffer only (_accumulate_tool_calls)
+    After the stream ends, reconstructed tool_calls (if any) trigger RAG; otherwise
+    the turn is done and all text was already forwarded.
+
+    Yields:
+      ("ping", keepalive_str)
+      ("content_sse", sse_str)
+      ("done", (full_content, final_tool_calls, llm_meta))
+      ("err", exc) — raised by caller
+    Tool-call deltas are buffered internally; only content is forwarded.
+    """
+    chunk_q: Queue = Queue()
+
+    def _worker():
+        try:
+            t0 = time.perf_counter()
+            ttft_ms = None
+            content_parts: list[str] = []
+            tool_calls_accumulator: dict = {}
+            usage = None
+
+            kwargs = {
+                "model": MODEL_NAME,
+                "messages": history,
+                "temperature": temperature,
+                "top_p": top_p,
+                "max_tokens": max_tokens,
+                "extra_body": _build_vllm_extra_body(history, current_cycle),
+                "stream": True,
+            }
+            if tools_enabled:
+                kwargs["tools"] = tools
+                kwargs["tool_choice"] = tool_choice
+
+            stream = client.chat.completions.create(**kwargs)
+            for chunk in stream:
+                if getattr(chunk, "usage", None):
+                    usage = chunk.usage
+                if not chunk.choices:
+                    continue
+                delta = chunk.choices[0].delta
+                if delta.content:
+                    if ttft_ms is None:
+                        ttft_ms = round((time.perf_counter() - t0) * 1000, 2)
+                    content_parts.append(delta.content)
+                    chunk_q.put(
+                        (
+                            "content_sse",
+                            _sse_content_chunk(stream_id, int(time.time()), delta.content),
+                        )
+                    )
+                if delta.tool_calls:
+                    _accumulate_tool_calls(tool_calls_accumulator, delta.tool_calls)
+
+            elapsed_ms = round((time.perf_counter() - t0) * 1000, 2)
+            full_content = "".join(content_parts)
+            final_tool_calls = _reconstruct_tool_calls(tool_calls_accumulator)
+            completion_tokens = getattr(usage, "completion_tokens", None) if usage else None
+            if completion_tokens is None and full_content:
+                completion_tokens = max(1, len(full_content.split()))
+            llm_meta = {
+                "elapsed_ms": elapsed_ms,
+                "ttft_ms": ttft_ms,
+                "prompt_tokens": getattr(usage, "prompt_tokens", None) if usage else None,
+                "completion_tokens": completion_tokens,
+                "total_tokens": getattr(usage, "total_tokens", None) if usage else None,
+                "tool_call_count": len(final_tool_calls),
+            }
+            _debug_log(
+                "B",
+                "agent_chat_api.py:_stream_vllm_turn",
+                "llm stream complete",
+                {
+                    "tool_choice": str(tool_choice),
+                    "tools_enabled": tools_enabled,
+                    "tool_call_count": len(final_tool_calls),
+                    "content_preview": full_content[:160],
+                    "ttft_ms": ttft_ms,
+                },
+            )
+            chunk_q.put(("done", (full_content, final_tool_calls, llm_meta)))
+        except Exception as exc:
+            chunk_q.put(("err", exc))
+
+    threading.Thread(target=_worker, daemon=True).start()
+    while True:
+        try:
+            kind, payload = chunk_q.get(timeout=SSE_KEEPALIVE_INTERVAL)
+        except Empty:
+            yield ("ping", _sse_keepalive_ping())
+            continue
+        if kind == "err":
+            raise payload
+        yield (kind, payload)
+        if kind == "done":
+            return
+
+
 def stream_llm_once(
     history,
     emit_token=None,
@@ -499,6 +702,7 @@ def stream_llm_once(
     top_p=0.8,
     max_tokens=512,
     tool_choice="auto",
+    current_cycle=0,
 ):
     """Single LLM call; emits final text via `emit_token` when there are no tool calls."""
     full_content, final_tool_calls, llm_meta = _llm_once(
@@ -507,6 +711,7 @@ def stream_llm_once(
         top_p=top_p,
         max_tokens=max_tokens,
         tool_choice=tool_choice,
+        current_cycle=current_cycle,
     )
 
     if emit_token and full_content and not final_tool_calls:
@@ -552,6 +757,7 @@ def agent_loop(
             top_p=top_p,
             max_tokens=max_tokens,
             tool_choice=_tool_choice_for_turn(history, current_cycle),
+            current_cycle=current_cycle,
         )
         if latency_out is not None:
             phase_name = "llm1" if current_cycle == 0 else f"llm{current_cycle + 1}"
@@ -764,18 +970,21 @@ def _stream_agent_sse_inner(
 
     while True:
         llm_result = None
-        for event_kind, payload in _blocking_with_keepalives(
-            lambda: _llm_once(
-                history,
-                temperature=temperature,
-                top_p=top_p,
-                max_tokens=max_tokens,
-                tool_choice=_tool_choice_for_turn(history, current_cycle),
-            )
+        for kind, payload in _stream_vllm_turn(
+            history,
+            stream_id,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            tool_choice=_tool_choice_for_turn(history, current_cycle),
+            tools_enabled=True,
+            current_cycle=current_cycle,
         ):
-            if event_kind == "ping":
+            if kind == "ping":
                 yield payload
-            else:
+            elif kind == "content_sse":
+                yield payload
+            elif kind == "done":
                 llm_result = payload
 
         full_content, final_tool_calls, _llm_meta = llm_result
@@ -840,20 +1049,7 @@ def _stream_agent_sse_inner(
         # #region agent log
         _debug_log("E", "agent_chat_api.py:stream_agent_sse", "sse final response", {"current_cycle": current_cycle, "had_tool_calls": bool(final_tool_calls), "content_preview": (full_content or "")[:160]})
         # #endregion
-        # Final answer — emit as SSE chunks (vLLM tool calls require non-streaming)
-        if full_content:
-            yield _sse(
-                {
-                    "id": stream_id,
-                    "object": "chat.completion.chunk",
-                    "created": created,
-                    "model": MODEL_NAME,
-                    "choices": [
-                        {"index": 0, "delta": {"content": full_content}, "finish_reason": None}
-                    ],
-                }
-            )
-
+        # Final answer tokens were already streamed during _stream_vllm_turn.
         break
 
     yield from _sse_stream_done(stream_id, created)

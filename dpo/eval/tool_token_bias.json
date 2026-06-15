@@ -1,0 +1,7 @@
+{
+  "model": "Qwen3-4B-Instruct-2507-FP8",
+  "tool_call_opener_token_id": 151657,
+  "tool_call_closer_token_id": 151658,
+  "opener_token_ids_for_pressure": [151657],
+  "notes": "Qwen3 registers <tool_call> as a single added token (151657). Force/nudge applies to reply token 0 only."
+}

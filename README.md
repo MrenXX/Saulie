@@ -135,6 +135,7 @@ remote_chat.py → ngrok → nginx :8080 → agent_chat_api.py :9000
 |-----------|-------|
 | Deploy vLLM | `bash dpo/eval/vllm_scripts/deploy_finalist_pick.sh` |
 | System prompts | `SAULIE_PROMPT=legacy\|steering\|compressed` (default `compressed`) |
+| **Token streaming** | `stream: true` → real vLLM tokens over SSE; tool JSON buffered server-side ([`AGENT_STREAMING.md`](AGENT_STREAMING.md)) |
 | Persona fixes | [`SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md`](SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md) |
 
 Branch landing page: [`deployment` README](https://github.com/MrenXX/Saulie/blob/deployment/README.md).

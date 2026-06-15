@@ -29,7 +29,7 @@ This document is the single entry point for understanding **why** we ran a 3×3 
 User → agent_chat_api.py (:9000) → vLLM (:8000, LoRA) + search_products tool → RAG (BGE-M3 + Qdrant)
 ```
 
-- **Agent:** `agent_chat_api.py` — injects system prompt, runs tool loop, streams SSE.
+- **Agent:** `agent_chat_api.py` — injects system prompt, runs tool loop, streams SSE. With `stream: true`, vLLM tokens stream to the client; `delta.tool_calls` are buffered server-side (never sent to the client). See [`AGENT_STREAMING.md`](AGENT_STREAMING.md).
 - **Model:** Qwen3-4B-Instruct FP8 + LoRA adapter (SFT trial-17 base, optional DPO overlay).
 - **RAG:** `rag/query2.py` → `amazon_products_v2` (McAuley US catalog), fusion **RRF**.
 - **Ops:** `start_saulie.sh` — stack startup; env `SAULIE_MODEL`, `SAULIE_PROMPT`, `QDRANT_COLLECTION`.
@@ -287,7 +287,9 @@ Priority order for a new agent:
 | Debug one conversation | Tail `agent_api.log` for `[TOOL CALL]`, `tool_call_count`, RAG results |
 | Test hallucination vs RAG | Look for **ALL CAPS** product names (only valid after real tool result) |
 
-**Do not assume** "searching for products..." in the client means a tool ran — check logs.
+**Do not assume** "searching for products..." in the client means a tool ran — check logs. Status lines are intentional user-facing SSE during RAG; raw tool JSON is never streamed.
+
+**Streaming note:** With `stream: true`, final answers and probe text arrive token-by-token. Tool-call assembly stays internal; see [`AGENT_STREAMING.md`](AGENT_STREAMING.md).
 
 ---
 

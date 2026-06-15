@@ -78,6 +78,8 @@ docker run -d \
   ${PORT_MAP} \
   -v "${MODEL_PATH}:/models/model:ro" \
   -v "${LORA_ADAPTER_PATH}:${CONTAINER_LORA_PATH}:ro" \
+  -v "${REPO}/vllm_plugins:/app/vllm_plugins:ro" \
+  -e "PYTHONPATH=/app" \
   -e "VLLM_API_KEY=${VLLM_API_KEY}" \
   -e NCCL_P2P_DISABLE=1 \
   "${VLLM_IMAGE}" \
@@ -97,7 +99,8 @@ docker run -d \
   --max-lora-rank "${MAX_LORA_RANK}" \
   --max-loras 1 \
   --trust-remote-code \
-  --enable-prefix-caching
+  --enable-prefix-caching \
+  --logits-processors vllm_plugins.saulie_tool_pressure:SaulieToolPressureWrapper
 
 echo "Waiting for API on port ${PORT}..."
 sleep 20

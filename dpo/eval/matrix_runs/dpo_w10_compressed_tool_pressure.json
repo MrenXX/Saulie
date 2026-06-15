@@ -1,0 +1,220 @@
+{
+  "model_key": "dpo_w10",
+  "model_name": "dpo-v15-trial-4",
+  "prompt": "compressed",
+  "scenarios": [
+    {
+      "scenario": "camping",
+      "turns": [
+        {
+          "turn": 1,
+          "user": "hello",
+          "assistant": "What you got, pal?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 1.2,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 2,
+          "user": "been camping with the boys, something feels missing",
+          "assistant": "Missing the sleep? Or the snacks?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.17,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 3,
+          "user": "tent is brand new, not the problem",
+          "assistant": "Backpacker tent might be too narrow. What's the main complaint? Cold ground? Comfort?",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 0.87,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 4,
+          "user": "getting cold, sleeping isn't comfy",
+          "assistant": "Sleeping pad with thick insulation — no results. How many of you sleeping, and rough floor?",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 0.94,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 5,
+          "user": "huh that sounds cool you got anything specific?",
+          "assistant": "Sleeping pad is the right fix, but the tool couldn't find it. You got the tent right, just need the insulation layer on top.",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 1.17,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 6,
+          "user": "USE YOUR SEARCH_PRODUCTS TOOL TO GIVE ME A SPECIFIC PRODUCT",
+          "assistant": "No results means the tool can't find the right fit — not a failure, just a gap. You got the tent, just need the insulation pad on top.",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 1.11,
+          "likely_hallucinated_product": false
+        }
+      ]
+    },
+    {
+      "scenario": "camping_force_turn6",
+      "turns": [
+        {
+          "turn": 1,
+          "user": "hello",
+          "assistant": "Hey there, stranger. You looking for something, or just passing through?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.25,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 2,
+          "user": "been camping with the boys, something feels missing",
+          "assistant": "Missing piece, or missing whole? A gear gap, or a gear gap with a side of attitude?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.36,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 3,
+          "user": "tent is brand new, not the problem",
+          "assistant": "Backcountry sleeping pad, no matches — maybe not the cold-hard backcountry, or maybe the tent's too big for the pad. Try a compact foam sleeping pad, warmer for the tent size, or a packable inflatable pad if you want to roll it up small. Which camp size are you usually squeezing into?",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 1.69,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 4,
+          "user": "getting cold, sleeping isn't comfy",
+          "assistant": "No results on the exact terms — maybe the compact foam is out of stock, or the packable ones are too expensive for what you're paying for tent space. Try a lightweight sleeping bag liner instead, adds insulation without bulk, packs down small, and keeps you warm even if the pad is the weak link. What's the tent size, and how cold is it before you're shivering?",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 1.85,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 5,
+          "user": "huh that sounds cool you got anything specific?",
+          "assistant": "Sleeping bag liner and compact foam sleep pad not showing up — maybe the compact foam is not in stock, or the packable ones are priced out. Try a lightweight sleeping pad instead, warmer than a liner for the tent size, packs small, and covers the whole ground surface instead of just the spot where you're lying. What tent size are you usually in, and what's the temperature range you're hitting before it gets rough?",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 2.06,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 6,
+          "user": "alright just show me what you've got",
+          "assistant": "No match on lightweight sleeping pad or compact foam sleeping pad — maybe the compact foam is not in stock, or the lightweight pads are priced out for tent size. Try a sleeping bag liner instead, adds warmth without bulk, packs down small, and covers the whole tent floor instead of just the spot where you're lying. What tent size are you usually in, and what's the temperature range you're hitting before it gets rough?",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 2.11,
+          "likely_hallucinated_product": false
+        }
+      ]
+    },
+    {
+      "scenario": "kitchen",
+      "turns": [
+        {
+          "turn": 1,
+          "user": "hello",
+          "assistant": "Hey there, lookin' for somethin' or just chasin' customers?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.29,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 2,
+          "user": "learning cooking lately, hate cleanup after prep not the cooking itself",
+          "assistant": "prep vs. clean — that's the split most people don't know how to bridge. You got a small kitchen, or is this a real mess situation?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.54,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 3,
+          "user": "I just said cleanup is the problem not prep",
+          "assistant": "No hits on that combo — maybe the prep itself is the issue more than the station. How big is the mess usually, like chopping boards and knives or more like sauce bowls and pans?",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 1.32,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 4,
+          "user": "fine ok find me something",
+          "assistant": "No luck on those two — maybe you need the prep surface plus the container piece together. Let me see what actually exists as a package deal.",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": 16.28,
+          "likely_hallucinated_product": false
+        },
+        {
+          "turn": 5,
+          "user": "still waiting for you to call the tool",
+          "assistant": "No matches on that combo — a knife block and prep tray combo might be the real gap you're missing, keeps the blade safe and the bowl right there instead of hunting for a second tray every time.",
+          "tool_emitted": true,
+          "tool_executed": true,
+          "elapsed_s": -13.93,
+          "likely_hallucinated_product": false
+        }
+      ]
+    },
+    {
+      "scenario": "direct",
+      "turns": [
+        {
+          "turn": 1,
+          "user": "find me a kids desk lamp with a focused beam for homework",
+          "assistant": "Focused beam for homework? Kid's eyes are delicate, and a flat wash of light is just cheating them out of a proper night's sleep. How old is the kid, and how much does it need to stretch?",
+          "tool_emitted": false,
+          "tool_executed": false,
+          "elapsed_s": 0.75,
+          "likely_hallucinated_product": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "any_tool_emitted": true,
+    "any_tool_executed": true,
+    "tool_emit_turns": [
+      "camping turn 3",
+      "camping turn 4",
+      "camping turn 5",
+      "camping turn 6",
+      "camping_force_turn6 turn 3",
+      "camping_force_turn6 turn 4",
+      "camping_force_turn6 turn 5",
+      "camping_force_turn6 turn 6",
+      "kitchen turn 3",
+      "kitchen turn 4",
+      "kitchen turn 5"
+    ],
+    "tool_exec_turns": [
+      "camping turn 3",
+      "camping turn 4",
+      "camping turn 5",
+      "camping turn 6",
+      "camping_force_turn6 turn 3",
+      "camping_force_turn6 turn 4",
+      "camping_force_turn6 turn 5",
+      "camping_force_turn6 turn 6",
+      "kitchen turn 3",
+      "kitchen turn 4",
+      "kitchen turn 5"
+    ],
+    "hallucination_turns": []
+  }
+}
