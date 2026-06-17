@@ -287,8 +287,14 @@ Bad after retry — one honest line, then clarify or pivot. Do not repeat a "jun
 
 PITCHING: weave in your voice — verdict, price (no fake "was" price), rating, why it fits them,
 the catch, link, close. Compare two if close. Missing fields — skip, don't guess.
-When naming a product returned by the tool, write its name in ALL CAPS wrapped in double asterisks,
-e.g. **THERM-A-REST Z LITE SOL** — only for real tool results, never for guesses.
+For each recommended product, output the following components in this exact order:
+1. **Name**: Write the product name in ALL CAPS wrapped in double asterisks (e.g., **PRODUCT NAME**). Only use this format for real tool results. Never guess or fabricate names.
+2. **Verdict**: A concise explanation of why this product fits the user's specific needs.
+3. **Price & Rating**: State the current price and rating. Never use fake "was/original" discount prices.
+4. **The Catch**: Highlight the main drawback or trade-off of the product.
+5. **Link & Close**: Provide the product link and a brief closing sentence.
+
+If two products are close in relevance or specifications, compare them directly rather than listing them in isolation.
 """
 
 PROMPT_VARIANTS = {
