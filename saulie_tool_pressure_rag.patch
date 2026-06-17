@@ -1,0 +1,787 @@
+diff --git a/.env.example b/.env.example
+index 4093aee..7d90caf 100644
+--- a/.env.example
++++ b/.env.example
+@@ -35,6 +35,12 @@ FUSION_METHOD=rrf
+ EMBED_URL=http://localhost:8888/embed
+ QDRANT_URL=http://localhost:1234
+ PREFETCH_LIMIT=50
++# Relevance gate: RRF still RANKS (good for short product titles); dense COSINE gates relevance.
++# Calibrate with rag/calibrate_cosine_threshold.py, A/B with rag/retrieval_ab_eval.py.
++#   > 0  -> gate ON: RRF order, cosine >= MIN, capped at MAX; 0 above => "no relevant products"
++#   <= 0 -> gate OFF: pure RRF baseline, top MAX by fused rank (use 0 for the A/B baseline)
++SAULIE_RAG_MIN_COSINE=0.5
++SAULIE_RAG_MAX_RESULTS=5
+ 
+ # --- Agent / vLLM client ---
+ LLM_BASE_URL=http://localhost:8000/v1
+@@ -47,9 +53,13 @@ SAULIE_TOOL_PRESSURE_ENABLED=1
+ SAULIE_TOOL_PRESSURE_BACKEND=processor
+ SAULIE_TOOL_BIAS_START_TURN=3
+ SAULIE_TOOL_FORCE_TURN=6
+-SAULIE_TOOL_BIAS_PER_TURN=8
++# Absolute logit add per effective turn. Keep SMALL: 8 -> +24/+32/+40 saturated and silently
++# forced. 2 -> +6/+8/+10 is a real nudge. Try 2, drop to 1 if turn 3 still always searches.
++SAULIE_TOOL_BIAS_PER_TURN=2
+ SAULIE_TOOL_PRESSURE_MOD=0
+ SAULIE_TOOL_FORCE_MODE=off
++# Bounded LRU for the server-side tool-aware pressure reset (fingerprint -> last search turn).
++SAULIE_TOOL_PRESSURE_REGISTRY_MAX=512
+ 
+ # --- Remote client (remote_chat.py) ---
+ PUBLIC_URL=https://your-ngrok-url.ngrok-free.dev
+diff --git a/agent_chat_api.py b/agent_chat_api.py
+index 2c9a0c8..b8bfa87 100644
+--- a/agent_chat_api.py
++++ b/agent_chat_api.py
+@@ -15,7 +15,9 @@ import os
+ import json
+ import logging
+ import threading
++import hashlib
+ from pathlib import Path
++from collections import OrderedDict
+ from queue import Empty, Queue
+ from dotenv import load_dotenv
+ from openai import OpenAI
+@@ -75,12 +77,22 @@ if _TOOL_BIAS_JSON.is_file():
+ 
+ TOOL_BIAS_START_TURN = int(os.getenv("SAULIE_TOOL_BIAS_START_TURN", "3"))
+ TOOL_FORCE_TURN = int(os.getenv("SAULIE_TOOL_FORCE_TURN", "6"))
+-TOOL_BIAS_PER_TURN = int(os.getenv("SAULIE_TOOL_BIAS_PER_TURN", "8"))
++# Absolute logit add per effective turn. Keep SMALL: +24/+32/+40 (PER_TURN=8) saturated the
++# softmax and silently forced. PER_TURN=2 -> +6/+8/+10 is a genuine probabilistic nudge.
++TOOL_BIAS_PER_TURN = int(os.getenv("SAULIE_TOOL_BIAS_PER_TURN", "2"))
+ TOOL_PRESSURE_MOD = int(os.getenv("SAULIE_TOOL_PRESSURE_MOD", "0"))
+ TOOL_FORCE_MODE = os.getenv("SAULIE_TOOL_FORCE_MODE", "off").strip().lower()
+ TOOL_PRESSURE_ENABLED = os.getenv("SAULIE_TOOL_PRESSURE_ENABLED", "1") == "1"
+ TOOL_PRESSURE_BACKEND = os.getenv("SAULIE_TOOL_PRESSURE_BACKEND", "processor").strip().lower()
+ 
++# Server-side tool-aware pressure reset. The stateless API strips tool messages from client
++# history (see sanitize_messages), so _pressure_turn cannot see the last search position
++# there. We map a conversation fingerprint (hash of user messages) -> the user-turn count at
++# which a search last fired, and reset the pressure counter on the next request. Bounded LRU
++# keeps it concurrency-safe without leaking memory.
++_PRESSURE_REGISTRY: "OrderedDict[str, int]" = OrderedDict()
++_PRESSURE_REGISTRY_MAX = int(os.getenv("SAULIE_TOOL_PRESSURE_REGISTRY_MAX", "512"))
++
+ client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_BASE_URL, timeout=LLM_TIMEOUT)
+ 
+ # #region agent log
+@@ -379,17 +391,21 @@ def execute_search(tool_call, verbose=True, timing_out: dict | None = None):
+         if timing_out is not None:
+             timing_out.update(rag_timing)
+         
+-        print(f"\033[93m [RESULTS]\033[0m Found {len(results)} products\n")
++        total_hits = (
++            sum(len(b.get("results", [])) for b in results)
++            if isinstance(results, list) else 0
++        )
++        print(f"\033[93m [RESULTS]\033[0m Found {total_hits} products\n")
+         # #region agent log
+-        _debug_log("D", "agent_chat_api.py:execute_search", "search results", {"result_count": len(results)})
++        _debug_log("D", "agent_chat_api.py:execute_search", "search results", {"result_count": total_hits})
+         # #endregion
+         if verbose:
+             print(f"\033[93m [RESULTS]\033[0m Results {results} \n")
+         
+-        if not results:
++        if not results or total_hits == 0:
+             result_json = json.dumps({
+                 "status": "no_results",
+-                "message": f"No products found for '{query_input}'. Recommend a general alternative."
++                "message": f"No relevant products found for '{query_input}'. Recommend a general alternative."
+             })
+             return result_json, "no_results"
+         
+@@ -462,13 +478,46 @@ def _accumulate_tool_calls(tool_calls_accumulator, tool_calls_delta):
+             tool_calls_accumulator[idx]["function"]["arguments"] += tool_piece.function.arguments
+ 
+ 
++def _user_fingerprint(user_contents) -> str:
++    """Stable, order-sensitive hash of the user-message contents."""
++    h = hashlib.sha1()
++    for c in user_contents:
++        h.update((c or "").encode("utf-8", "ignore"))
++        h.update(b"\x00")
++    return h.hexdigest()
++
++
++def _note_search_fired(history) -> None:
++    """Record that a search fired at the current user-turn count, keyed by the full
++    user-message fingerprint. The next request (one more user message) looks this up via its
++    prefix fingerprint and resets the pressure counter. Bounded LRU eviction."""
++    user_contents = [m.get("content") or "" for m in history if m.get("role") == "user"]
++    if not user_contents:
++        return
++    fp = _user_fingerprint(user_contents)
++    _PRESSURE_REGISTRY[fp] = len(user_contents)
++    _PRESSURE_REGISTRY.move_to_end(fp)
++    while len(_PRESSURE_REGISTRY) > _PRESSURE_REGISTRY_MAX:
++        _PRESSURE_REGISTRY.popitem(last=False)
++
++
+ def _pressure_turn(history) -> int:
+-    """User messages since the last tool result (1-indexed episode counter)."""
+-    last_tool_idx = -1
+-    for i, m in enumerate(history):
+-        if m.get("role") == "tool":
+-            last_tool_idx = i
+-    return sum(1 for m in history[last_tool_idx + 1 :] if m.get("role") == "user")
++    """User turns since the last search (episode counter).
++
++    The stateless API strips tool messages from client history, so we cannot read the last
++    search position from `history`. Instead we look up a server-side registry keyed by the
++    fingerprint of all user messages EXCEPT the latest -- which equals the fingerprint stored
++    when the previous request's search fired. Falls back to the full user count when no search
++    has fired yet (new conversation)."""
++    user_contents = [m.get("content") or "" for m in history if m.get("role") == "user"]
++    total = len(user_contents)
++    if total == 0:
++        return 0
++    prefix_fp = _user_fingerprint(user_contents[:-1])
++    last_search_turn = _PRESSURE_REGISTRY.get(prefix_fp)
++    if last_search_turn is None:
++        return total
++    return max(1, total - last_search_turn)
+ 
+ 
+ def _effective_pressure_turn(pressure_turn: int) -> int:
+@@ -778,6 +827,7 @@ def agent_loop(
+         # 3) Tool execution path
+         if final_tool_calls and current_cycle < max_tool_cycles:
+             current_cycle += 1
++            _note_search_fired(history)
+             # #region agent log
+             _debug_log("C", "agent_chat_api.py:agent_loop", "executing tools", {"current_cycle": current_cycle, "tool_count": len(final_tool_calls), "max_tool_cycles": max_tool_cycles})
+             # #endregion
+@@ -1001,6 +1051,7 @@ def _stream_agent_sse_inner(
+         # Tool execution path
+         if final_tool_calls and current_cycle < max_tool_cycles:
+             current_cycle += 1
++            _note_search_fired(history)
+             # #region agent log
+             _debug_log("E", "agent_chat_api.py:stream_agent_sse", "executing tools", {"current_cycle": current_cycle, "tool_count": len(final_tool_calls)})
+             # #endregion
+diff --git a/dpo/eval/model_prompt_matrix_eval.py b/dpo/eval/model_prompt_matrix_eval.py
+index e00a43e..d47c425 100644
+--- a/dpo/eval/model_prompt_matrix_eval.py
++++ b/dpo/eval/model_prompt_matrix_eval.py
+@@ -5,6 +5,7 @@ from __future__ import annotations
+ 
+ import argparse
+ import json
++import os
+ import re
+ import time
+ import urllib.error
+@@ -17,6 +18,11 @@ DEBUG_LOG = REPO / ".cursor" / "debug-049191.log"
+ AGENT_STDLOG = REPO / "agent_api.log"
+ OUTPUT_DIR = REPO / "dpo" / "eval" / "matrix_runs"
+ 
++# Dependency endpoints for preflight (must match rag/query2.py defaults).
++EMBED_URL = os.getenv("EMBED_URL", "http://localhost:8888/embed")
++QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:1234")
++QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "amazon_products_v2")
++
+ SCENARIOS: dict[str, list[str]] = {
+     "camping": [
+         "hello",
+@@ -48,6 +54,7 @@ SCENARIOS: dict[str, list[str]] = {
+ 
+ TOOL_EMIT_RE = re.compile(r'"tool_call_count"\s*:\s*([1-9]\d*)')
+ TOOL_EXEC_RE = re.compile(r"executing tools")
++RESULT_COUNT_RE = re.compile(r'"result_count"\s*:\s*(\d+)')
+ HALLUCINATE_RE = re.compile(
+     r"\$\d|R-value|closed-cell|2-inch|amazon\.com|https?://",
+     re.I,
+@@ -63,6 +70,7 @@ class TurnResult:
+     tool_executed: bool
+     elapsed_s: float
+     likely_hallucinated_product: bool
++    results_count: int = 0
+ 
+ 
+ @dataclass
+@@ -121,9 +129,10 @@ def _log_byte_offset(path: Path) -> int:
+     return path.stat().st_size
+ 
+ 
+-def _parse_new_logs(debug_from: int, agent_from: int) -> tuple[bool, bool]:
++def _parse_new_logs(debug_from: int, agent_from: int) -> tuple[bool, bool, int]:
+     tool_emitted = False
+     tool_executed = False
++    results_count = 0
+ 
+     if DEBUG_LOG.is_file():
+         with DEBUG_LOG.open("rb") as f:
+@@ -133,6 +142,9 @@ def _parse_new_logs(debug_from: int, agent_from: int) -> tuple[bool, bool]:
+             tool_emitted = True
+         if TOOL_EXEC_RE.search(chunk):
+             tool_executed = True
++        counts = [int(m) for m in RESULT_COUNT_RE.findall(chunk)]
++        if counts:
++            results_count = max(counts)
+ 
+     if AGENT_STDLOG.is_file():
+         with AGENT_STDLOG.open("rb") as f:
+@@ -141,7 +153,36 @@ def _parse_new_logs(debug_from: int, agent_from: int) -> tuple[bool, bool]:
+         if "[TOOL CALL]" in chunk:
+             tool_executed = True
+ 
+-    return tool_emitted, tool_executed
++    return tool_emitted, tool_executed, results_count
++
++
++def _preflight_deps() -> None:
++    """Fail loudly if the embedding server or Qdrant is down/empty, so a run never silently
++    produces 'no_results' everywhere (the failure mode that invalidated the first smoke)."""
++    try:
++        emb = _http_json("POST", EMBED_URL, {"text": ["preflight ping"]}, timeout=30)
++        if not isinstance(emb, dict) or "dense" not in emb:
++            raise RuntimeError("embed response missing 'dense'")
++    except SystemExit:
++        raise
++    except Exception as e:
++        raise SystemExit(
++            f"PREFLIGHT FAIL: embedding server unreachable at {EMBED_URL} ({e}). "
++            "Start tensorrt_bge-m3 (:8888) before running."
++        )
++    try:
++        info = _http_json("GET", f"{QDRANT_URL.rstrip('/')}/collections/{QDRANT_COLLECTION}", timeout=15)
++        count = (info.get("result") or {}).get("points_count")
++        if not count:
++            raise RuntimeError(f"collection '{QDRANT_COLLECTION}' empty/missing (points_count={count})")
++    except SystemExit:
++        raise
++    except Exception as e:
++        raise SystemExit(
++            f"PREFLIGHT FAIL: Qdrant unreachable/empty at {QDRANT_URL} ({e}). "
++            f"Start qdrant_index (:1234) and confirm '{QDRANT_COLLECTION}' is indexed."
++        )
++    print(f"Preflight OK: embed {EMBED_URL} reachable, Qdrant '{QDRANT_COLLECTION}' has {count} points.")
+ 
+ 
+ def run_cell(model_key: str, model_name: str, prompt: str, agent_url: str) -> CellResult:
+@@ -161,7 +202,7 @@ def run_cell(model_key: str, model_name: str, prompt: str, agent_url: str) -> Ce
+             messages.append({"role": "user", "content": user_text})
+             debug_from = _log_byte_offset(DEBUG_LOG)
+             agent_from = _log_byte_offset(AGENT_STDLOG)
+-            t0 = time.time()
++            t0 = time.perf_counter()
+ 
+             resp = _http_json(
+                 "POST",
+@@ -176,7 +217,7 @@ def run_cell(model_key: str, model_name: str, prompt: str, agent_url: str) -> Ce
+                 },
+                 timeout=300,
+             )
+-            elapsed = time.time() - t0
++            elapsed = time.perf_counter() - t0
+             assistant = (
+                 resp.get("choices", [{}])[0]
+                 .get("message", {})
+@@ -185,7 +226,7 @@ def run_cell(model_key: str, model_name: str, prompt: str, agent_url: str) -> Ce
+             )
+             messages.append({"role": "assistant", "content": assistant})
+ 
+-            tool_emitted, tool_executed = _parse_new_logs(debug_from, agent_from)
++            tool_emitted, tool_executed, results_count = _parse_new_logs(debug_from, agent_from)
+             scenario.turns.append(
+                 TurnResult(
+                     turn=i,
+@@ -197,6 +238,7 @@ def run_cell(model_key: str, model_name: str, prompt: str, agent_url: str) -> Ce
+                     likely_hallucinated_product=bool(
+                         HALLUCINATE_RE.search(assistant) and not tool_executed
+                     ),
++                    results_count=results_count,
+                 )
+             )
+ 
+@@ -212,12 +254,25 @@ def main():
+     parser.add_argument("--prompt", required=True, choices=["legacy", "steering", "compressed"])
+     parser.add_argument("--agent-url", default="http://127.0.0.1:9000")
+     parser.add_argument("--output", type=Path, default=None)
++    parser.add_argument("--skip-preflight", action="store_true",
++                        help="skip embed/Qdrant health checks (not recommended)")
+     args = parser.parse_args()
+ 
+     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+     out_path = args.output or OUTPUT_DIR / f"{args.model_key}_{args.prompt}.json"
+ 
++    if not args.skip_preflight:
++        _preflight_deps()
++
+     cell = run_cell(args.model_key, args.model_name, args.prompt, args.agent_url)
++
++    exec_turns = [t for sc in cell.scenarios for t in sc.turns if t.tool_executed]
++    if exec_turns and all(t.results_count == 0 for t in exec_turns):
++        raise SystemExit(
++            "FAIL: every executed search returned 0 results across all scenarios. "
++            "Embed/Qdrant is down, the index is stale, or the cosine gate is too strict "
++            "(SAULIE_RAG_MIN_COSINE). Results are not trustworthy -- aborting."
++        )
+     payload = asdict(cell)
+     payload["summary"] = {
+         "any_tool_emitted": any(s.any_tool_emitted for s in cell.scenarios),
+diff --git a/dpo/eval/nudge_rate_probe.py b/dpo/eval/nudge_rate_probe.py
+new file mode 100644
+index 0000000..ff1d0dc
+--- /dev/null
++++ b/dpo/eval/nudge_rate_probe.py
+@@ -0,0 +1,88 @@
++#!/usr/bin/env python3
++"""Measure tool-emit RATE at a single turn to tell a nudge from a silent force.
++
++A single scripted pass cannot distinguish a ~55%-trigger nudge from a 100% force. This sends
++the SAME frozen conversation prefix N times and reports how often the model emits a tool call
++on the target turn. A genuine nudge lands strictly between 0 and 100%; force is 100%.
++
++Run on the machine with the agent up (deps up, run alone -- it reads the shared debug log by
++byte offset, so concurrent traffic would corrupt the count):
++    python dpo/eval/nudge_rate_probe.py --scenario camping --turn 3 --samples 20
++    python dpo/eval/nudge_rate_probe.py --scenario camping_force_turn6 --turn 6 --samples 20
++"""
++
++from __future__ import annotations
++
++import argparse
++
++from model_prompt_matrix_eval import (
++    AGENT_STDLOG,
++    DEBUG_LOG,
++    SCENARIOS,
++    _http_json,
++    _log_byte_offset,
++    _parse_new_logs,
++)
++
++
++def _post(agent_url: str, model_name: str, messages: list[dict]) -> dict:
++    return _http_json(
++        "POST",
++        f"{agent_url.rstrip('/')}/v1/chat/completions",
++        {
++            "model": model_name,
++            "messages": messages,
++            "stream": False,
++            "temperature": 0.7,
++            "top_p": 0.8,
++            "max_tokens": 512,
++        },
++        timeout=300,
++    )
++
++
++def main():
++    ap = argparse.ArgumentParser(description="Nudge-rate probe (fixed-prefix sampling)")
++    ap.add_argument("--scenario", required=True, choices=list(SCENARIOS))
++    ap.add_argument("--turn", type=int, required=True, help="1-indexed target turn")
++    ap.add_argument("--samples", type=int, default=20)
++    ap.add_argument("--agent-url", default="http://127.0.0.1:9000")
++    ap.add_argument("--model-name", default="dpo-v15-trial-4")
++    args = ap.parse_args()
++
++    lines = SCENARIOS[args.scenario]
++    if not (1 <= args.turn <= len(lines)):
++        raise SystemExit(f"--turn must be 1..{len(lines)} for scenario {args.scenario}")
++
++    health = _http_json("GET", f"{args.agent_url.rstrip('/')}/health")
++    print(f"agent: model={health.get('model')} prompt={health.get('prompt')}")
++
++    # Freeze the prefix: run turns 1..T-1 once, capturing assistant replies.
++    prefix: list[dict] = []
++    for user_text in lines[: args.turn - 1]:
++        prefix.append({"role": "user", "content": user_text})
++        resp = _post(args.agent_url, args.model_name, prefix)
++        assistant = resp.get("choices", [{}])[0].get("message", {}).get("content", "") or ""
++        prefix.append({"role": "assistant", "content": assistant})
++
++    target_user = lines[args.turn - 1]
++    emits = 0
++    for n in range(args.samples):
++        debug_from = _log_byte_offset(DEBUG_LOG)
++        agent_from = _log_byte_offset(AGENT_STDLOG)
++        _post(args.agent_url, args.model_name, prefix + [{"role": "user", "content": target_user}])
++        emitted, _executed, _count = _parse_new_logs(debug_from, agent_from)
++        emits += int(emitted)
++        print(f"  sample {n + 1:>2}/{args.samples}: tool_emitted={emitted}")
++
++    rate = emits / args.samples if args.samples else 0.0
++    print(f"\nscenario={args.scenario} turn={args.turn} samples={args.samples}")
++    print(f"tool-emit rate = {emits}/{args.samples} = {rate:.0%}")
++    if rate in (0.0, 1.0):
++        print("  -> binary (0% or 100%): force or fully suppressed, NOT a probabilistic nudge.")
++    else:
++        print("  -> strictly between 0 and 100%: genuine nudge.")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/rag/calibrate_cosine_threshold.py b/rag/calibrate_cosine_threshold.py
+new file mode 100644
+index 0000000..60be2da
+--- /dev/null
++++ b/rag/calibrate_cosine_threshold.py
+@@ -0,0 +1,155 @@
++#!/usr/bin/env python3
++"""Calibrate SAULIE_RAG_MIN_COSINE on the 18-query labeled benchmark.
++
++Why: RRF (Qdrant k=2) scores are rank-based, not relevance-based -- the top fused hit is
++~always >= 0.5 even for garbage queries, so it cannot gate. The dense vectors are a COSINE
++collection, so dense cosine is the true 0-1 relevance signal. This script runs the same 18
++benchmark queries through a dense-only search, labels each returned product with a keyword
++rubric (reproducing fusion_comparison_report.md's method), and reports the cosine threshold
++that best separates relevant from irrelevant hits.
++
++It also doubles as a sanity check for the historical dense-vector corruption bug (README:
++SERVER_BATCH_SIZE). If cosine cannot separate good from junk (overlap warning), the index is
++likely stale/corrupted and gating on cosine will not work until it is rebuilt.
++
++Run on the machine with the embed server (:8888) and Qdrant (:1234) up:
++    python rag/calibrate_cosine_threshold.py
++    python rag/calibrate_cosine_threshold.py --top-n 10 --collection amazon_products_v2
++"""
++
++from __future__ import annotations
++
++import argparse
++import os
++import sys
++from pathlib import Path
++
++sys.path.insert(0, os.path.dirname(__file__))
++
++from qdrant_client.http import models  # noqa: E402
++
++import query2  # noqa: E402
++from query2 import client, get_server_embeddings  # noqa: E402
++from benchmark_fusion import QUERIES, category_for_collection  # noqa: E402
++
++# Relevant if the product name contains any of these tokens (lowercased substring match).
++# Mirrors the manual keyword rubric used to label fusion_comparison_report.md.
++RUBRIC: dict[str, list[str]] = {
++    "wireless earbuds noise cancelling": ["earbud", "earphone", "headphone", "in-ear", "in ear"],
++    "bluetooth speaker portable waterproof": ["speaker"],
++    "gaming laptop RTX": ["laptop", "notebook"],
++    "32 inch smart TV 4K": ["tv", "television"],
++    "men's running shoes lightweight": ["shoe", "sneaker", "running", "trainer"],
++    "women's winter coat warm": ["coat", "jacket", "parka", "puffer"],
++    "cotton bed sheets king size": ["sheet", "bedsheet", "bedding", "duvet"],
++    "stainless steel cookware set": ["cookware", "pot", "pan", "saucepan", "skillet", "dutch oven"],
++    "yoga mat non slip thick": ["yoga mat", "mat"],
++    "protein powder whey chocolate": ["protein", "whey"],
++    "baby diaper pants large pack": ["diaper", "nappy"],
++    "dog food dry adult": ["dog food", "dog"],
++    "car phone mount dashboard": ["mount", "holder", "cradle"],
++    "mechanical keyboard RGB gaming": ["keyboard"],
++    "men's formal leather belt": ["belt"],
++    "kids school backpack waterproof": ["backpack", "bag", "rucksack"],
++    "air fryer large capacity": ["air fryer", "fryer"],
++    "face moisturizer dry skin": ["moisturizer", "moisturising", "moisturiser", "cream", "lotion", "hydra"],
++}
++
++
++def _is_relevant(query: str, name: str) -> bool:
++    tokens = RUBRIC.get(query, [])
++    low = (name or "").lower()
++    return any(tok in low for tok in tokens)
++
++
++def _dense_search(dense_vec, category, top_n):
++    query_filter = None
++    if category:
++        query_filter = models.Filter(
++            must=[models.FieldCondition(key="main_category", match=models.MatchValue(value=category))]
++        )
++    resp = client.query_points(
++        collection_name=query2.COLLECTION,
++        query=dense_vec,
++        using="dense",
++        limit=top_n,
++        query_filter=query_filter,
++        with_payload=["name"],
++    )
++    return resp.points
++
++
++def _sweep(pairs: list[tuple[float, bool]]) -> tuple[float, dict]:
++    """Pick the cosine threshold maximizing F1 over (cosine, relevant) pairs."""
++    if not pairs:
++        return 0.0, {}
++    candidates = sorted({round(c, 3) for c, _ in pairs})
++    best_t, best = candidates[0], {"f1": -1.0}
++    for t in candidates:
++        tp = sum(1 for c, r in pairs if c >= t and r)
++        fp = sum(1 for c, r in pairs if c >= t and not r)
++        fn = sum(1 for c, r in pairs if c < t and r)
++        prec = tp / (tp + fp) if (tp + fp) else 0.0
++        rec = tp / (tp + fn) if (tp + fn) else 0.0
++        f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else 0.0
++        if f1 > best["f1"]:
++            best_t, best = t, {"f1": round(f1, 3), "precision": round(prec, 3), "recall": round(rec, 3)}
++    return best_t, best
++
++
++def main():
++    ap = argparse.ArgumentParser(description="Calibrate dense-cosine relevance threshold")
++    ap.add_argument("--collection", default=os.getenv("QDRANT_COLLECTION", "amazon_products_v2"))
++    ap.add_argument("--top-n", type=int, default=10, help="dense hits to inspect per query")
++    args = ap.parse_args()
++
++    os.environ["QDRANT_COLLECTION"] = args.collection
++    query2.COLLECTION = args.collection
++
++    all_pairs: list[tuple[float, bool]] = []
++    top_hit_rows: list[tuple[str, float, bool, str]] = []
++
++    print(f"Collection: {args.collection}  top_n: {args.top_n}\n")
++    for item in QUERIES:
++        q = item["query"]
++        cat = category_for_collection(args.collection, item)
++        emb = get_server_embeddings([q])
++        if not emb or not emb.get("dense"):
++            raise SystemExit(f"Embed server returned nothing for {q!r} -- is :8888 up?")
++        points = _dense_search(emb["dense"][0], cat, args.top_n)
++        if not points:
++            print(f"  [WARN] no dense hits for {q!r} (filter={cat!r})")
++            continue
++        for j, p in enumerate(points):
++            name = (p.payload or {}).get("name", "")
++            rel = _is_relevant(q, name)
++            all_pairs.append((float(p.score), rel))
++            if j == 0:
++                top_hit_rows.append((q, float(p.score), rel, name[:60]))
++
++    print("Top hit per query (cosine | relevant | name):")
++    for q, cos, rel, name in top_hit_rows:
++        flag = "REL " if rel else "junk"
++        print(f"  {cos:6.4f}  {flag}  {q[:34]:34s} -> {name}")
++
++    rel_cos = [c for c, r in all_pairs if r]
++    junk_cos = [c for c, r in all_pairs if not r]
++    best_t, metrics = _sweep(all_pairs)
++
++    print("\n--- separation ---")
++    if rel_cos:
++        print(f"  relevant  cosine: min={min(rel_cos):.4f}  max={max(rel_cos):.4f}  n={len(rel_cos)}")
++    if junk_cos:
++        print(f"  irrelevant cosine: min={min(junk_cos):.4f}  max={max(junk_cos):.4f}  n={len(junk_cos)}")
++    if rel_cos and junk_cos and max(junk_cos) >= min(rel_cos):
++        print("  [WARN] relevant/irrelevant cosine ranges OVERLAP. Either the rubric needs"
++              " tuning or the dense index is stale/corrupted (see README SERVER_BATCH_SIZE).")
++
++    print("\n--- recommendation ---")
++    print(f"  SAULIE_RAG_MIN_COSINE={best_t}   (F1={metrics.get('f1')}, "
++          f"precision={metrics.get('precision')}, recall={metrics.get('recall')})")
++    print("  Review the top-hit table above before committing the value.")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/rag/query2.py b/rag/query2.py
+index dfc027c..8f88ca5 100644
+--- a/rag/query2.py
++++ b/rag/query2.py
+@@ -10,6 +10,17 @@ QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:1234")
+ COLLECTION = os.getenv("QDRANT_COLLECTION", "amazon_products_v2")
+ FUSION_METHOD = os.getenv("FUSION_METHOD", "rrf").lower()  # rrf | dbsf
+ DEFAULT_PREFETCH = int(os.getenv("PREFETCH_LIMIT", "50"))
++# Relevance gating. RRF (Qdrant k=2) scores are RANK-based, not relevance-based: the top
++# fused hit is ~always >= 0.5 even for garbage queries, so it cannot gate. RRF still RANKS
++# (it is strong for short product titles); dense COSINE is added ONLY as a relevance gate.
++# Calibrate SAULIE_RAG_MIN_COSINE on the labeled benchmark (calibrate_cosine_threshold.py).
++# Behavior:
++#   SAULIE_RAG_MIN_COSINE > 0  -> gate ON: return RRF-ordered hits with cosine >= threshold,
++#                                 capped at MAX_RESULTS; zero above => "no relevant products".
++#   SAULIE_RAG_MIN_COSINE <= 0 -> gate OFF: pure RRF baseline, top MAX_RESULTS by fused rank
++#                                 (no extra dense pass). Use 0 for the A/B baseline config.
++RAG_MIN_COSINE = float(os.getenv("SAULIE_RAG_MIN_COSINE", "0.5"))
++RAG_MAX_RESULTS = int(os.getenv("SAULIE_RAG_MAX_RESULTS", "5"))
+ 
+ client = QdrantClient(url=QDRANT_URL, check_compatibility=False)
+ 
+@@ -102,21 +113,54 @@ def search_hybrid(query_text, top_k=5, main_category=None, prefetch_limit=None,
+                 filter=query_filter,
+             ),
+         ]
++        gate_on = RAG_MIN_COSINE > 0.0
+         t_q = time.perf_counter()
++        fused_limit = max(top_k, RAG_MAX_RESULTS)
+         resp = client.query_points(
+             collection_name=COLLECTION,
+             prefetch=prefetch,
+             query=models.FusionQuery(fusion=_fusion_mode()),
+-            limit=top_k,
++            limit=fused_limit,
+             with_payload=[
+                 "name", "parent_asin", "main_category",
+                 "ratings", "no_of_ratings", "discount_price", "actual_price",
+             ],
+         )
++        cosine_by_id: dict = {}
++        if gate_on:
++            # Dense-only pass for the relevance signal. Same dense vector (already embedded)
++            # and same category filter; cosine score per point id is the true relevance
++            # measure RRF cannot provide. with_payload=False -> only id + score.
++            dense_resp = client.query_points(
++                collection_name=COLLECTION,
++                query=dense_vec,
++                using="dense",
++                limit=prefetch_limit,
++                query_filter=query_filter,
++                with_payload=False,
++            )
++            cosine_by_id = {p.id: p.score for p in dense_resp.points}
+         qdrant_ms += (time.perf_counter() - t_q) * 1000
++
++        if gate_on:
++            # Gate by cosine, keep RRF order, cap at RAG_MAX_RESULTS. Hits absent from the
++            # dense top-N (sparse-only keyword matches) have no cosine -> treated irrelevant.
++            results = []
++            for hit in resp.points:
++                cos = cosine_by_id.get(hit.id)
++                if cos is None or cos < RAG_MIN_COSINE:
++                    continue
++                formatted = _format_hit(hit)
++                formatted["relevance"] = round(float(cos), 4)
++                results.append(formatted)
++                if len(results) >= RAG_MAX_RESULTS:
++                    break
++        else:
++            # Pure RRF baseline: top hits by fused rank, no relevance gate.
++            results = [_format_hit(hit) for hit in resp.points[:RAG_MAX_RESULTS]]
+         out.append({
+             "query": q,
+-            "results": [_format_hit(hit) for hit in resp.points],
++            "results": results,
+         })
+ 
+     if timing_out is not None:
+diff --git a/rag/retrieval_ab_eval.py b/rag/retrieval_ab_eval.py
+new file mode 100644
+index 0000000..79dcee1
+--- /dev/null
++++ b/rag/retrieval_ab_eval.py
+@@ -0,0 +1,121 @@
++#!/usr/bin/env python3
++"""A/B retrieval eval: pure RRF baseline vs RRF + dense-cosine gate.
++
++RRF (Qdrant k=2) is a strong RANKER for short product titles, but its score is rank-based and
++cannot tell relevant from irrelevant. The dense-cosine gate drops sub-threshold hits. This
++question -- does gating actually return better results, or does it throw away good RRF hits? --
++is empirical, so this script runs BOTH configs over the 18 labeled benchmark queries and
++reports relevance metrics side by side. RRF ranking is identical in both; only the gate differs.
++
++Configs (RAG_MAX_RESULTS held equal so the only variable is the gate):
++  A  baseline : SAULIE_RAG_MIN_COSINE = 0      -> top-N by fused RRF rank, no gate
++  B  gated    : SAULIE_RAG_MIN_COSINE = <thr>  -> RRF order, cosine >= thr, dynamic count
++
++Run on the machine with embed (:8888) + Qdrant (:1234) up, AFTER calibrating the threshold:
++    python rag/calibrate_cosine_threshold.py        # -> pick THR
++    python rag/retrieval_ab_eval.py --threshold THR  # default 0.5
++"""
++
++from __future__ import annotations
++
++import argparse
++import os
++import sys
++from pathlib import Path
++
++sys.path.insert(0, os.path.dirname(__file__))
++
++import query2  # noqa: E402
++from query2 import search_hybrid  # noqa: E402
++from benchmark_fusion import QUERIES, category_for_collection  # noqa: E402
++from calibrate_cosine_threshold import RUBRIC, _is_relevant  # noqa: E402  (reuse rubric)
++
++
++def run_config(min_cosine: float, collection: str, top_k: int, max_results: int):
++    query2.COLLECTION = collection
++    query2.RAG_MIN_COSINE = min_cosine
++    query2.RAG_MAX_RESULTS = max_results
++    os.environ["QDRANT_COLLECTION"] = collection
++
++    rows = []
++    for item in QUERIES:
++        q = item["query"]
++        cat = category_for_collection(collection, item)
++        blocks = search_hybrid(q, main_category=cat, top_k=top_k)
++        hits = blocks[0]["results"] if blocks else []
++        rels = [_is_relevant(q, h.get("name", "")) for h in hits]
++        rows.append({
++            "query": q,
++            "returned": len(hits),
++            "relevant": sum(rels),
++            "top1_relevant": bool(rels and rels[0]),
++            "any_relevant": any(rels),
++            "no_results": len(hits) == 0,
++            "top_name": (hits[0]["name"][:48] if hits else ""),
++        })
++    return rows
++
++
++def summarize(rows):
++    n = len(rows)
++    returned = sum(r["returned"] for r in rows)
++    relevant = sum(r["relevant"] for r in rows)
++    return {
++        "queries": n,
++        "total_returned": returned,
++        "total_relevant": relevant,
++        "precision": round(relevant / returned, 3) if returned else 0.0,
++        "top1_acc": round(sum(r["top1_relevant"] for r in rows) / n, 3) if n else 0.0,
++        "coverage": round(sum(r["any_relevant"] for r in rows) / n, 3) if n else 0.0,
++        "no_result_queries": sum(r["no_results"] for r in rows),
++        "avg_returned": round(returned / n, 2) if n else 0.0,
++    }
++
++
++def _print_block(label, s):
++    print(f"\n[{label}]")
++    print(f"  precision (relevant/returned) : {s['precision']}")
++    print(f"  top-1 accuracy                : {s['top1_acc']}")
++    print(f"  coverage (>=1 relevant/query) : {s['coverage']}")
++    print(f"  avg results returned          : {s['avg_returned']}")
++    print(f"  queries returning nothing     : {s['no_result_queries']}/{s['queries']}")
++    print(f"  totals: returned={s['total_returned']} relevant={s['total_relevant']}")
++
++
++def main():
++    ap = argparse.ArgumentParser(description="A/B retrieval: pure RRF vs RRF+dense gate")
++    ap.add_argument("--collection", default=os.getenv("QDRANT_COLLECTION", "amazon_products_v2"))
++    ap.add_argument("--threshold", type=float, default=0.5, help="cosine gate for config B")
++    ap.add_argument("--top-k", type=int, default=5)
++    ap.add_argument("--max-results", type=int, default=5)
++    args = ap.parse_args()
++
++    print(f"Collection: {args.collection}  top_k={args.top_k}  max_results={args.max_results}")
++    print(f"Config A (baseline): RRF only, no gate")
++    print(f"Config B (gated):    RRF + cosine >= {args.threshold}")
++
++    rows_a = run_config(0.0, args.collection, args.top_k, args.max_results)
++    rows_b = run_config(args.threshold, args.collection, args.top_k, args.max_results)
++    sa, sb = summarize(rows_a), summarize(rows_b)
++
++    print("\nPer-query (A returned/relevant | B returned/relevant | query):")
++    by_q_b = {r["query"]: r for r in rows_b}
++    for ra in rows_a:
++        rb = by_q_b[ra["query"]]
++        print(f"  A {ra['returned']}/{ra['relevant']}  |  B {rb['returned']}/{rb['relevant']}  |  {ra['query']}")
++
++    _print_block("A  pure RRF baseline", sa)
++    _print_block("B  RRF + dense gate", sb)
++
++    print("\n--- verdict ---")
++    print(f"  precision delta (B - A): {round(sb['precision'] - sa['precision'], 3):+}")
++    print(f"  coverage delta  (B - A): {round(sb['coverage'] - sa['coverage'], 3):+}")
++    print(f"  B drops {sb['no_result_queries'] - sa['no_result_queries']:+} queries to 'no results' vs A")
++    print("  Higher precision + acceptable coverage loss favors the gate; large coverage")
++    print("  loss with little precision gain favors pure RRF. Decide from the table above.")
++    if sb["no_result_queries"] == sb["queries"]:
++        print("  [WARN] Config B returned nothing for EVERY query -- threshold too high or index stale.")
++
++
++if __name__ == "__main__":
++    main()

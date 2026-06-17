@@ -15,7 +15,9 @@ import os
 import json
 import logging
 import threading
+import hashlib
 from pathlib import Path
+from collections import OrderedDict
 from queue import Empty, Queue
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -75,11 +77,21 @@ if _TOOL_BIAS_JSON.is_file():
 
 TOOL_BIAS_START_TURN = int(os.getenv("SAULIE_TOOL_BIAS_START_TURN", "3"))
 TOOL_FORCE_TURN = int(os.getenv("SAULIE_TOOL_FORCE_TURN", "6"))
-TOOL_BIAS_PER_TURN = int(os.getenv("SAULIE_TOOL_BIAS_PER_TURN", "8"))
+# Absolute logit add per effective turn. Keep SMALL: +24/+32/+40 (PER_TURN=8) saturated the
+# softmax and silently forced. PER_TURN=2 -> +6/+8/+10 is a genuine probabilistic nudge.
+TOOL_BIAS_PER_TURN = int(os.getenv("SAULIE_TOOL_BIAS_PER_TURN", "2"))
 TOOL_PRESSURE_MOD = int(os.getenv("SAULIE_TOOL_PRESSURE_MOD", "0"))
 TOOL_FORCE_MODE = os.getenv("SAULIE_TOOL_FORCE_MODE", "off").strip().lower()
 TOOL_PRESSURE_ENABLED = os.getenv("SAULIE_TOOL_PRESSURE_ENABLED", "1") == "1"
 TOOL_PRESSURE_BACKEND = os.getenv("SAULIE_TOOL_PRESSURE_BACKEND", "processor").strip().lower()
+
+# Server-side tool-aware pressure reset. The stateless API strips tool messages from client
+# history (see sanitize_messages), so _pressure_turn cannot see the last search position
+# there. We map a conversation fingerprint (hash of user messages) -> the user-turn count at
+# which a search last fired, and reset the pressure counter on the next request. Bounded LRU
+# keeps it concurrency-safe without leaking memory.
+_PRESSURE_REGISTRY: "OrderedDict[str, int]" = OrderedDict()
+_PRESSURE_REGISTRY_MAX = int(os.getenv("SAULIE_TOOL_PRESSURE_REGISTRY_MAX", "512"))
 
 client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_BASE_URL, timeout=LLM_TIMEOUT)
 
@@ -379,17 +391,21 @@ def execute_search(tool_call, verbose=True, timing_out: dict | None = None):
         if timing_out is not None:
             timing_out.update(rag_timing)
         
-        print(f"\033[93m [RESULTS]\033[0m Found {len(results)} products\n")
+        total_hits = (
+            sum(len(b.get("results", [])) for b in results)
+            if isinstance(results, list) else 0
+        )
+        print(f"\033[93m [RESULTS]\033[0m Found {total_hits} products\n")
         # #region agent log
-        _debug_log("D", "agent_chat_api.py:execute_search", "search results", {"result_count": len(results)})
+        _debug_log("D", "agent_chat_api.py:execute_search", "search results", {"result_count": total_hits})
         # #endregion
         if verbose:
             print(f"\033[93m [RESULTS]\033[0m Results {results} \n")
         
-        if not results:
+        if not results or total_hits == 0:
             result_json = json.dumps({
                 "status": "no_results",
-                "message": f"No products found for '{query_input}'. Recommend a general alternative."
+                "message": f"No relevant products found for '{query_input}'. Recommend a general alternative."
             })
             return result_json, "no_results"
         
@@ -462,13 +478,46 @@ def _accumulate_tool_calls(tool_calls_accumulator, tool_calls_delta):
             tool_calls_accumulator[idx]["function"]["arguments"] += tool_piece.function.arguments
 
 
+def _user_fingerprint(user_contents) -> str:
+    """Stable, order-sensitive hash of the user-message contents."""
+    h = hashlib.sha1()
+    for c in user_contents:
+        h.update((c or "").encode("utf-8", "ignore"))
+        h.update(b"\x00")
+    return h.hexdigest()
+
+
+def _note_search_fired(history) -> None:
+    """Record that a search fired at the current user-turn count, keyed by the full
+    user-message fingerprint. The next request (one more user message) looks this up via its
+    prefix fingerprint and resets the pressure counter. Bounded LRU eviction."""
+    user_contents = [m.get("content") or "" for m in history if m.get("role") == "user"]
+    if not user_contents:
+        return
+    fp = _user_fingerprint(user_contents)
+    _PRESSURE_REGISTRY[fp] = len(user_contents)
+    _PRESSURE_REGISTRY.move_to_end(fp)
+    while len(_PRESSURE_REGISTRY) > _PRESSURE_REGISTRY_MAX:
+        _PRESSURE_REGISTRY.popitem(last=False)
+
+
 def _pressure_turn(history) -> int:
-    """User messages since the last tool result (1-indexed episode counter)."""
-    last_tool_idx = -1
-    for i, m in enumerate(history):
-        if m.get("role") == "tool":
-            last_tool_idx = i
-    return sum(1 for m in history[last_tool_idx + 1 :] if m.get("role") == "user")
+    """User turns since the last search (episode counter).
+
+    The stateless API strips tool messages from client history, so we cannot read the last
+    search position from `history`. Instead we look up a server-side registry keyed by the
+    fingerprint of all user messages EXCEPT the latest -- which equals the fingerprint stored
+    when the previous request's search fired. Falls back to the full user count when no search
+    has fired yet (new conversation)."""
+    user_contents = [m.get("content") or "" for m in history if m.get("role") == "user"]
+    total = len(user_contents)
+    if total == 0:
+        return 0
+    prefix_fp = _user_fingerprint(user_contents[:-1])
+    last_search_turn = _PRESSURE_REGISTRY.get(prefix_fp)
+    if last_search_turn is None:
+        return total
+    return max(1, total - last_search_turn)
 
 
 def _effective_pressure_turn(pressure_turn: int) -> int:
@@ -778,6 +827,7 @@ def agent_loop(
         # 3) Tool execution path
         if final_tool_calls and current_cycle < max_tool_cycles:
             current_cycle += 1
+            _note_search_fired(history)
             # #region agent log
             _debug_log("C", "agent_chat_api.py:agent_loop", "executing tools", {"current_cycle": current_cycle, "tool_count": len(final_tool_calls), "max_tool_cycles": max_tool_cycles})
             # #endregion
@@ -1001,6 +1051,7 @@ def _stream_agent_sse_inner(
         # Tool execution path
         if final_tool_calls and current_cycle < max_tool_cycles:
             current_cycle += 1
+            _note_search_fired(history)
             # #region agent log
             _debug_log("E", "agent_chat_api.py:stream_agent_sse", "executing tools", {"current_cycle": current_cycle, "tool_count": len(final_tool_calls)})
             # #endregion
