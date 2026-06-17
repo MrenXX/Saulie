@@ -1,15 +1,78 @@
-# Saulie
+# Saulie — `fix/tool-pressure-reset-and-rag-gate`
 
-Shopping-agent project: **DPO steering training**, **behavioral eval**, **production deployment**, and **hybrid RAG** over Amazon product catalogs. Model stack: **Qwen3-4B-Instruct FP8** + SFT/DPO LoRA adapters; retrieval: **BGE-M3** (TensorRT) + **Qdrant**.
+Branch focus: make tool-call **pressure** smarter than a binary `tool_choice` (tool-aware reset + a real nudge), add a **dense-cosine RAG relevance gate** on top of RRF, and harden the eval. Model stack: **Qwen3-4B-Instruct FP8** + SFT/DPO LoRA; retrieval: **BGE-M3** (TensorRT) + **Qdrant**.
 
-This is the **`main`** branch — it contains the full codebase. Branch-specific landing pages (same repo, different focus):
+> **Branch landing page.** Repo convention: each branch keeps its own root README focused on its area (see *Branch workflow* at the bottom). The full codebase index lives on the [`main` README](https://github.com/MrenXX/Saulie/blob/main/README.md).
 
 | Branch | Focus | Start here |
 |--------|-------|------------|
-| **`main`** (this) | Everything | this file |
+| [`main`](https://github.com/MrenXX/Saulie/blob/main/README.md) | Full codebase index | `main` README |
+| **`fix/tool-pressure-reset-and-rag-gate`** (this) | Tool-pressure reset + dense-cosine RAG gate + eval hardening | [`RETRIEVAL_AND_TOOL_PRESSURE_HANDOFF.md`](RETRIEVAL_AND_TOOL_PRESSURE_HANDOFF.md) |
 | [`deployment`](https://github.com/MrenXX/Saulie/tree/deployment) | Production serving (vLLM + agent + nginx + ngrok) | [`README.md` on `deployment`](https://github.com/MrenXX/Saulie/blob/deployment/README.md) |
 | [`dpo_eval`](https://github.com/MrenXX/Saulie/tree/dpo_eval) | v1.5 merge gate, vLLM eval, judge workflow, matrix A/B | [`README.md` on `dpo_eval`](https://github.com/MrenXX/Saulie/blob/dpo_eval/README.md) |
 | [`rag`](https://github.com/MrenXX/Saulie/tree/rag) | Product search pipeline, benchmarks, catalog prep | [`rag/README.md`](rag/README.md) |
+
+---
+
+## What this branch changes
+
+**Start here:** [`RETRIEVAL_AND_TOOL_PRESSURE_HANDOFF.md`](RETRIEVAL_AND_TOOL_PRESSURE_HANDOFF.md) — full rationale, exact diffs (Appendix A), and the staged runbook.
+
+| # | Workstream | Why | Key files |
+|---|-----------|-----|-----------|
+| 1 | **Tool-aware pressure reset** | The old cross-turn counter couldn't see past searches (the stateless API strips tool messages), so it force-called the tool on every late turn — "thanks man" on turn 6 → forced search. A fingerprint→last-search registry resets pressure after a real search. | [`agent_chat_api.py`](agent_chat_api.py) |
+| 2 | **Real nudge, not silent force** | `SAULIE_TOOL_BIAS_PER_TURN` default 8 → 2: +24/+32/+40 saturated the softmax (always forced); +6/+8/+10 is a genuine probabilistic nudge. Force at turn 6 stays the hard guarantee. | [`agent_chat_api.py`](agent_chat_api.py), [`.env.example`](.env.example) |
+| 3 | **Dense-cosine RAG relevance gate** | RRF (Qdrant k=2) is rank-based: the top hit is ~always ≥0.5 even for junk, so it can't gate. RRF still *ranks*; dense cosine *gates*. Toggleable via `SAULIE_RAG_MIN_COSINE` (≤0 = pure-RRF baseline). | [`rag/query2.py`](rag/query2.py) |
+| 4 | **Eval hardening** | Dependency preflight (no more silently-empty smoke runs), monotonic timing, per-turn `results_count` + an all-empty hard-fail. | [`dpo/eval/model_prompt_matrix_eval.py`](dpo/eval/model_prompt_matrix_eval.py) |
+
+---
+
+## Apply it (no network needed)
+
+This branch was authored on a machine whose proxy/DLP blocks `git push`. Move it to the GPU/dev box with the **git bundle**, or apply the patch / Appendix A.
+
+```bash
+# on the dev machine, inside the repo:
+git fetch origin
+git bundle verify saulie_tool_pressure.bundle
+git fetch saulie_tool_pressure.bundle fix/tool-pressure-reset-and-rag-gate:fix/tool-pressure-reset-and-rag-gate
+git checkout fix/tool-pressure-reset-and-rag-gate
+```
+
+No bundle? Apply [`saulie_tool_pressure_rag.patch`](saulie_tool_pressure_rag.patch) with `git apply`, or follow Appendix A in the handoff by hand.
+
+---
+
+## New / changed config (`.env`)
+
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `SAULIE_TOOL_BIAS_PER_TURN` | `2` | Logit add per turn (was 8). Drop to 1 if turn 3 still always searches. |
+| `SAULIE_TOOL_PRESSURE_REGISTRY_MAX` | `512` | LRU size for the tool-aware reset registry. |
+| `SAULIE_RAG_MIN_COSINE` | `0.5` | Dense-cosine gate. `>0` on; `≤0` off (pure-RRF baseline). |
+| `SAULIE_RAG_MAX_RESULTS` | `5` | Max products returned. |
+
+---
+
+## New scripts
+
+| Script | Purpose |
+|--------|---------|
+| [`rag/calibrate_cosine_threshold.py`](rag/calibrate_cosine_threshold.py) | Calibrate `SAULIE_RAG_MIN_COSINE` on the 18-query labeled benchmark. |
+| [`rag/retrieval_ab_eval.py`](rag/retrieval_ab_eval.py) | A/B: pure RRF vs RRF+gate (decide whether the gate actually helps). |
+| [`dpo/eval/nudge_rate_probe.py`](dpo/eval/nudge_rate_probe.py) | N-sample tool-emit rate — proves nudge (0<rate<1) vs force (100%). |
+
+---
+
+## Validate
+
+The staged runbook (deps → calibrate → A/B → deploy → pressure-only → nudge probe → +gate) is in [`RETRIEVAL_AND_TOOL_PRESSURE_HANDOFF.md`](RETRIEVAL_AND_TOOL_PRESSURE_HANDOFF.md) §5. Run the stages separately for clean attribution.
+
+---
+
+## Full codebase reference
+
+The sections below are the general project index (same as `main`), kept for navigation while working on this branch.
 
 ---
 
