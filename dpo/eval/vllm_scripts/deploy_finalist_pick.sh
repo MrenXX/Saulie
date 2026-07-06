@@ -24,7 +24,7 @@ CONTAINER_LORA_PATH="/models/lora/dpo-v15-trial-4"
 MODEL_NAME="dpo-v15-trial-4"
 MAX_LORA_RANK=32
 GPU_DEVICE="0"
-PORT="8000"
+PORT="${VLLM_PORT:-8000}"
 # WSL2/Docker Desktop may reject 127.0.0.1:PORT binds; set VLLM_BIND=0.0.0.0 in .env
 VLLM_BIND="${VLLM_BIND:-127.0.0.1}"
 if [[ "$VLLM_BIND" == "0.0.0.0" || "$VLLM_BIND" == "all" ]]; then
