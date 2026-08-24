@@ -39,3 +39,24 @@ __pycache__/
 dpo/dataset/DPO_522_prompt_a_and_prompt_b_V2.jsonl
 dpo/dataset/DPO_192_PROMPT_B_SFT_MODEL_OUTPUT_V2.jsonl
 dpo/dataset/dpo_330_prompt_a_V2.jsonl
+
+# Local planning/handoff notes (do not publish)
+SKILL.md
+handoff_skill.md
+SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md
+MODEL_PROMPT_MATRIX_COMPARISON.md
+dpo/DPO_HANDOFF.md
+dpo/PLAN_FINAL.md
+dpo/train/HANDOFF.md
+dpo/train/DPO_V1_1_OPTUNA_STUDY_PLAN.md
+dpo/train/DPO_V1_5_HYBRID_20_TRIAL_PLAN.md
+dpo/train/PARALLEL_OPTUNA_OOM_RETRY_PLAN.md
+dpo/eval/DPO_FINAL_EVAL_EXECUTION_PLAN.md
+dpo/eval/DPO_POLICY_RESCUE_PLAN.md
+dpo/eval/MERGE_SCRIPT_VALIDATION_FIX_PLAN.md
+dpo/eval/OLD_DPO_FINAL_EVAL_PLAN.md
+dpo/eval/PLAN_A_V12_CHAT_AGENT_HANDOFF.md
+dpo/eval/RUN_PLAN_A_V12.md
+dpo/eval/RUN_PLAN_B_V13.md
+dpo/eval/plan_a_existing_trials_and_final_stack_retrains.md
+dpo/eval/plan_b_sft_baked_base.md

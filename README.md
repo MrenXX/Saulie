@@ -111,9 +111,7 @@ Post-training **behavioral gate** before deploy: cat-merge validation, vLLM FP8 
 | vLLM deploy | `dpo/eval/vllm_scripts/deploy_qwenie_eval.sh` |
 | Round 1 gen | `python dpo/eval/run_v15_final_eval.py --round 1` |
 | Matrix A/B | `bash dpo/eval/run_model_prompt_matrix.sh` |
-| Results | [`MODEL_PROMPT_MATRIX_COMPARISON.md`](MODEL_PROMPT_MATRIX_COMPARISON.md) |
 
-Full protocol: [`dpo/eval/DPO_FINAL_EVAL_EXECUTION_PLAN.md`](dpo/eval/DPO_FINAL_EVAL_EXECUTION_PLAN.md)  
 Branch landing page: [`dpo_eval` README](https://github.com/MrenXX/Saulie/blob/dpo_eval/README.md).
 
 ---
