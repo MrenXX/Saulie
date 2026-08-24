@@ -13,9 +13,7 @@ This is the **`main`** branch — it contains the full codebase. Branch-specific
 
 ---
 
-## Reproducible setup
-
-First-time machine setup:
+## Setup
 
 ```bash
 cp .env.example .env          # edit secrets/paths
@@ -60,7 +58,6 @@ saulie/
 ├── remote_chat.py                 # Remote CLI client
 ├── start_saulie.sh / stop_saulie.sh
 ├── nginx/                         # Reverse proxy (Bearer auth, SSE)
-├── SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md
 │
 ├── rag/                           # Hybrid product search (BGE-M3 + Qdrant, code + data)
 │   ├── README.md                  # ← full RAG docs
@@ -94,13 +91,13 @@ Steering SFT + DPO over multi-turn shopping conversations (Qwen + LoRA, Optuna h
 
 ```bash
 python -m dpo.train.study_report \
-  --summary dpo/results/optuna-run-20260523-041252/trial_summary.json
-# HTML: dpo/results/optuna-run-20260523-041252/study_report.html
+  --summary dpo/results/<optuna-run-id>/trial_summary.json
+# HTML: dpo/results/<optuna-run-id>/study_report.html
 ```
 
 **Requirements:** GPU, SFT adapter, `requirements.txt` (or `conda env create -f environment.yml`).
 
-Key docs: `dpo/PLAN_FINAL.md`, `dpo/dataset/DATA_CONTEXT.md`, `dpo/train/HANDOFF.md`.
+Key docs: `dpo/dataset/DATA_CONTEXT.md`.
 
 ---
 
@@ -136,7 +133,6 @@ remote_chat.py → ngrok → nginx :8080 → agent_chat_api.py :9000
 | Deploy vLLM | `bash dpo/eval/vllm_scripts/deploy_finalist_pick.sh` |
 | System prompts | `SAULIE_PROMPT=legacy\|steering\|compressed` (default `compressed`) |
 | **Token streaming** | `stream: true` → real vLLM tokens over SSE; tool JSON buffered server-side ([`AGENT_STREAMING.md`](AGENT_STREAMING.md)) |
-| Persona fixes | [`SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md`](SAULIE_PERSONA_AND_STEERING_FIX_PLAN.md) |
 
 Branch landing page: [`deployment` README](https://github.com/MrenXX/Saulie/blob/deployment/README.md).
 
@@ -175,15 +171,7 @@ Full pipeline docs: [`rag/README.md`](rag/README.md).
 | `SAULIE_PROMPT` | `compressed` | Deployment |
 | `QDRANT_COLLECTION` | `amazon_products_v2` | RAG |
 | `FUSION_METHOD` | `rrf` | RAG |
-| `VLLM_API_KEY` | `dipshit` (in `.env`) | vLLM (agent → vLLM) |
+| `VLLM_API_KEY` | set in `.env` | vLLM (agent → vLLM) |
 | `NGINX_API_KEY` | `secret` (in `.env`) | Public API via nginx Bearer |
 
 Security details: [`SECURITY.md`](SECURITY.md). Agent listens on `127.0.0.1` only; `/health` is not exposed via nginx.
-
----
-
-## Branch workflow (avoid README merge fights)
-
-Each feature branch keeps its **own root README** focused on that area. **`main`** uses this index README. When merging branches, resolve `README.md` conflicts by keeping **`main`'s index** (this file) on `main`, and the branch-specific README on that branch.
-
-Do **not** merge `deployment` ↔ `dpo_eval` directly expecting clean README merges — they intentionally differ.
