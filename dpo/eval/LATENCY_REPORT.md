@@ -1,12 +1,14 @@
 # Saulie Latency Report
 
+Archived small-sample local benchmark. See [evaluation conditions and limits](../../docs/evaluation.md) before treating these measurements as deployment guarantees. This report covers the non-streaming agent path.
+
 Generated: 2026-06-11T01:18:28.718338
 
 ## Source runs
 
-- vLLM: `/root/saulie/dpo/eval/latency_runs/vllm_latency_20260611_011819.json`
-- RAG: `/root/saulie/dpo/eval/latency_runs/rag_latency_20260611_011818.json`
-- E2E: `/root/saulie/dpo/eval/latency_runs/prod_e2e_latency_20260611_011825.json`
+- [vLLM run](latency_runs/vllm_latency_20260611_011819.json)
+- [RAG run](latency_runs/rag_latency_20260611_011818.json)
+- [E2E run](latency_runs/prod_e2e_latency_20260611_011825.json)
 
 ## SLO pass/fail
 

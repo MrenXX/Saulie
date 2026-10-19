@@ -1,1 +1,1 @@
-../dataset/DATA_CONTEXT.md
+[DPO dataset contract](../dataset/DATA_CONTEXT.md)

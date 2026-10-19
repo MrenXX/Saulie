@@ -1,0 +1,507 @@
+{
+  "audited_on": "2026-10-19",
+  "historical_sft_logged_hash_prefix": "ced5b49dd3d0",
+  "historical_sft_exact_bytes_recovered": false,
+  "historical_sft_split_sizes": {
+    "train": 400,
+    "validation": 50,
+    "test": 50
+  },
+  "current_sft_opening_types": {
+    "B": 131,
+    "C": 89,
+    "D": 94,
+    "A": 186
+  },
+  "datasets": [
+    {
+      "sha256": "f24dd4f57852f98dec556a0293dff331f5f73d8853c119b71fd752f9b3492a79",
+      "rows": 60,
+      "unique_rows": 60,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 60,
+        "messages": 60,
+        "metadata": 60
+      },
+      "source": "windows/saulgman_sft/claude opus 41.jsonl"
+    },
+    {
+      "sha256": "70b57ad738574d25dbea27cbbe0b7db0738b36f9c300e70c2862cda6221f8ee8",
+      "rows": 10,
+      "unique_rows": 10,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 10,
+        "messages": 10,
+        "metadata": 10
+      },
+      "source": "windows/saulgman_sft/claude sonnet 45.jsonl"
+    },
+    {
+      "sha256": "c7ca86f64a2082df62c656135c367e4e62c2570f869fa97923503100616976ee",
+      "rows": 60,
+      "unique_rows": 60,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 60,
+        "messages": 60,
+        "metadata": 60
+      },
+      "source": "windows/saulgman_sft/dpskr1.jsonl"
+    },
+    {
+      "sha256": "e4cd0fb9fbef4212fbe65aa3680d4e17ed89725f7b25c1a064aa393675a66992",
+      "rows": 512,
+      "unique_rows": 512,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 512,
+        "messages": 512,
+        "metadata": 512
+      },
+      "source": "windows/saulgman_sft/fixed_dataset_512.jsonl"
+    },
+    {
+      "sha256": "2f64334f90ba6431f8af6961d7a1a9acfdbe9b8a4aef8ec5287eff8154569494",
+      "rows": 230,
+      "unique_rows": 230,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 230,
+        "messages": 230,
+        "metadata": 230
+      },
+      "source": "windows/saulgman_sft/gem25pro.jsonl"
+    },
+    {
+      "sha256": "06fedb2ac3f3f0b4d743d27245ccaa25027c3d5a83acbe0e005b7beaf2e4f2f8",
+      "rows": 100,
+      "unique_rows": 100,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 100,
+        "messages": 100,
+        "metadata": 100
+      },
+      "source": "windows/saulgman_sft/gpt5think.jsonl"
+    },
+    {
+      "sha256": "052a2189ae3de90363c2008beb1b1f3a995cf7bb298f363ea993637cf6a5c5c1",
+      "rows": 110,
+      "unique_rows": 110,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 110,
+        "messages": 110,
+        "metadata": 110
+      },
+      "source": "windows/saulgman_sft/grok4.jsonl"
+    },
+    {
+      "sha256": "bf13846260c1f7c93039a3130995e1a7c1fc6a5020ced84686ae64d357bc3d10",
+      "rows": 570,
+      "unique_rows": 570,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 570,
+        "messages": 570,
+        "metadata": 570
+      },
+      "source": "windows/saulgman_sft/merged_data_v1.1_570exps.jsonl"
+    },
+    {
+      "sha256": "6d25ad457cfe0a36fc659b9b5511ef83707f658a1f4a207e100a42b609aa41f2",
+      "rows": 559,
+      "unique_rows": 559,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 559,
+        "messages": 559,
+        "metadata": 559
+      },
+      "source": "windows/saulgman_sft/merged_data_v1_560exps.jsonl"
+    },
+    {
+      "sha256": "078b3196041f8d788e2713f118f77ffcd7d516e3db96592236170a7f80c6fb2d",
+      "rows": 95,
+      "unique_rows": 95,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 95,
+        "messages": 95,
+        "metadata": 95
+      },
+      "source": "windows/DATA/claude46think_COMBINED_FINAL.jsonl"
+    },
+    {
+      "sha256": "91b0852cc7e1d306bed861b87f1401eb637347f2eb1a6cc8de9d7ef2bd857397",
+      "rows": 75,
+      "unique_rows": 75,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 75,
+        "messages": 75,
+        "metadata": 75
+      },
+      "source": "windows/DATA/claude46think_FIX.jsonl"
+    },
+    {
+      "sha256": "c5889191b80654e0a2b833db141ee2743d74289c8383cc022909297acd80ef34",
+      "rows": 31,
+      "unique_rows": 31,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 31,
+        "messages": 31,
+        "metadata": 31
+      },
+      "source": "windows/DATA/claude46think_scrapped.jsonl"
+    },
+    {
+      "sha256": "2ef3b9e97fb386f12d60abffade0824b68a8aa9c4d061f6a760f413e3b277841",
+      "rows": 95,
+      "unique_rows": 95,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 95,
+        "messages": 95,
+        "metadata": 95
+      },
+      "source": "windows/DATA/data_claude46think_numbers_fixed.jsonl"
+    },
+    {
+      "sha256": "fbfc31a8f40eced2017f965bcffb698e5803520b64cab55bada630a5713c7e2e",
+      "rows": 100,
+      "unique_rows": 100,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 100,
+        "messages": 100,
+        "metadata": 100
+      },
+      "source": "windows/DATA/data_CLD-OPUS-46-V2.jsonl"
+    },
+    {
+      "sha256": "0238a9630cd9607d6195746ecb2c10728febb0d37aa026bce20afd3149961af1",
+      "rows": 34,
+      "unique_rows": 34,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 34,
+        "messages": 34,
+        "metadata": 34
+      },
+      "source": "windows/DATA/data_GEM-PRO-31-V2.jsonl"
+    },
+    {
+      "sha256": "25a59314be4183ea8e59bfd5a2dceb887dd3bec5b6d75b13845dbc2a7224ffa9",
+      "rows": 83,
+      "unique_rows": 83,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 83,
+        "messages": 83,
+        "metadata": 83
+      },
+      "source": "windows/DATA/data_gem31pro_numbers_fixed.jsonl"
+    },
+    {
+      "sha256": "b065d1361a4f2fd5c4b9d4a623388855afa5e61f6e98095ae62eed49f573933c",
+      "rows": 188,
+      "unique_rows": 188,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 188,
+        "messages": 188,
+        "metadata": 188
+      },
+      "source": "windows/DATA/data_orginal_570_exp_fix_v3.jsonl"
+    },
+    {
+      "sha256": "f72807ae0eeec66db730d05d4333500fbe0b2b6b61e0af2409c86917f7a95d1d",
+      "rows": 13,
+      "unique_rows": 13,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 13,
+        "messages": 13,
+        "metadata": 13
+      },
+      "source": "windows/DATA/FIX_FOR_GEMINI.jsonl"
+    },
+    {
+      "sha256": "ad3658f67aa64f98f9b0e3df4c74db8a5a1aa27e210d148405fcd1140374c9c2",
+      "rows": 83,
+      "unique_rows": 83,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 83,
+        "messages": 83,
+        "metadata": 83
+      },
+      "source": "windows/DATA/gem31pro_FIX_FINAL.jsonl"
+    },
+    {
+      "sha256": "64bae79b98faa040b7055c36919f9123effa51fefa6d7449945530430c1e0601",
+      "rows": 34,
+      "unique_rows": 34,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 34,
+        "messages": 34,
+        "metadata": 34
+      },
+      "source": "windows/DATA/GEMINI-3.1-V2.jsonl"
+    },
+    {
+      "sha256": "516c681ab3bbf37617a9acbc3881ac8cde847b8bb22c5de6af1c362f4abd2dd7",
+      "rows": 34,
+      "unique_rows": 34,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 34,
+        "messages": 34,
+        "metadata": 34
+      },
+      "source": "windows/DATA/name_whatever.jsonl"
+    },
+    {
+      "sha256": "eeda6c71150e9ba17650900a55dbd7a8f8d4c45c17e695168490d1628e5e6fb5",
+      "rows": 192,
+      "unique_rows": 192,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 192,
+        "messages": 192,
+        "metadata": 192
+      },
+      "source": "windows/DATA/orginal_570_exp_fix_v1.jsonl"
+    },
+    {
+      "sha256": "0033755701b5d737a06660c53ddb0984d58f2dd798d23b6e0ae7d236740a5ff2",
+      "rows": 192,
+      "unique_rows": 192,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 192,
+        "messages": 192,
+        "metadata": 192
+      },
+      "source": "windows/DATA/orginal_570_exp_fix_v2.jsonl"
+    },
+    {
+      "sha256": "b065d1361a4f2fd5c4b9d4a623388855afa5e61f6e98095ae62eed49f573933c",
+      "rows": 188,
+      "unique_rows": 188,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 188,
+        "messages": 188,
+        "metadata": 188
+      },
+      "source": "windows/DATA/orginal_570_exp_fix_v3.jsonl"
+    },
+    {
+      "sha256": "09fbfec940e57a5183c5249897617a2acc85eb56ed10c7fffa5d5d116c4f1ea0",
+      "rows": 366,
+      "unique_rows": 366,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 366,
+        "messages": 366,
+        "metadata": 366
+      },
+      "source": "windows/DATA/SFT_DATA_V1.jsonl"
+    },
+    {
+      "sha256": "5cf4b59acc385efc52c1cb8f3a7d8369478414d0611308edbe74617dd95e96c2",
+      "rows": 500,
+      "unique_rows": 500,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 500,
+        "messages": 500,
+        "metadata": 500
+      },
+      "source": "windows/DATA/SFT_DATA_V2.jsonl"
+    },
+    {
+      "sha256": "f3fde6c19adeb51f00ca306fba5bfa9f5da60a7bcbe0db6f39e619747326877b",
+      "rows": 330,
+      "unique_rows": 330,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 330,
+        "category": 330,
+        "opening_type": 330,
+        "total_turns": 330,
+        "divergence_turn": 330,
+        "prompt": 330,
+        "chosen": 330,
+        "rejected": 330
+      },
+      "category": {
+        "style": 111,
+        "steering": 110,
+        "product_fit": 109
+      },
+      "branch_local_user_rows": 110,
+      "source": "windows/DATA/DPO/DPO_PART_A/dpo_330_prompt_a_V2.jsonl"
+    },
+    {
+      "sha256": "5d6f7c4ead48000b0c9d1b907d03ad65af318fbcf947f13fe65719dba731c3c1",
+      "rows": 92,
+      "unique_rows": 92,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 92,
+        "source_skeleton": 92,
+        "source_model": 92,
+        "opening_type": 92,
+        "category": 92,
+        "flaw_description": 92,
+        "divergence_turn": 92,
+        "total_turns": 92,
+        "prompt": 92,
+        "chosen": 92,
+        "rejected": 92
+      },
+      "category": {
+        "style": 89,
+        "product_fit": 2,
+        "steering": 1
+      },
+      "branch_local_user_rows": 79,
+      "source": "windows/DATA/DPO/DPO_PART_B/final/DPO2_pairs_repaired.jsonl"
+    },
+    {
+      "sha256": "958f1a0131d2b1de9dcd0fdea64d134725383decf8199714373ad5f66748f8c3",
+      "rows": 500,
+      "unique_rows": 500,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 500,
+        "messages": 500,
+        "metadata": 500
+      },
+      "source": "wsl/saulie/sft/SFT_DATA_V3.jsonl"
+    },
+    {
+      "sha256": "f3b9ade4dc53446e76be8d11e1ed88b6a529564326e63a0c9ba788ed5ef0247b",
+      "rows": 522,
+      "unique_rows": 522,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 522,
+        "category": 522,
+        "opening_type": 522,
+        "total_turns": 522,
+        "divergence_turn": 522,
+        "prompt": 522,
+        "chosen": 522,
+        "rejected": 522,
+        "dpo_source": 522,
+        "source_skeleton": 192,
+        "source_model": 192,
+        "flaw_description": 192,
+        "review_rationale": 26
+      },
+      "category": {
+        "style": 220,
+        "steering": 121,
+        "product_fit": 181
+      },
+      "dpo_source": {
+        "prompt_a": 330,
+        "prompt_b_repaired": 92,
+        "prompt_b_exp500": 100
+      },
+      "branch_local_user_rows": 209,
+      "source": "wsl/saulie/dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl"
+    },
+    {
+      "sha256": "75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d",
+      "rows": 522,
+      "unique_rows": 522,
+      "invalid_lines": [],
+      "schema_keys": {
+        "id": 522,
+        "split": 522,
+        "split_seed": 522,
+        "dpo_source": 522,
+        "source_family": 522,
+        "category": 522,
+        "opening_type": 522,
+        "total_turns": 522,
+        "divergence_turn": 522,
+        "has_branch_local_user": 522,
+        "stratum_key": 522
+      },
+      "category": {
+        "style": 220,
+        "steering": 121,
+        "product_fit": 181
+      },
+      "dpo_source": {
+        "prompt_a": 330,
+        "prompt_b_repaired": 92,
+        "prompt_b_exp500": 100
+      },
+      "split": {
+        "train": 418,
+        "val": 52,
+        "test": 52
+      },
+      "branch_local_user_rows": 0,
+      "source": "wsl/saulie/dpo/train/dataset/dpo_v4_split_seed_42.jsonl"
+    }
+  ],
+  "current_sft_normalized_row_overlaps": [
+    {
+      "source": "windows/DATA/data_claude46think_numbers_fixed.jsonl",
+      "rows": 95
+    },
+    {
+      "source": "windows/DATA/data_CLD-OPUS-46-V2.jsonl",
+      "rows": 100
+    },
+    {
+      "source": "windows/DATA/data_gem31pro_numbers_fixed.jsonl",
+      "rows": 79
+    },
+    {
+      "source": "windows/DATA/data_orginal_570_exp_fix_v3.jsonl",
+      "rows": 105
+    },
+    {
+      "source": "windows/DATA/GEMINI-3.1-V2.jsonl",
+      "rows": 34
+    },
+    {
+      "source": "windows/DATA/name_whatever.jsonl",
+      "rows": 21
+    },
+    {
+      "source": "windows/DATA/orginal_570_exp_fix_v1.jsonl",
+      "rows": 44
+    },
+    {
+      "source": "windows/DATA/orginal_570_exp_fix_v2.jsonl",
+      "rows": 69
+    },
+    {
+      "source": "windows/DATA/orginal_570_exp_fix_v3.jsonl",
+      "rows": 105
+    },
+    {
+      "source": "windows/DATA/SFT_DATA_V1.jsonl",
+      "rows": 279
+    },
+    {
+      "source": "windows/DATA/SFT_DATA_V2.jsonl",
+      "rows": 379
+    }
+  ],
+  "overlap_method": "Exact equality of full parsed JSON rows after sorting object keys. Overlap does not establish that a file was used in a run."
+}

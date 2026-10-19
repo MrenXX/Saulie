@@ -1,5 +1,7 @@
 # Train-setup semantic review (10 skeletons × 3 trials × 6 weights)
 
+Historical diagnostic for early DPO candidates. The current deployment choice is documented in the [DPO guide](../README.md). Recommendations below describe this earlier experiment.
+
 **Setup:** HF BnB `Qwen3-4B-Instruct-2507` + frozen SFT (`default`) + DPO (`dpo`) + `set_adapter(["default","dpo"])` + runtime `dpo_weight` scaling. **Not** merged cat LoRAs.
 
 **Data:** `dpo/eval/train_setup_grid_10skel.jsonl` (180 lines)  

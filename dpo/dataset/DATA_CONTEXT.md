@@ -1,90 +1,28 @@
-# DPO V4 Data Context
+# DPO dataset contract
 
-This port bundle is for implementing DPO training on the accepted V4 dataset only. The source of truth for implementation decisions is `PLAN_FINAL.md`.
+The active input is [`DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl`](DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl). [`dpo/train/paths.py`](../train/paths.py) defines this file as the training source. Older V2 metadata is historical provenance.
 
-## Current Training Dataset
+The file has 522 unique IDs: 330 `prompt_a`, 92 `prompt_b_repaired`, and 100 `prompt_b_exp500`. Categories are 220 style, 121 steering, and 181 product fit.
 
-Use `DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl`.
+## Schema and scoring
 
-Validated companion files:
+Rows contain `id`, `category`, `opening_type`, `total_turns`, `divergence_turn`, `prompt`, `chosen`, `rejected`, and `dpo_source`. Each message has a role and content.
 
-- `DPO_522_prompt_a_and_prompt_b_V4_validation_report.json`
-- `DPO_522_prompt_a_and_prompt_b_V4_repair_manifest.jsonl`
+The prompt and both continuations remain visible as conversational context. Only assistant tokens contribute to the preference score. Branch-local user text must remain unscored. There are 209 rows with a user message in a continuation.
 
-Validated counts from the V4 report:
+The [data builder](../train/dpo_data.py) supplies stable splits and assistant-only masks. It rejects trajectories beyond the configured length limit instead of silently truncating them. The [compatibility trainer](../train/dpo_trainer_compat.py) carries those masks into TRL.
 
-| Field | Counts |
-|---|---:|
-| Total rows | 522 |
-| `prompt_a` | 330 |
-| `prompt_b_repaired` | 92 |
-| `prompt_b_exp500` | 100 |
-| `style` | 220 |
-| `steering` | 121 |
-| `product_fit` | 181 |
+## Validation and splits
 
-V4 validation passes. No data repair work remains unless implementation discovers a hard structural blocker, such as invalid roles, duplicate IDs, empty assistant branches, impossible tokenization, or schema drift from the validation report.
+- [Validation report](DPO_522_prompt_a_and_prompt_b_V4_validation_report.json).
+- [Repair manifest](DPO_522_prompt_a_and_prompt_b_V4_repair_manifest.jsonl).
+- [Repair utility](repair_dpo_522_v4.py).
+- [Seed-42 split manifest](../train/dataset/dpo_v4_split_seed_42.jsonl), with 418 training, 52 validation, and 52 test rows.
 
-## Schema
+The V4 data hash prefix is `f3b9ade4dc53`. The split manifest SHA-256 is `75d154f4c40d34efc8be6205009671290cf913c9b0b1b564880dcc835ee71b9d`. These match the saved final study.
 
-Each JSONL row is a preference example with at least:
+## Authoring and provenance
 
-- `id`
-- `category`
-- `opening_type`
-- `total_turns`
-- `divergence_turn`
-- `prompt`
-- `chosen`
-- `rejected`
-- `dpo_source`
+[Prompt A](DPO_PROMPT_A_OG.md) defines the synthetic-pair specification. [Prompt B](DPO_PROMPT_B.md) defines SFT-output-based pairs. The [full data guide](../../docs/data.md) explains generation, repairs, and source counts.
 
-`prompt`, `chosen`, and `rejected` are chat message lists with `role` and `content` fields. Some chosen/rejected continuations contain branch-local user messages. These user messages are context only and must never be scored as model tokens.
-
-## Training Objective
-
-Train branch-safe DPO over full chosen/rejected trajectories:
-
-- Keep full branch trajectories visible to attention.
-- Score only assistant/action tokens.
-- Never score user-role text inside chosen/rejected continuations.
-- Do not implement alternate branch-ablation training paths.
-
-## Split Requirements
-
-Use deterministic 80/10/10 train/validation/test splits by stable row ID.
-
-Primary stratification:
-
-- raw `dpo_source`: `prompt_a`, `prompt_b_repaired`, `prompt_b_exp500`
-- `category`: `style`, `steering`, `product_fit`
-
-Secondary stratification:
-
-- `opening_type` inside each `(dpo_source, category)` bucket when cell sizes allow
-
-Write a split manifest such as `dpo/train/dataset/dpo_v4_split_seed_<seed>.jsonl` with `id`, `split`, `split_seed`, `dpo_source`, `source_family`, `category`, `opening_type`, `total_turns`, `divergence_turn`, `has_branch_local_user`, final stratum key, and allocation reason.
-
-## Port Bundle Contents
-
-Required files in this folder:
-
-- `PLAN_FINAL.md`
-- `DATA_CONTEXT.md`
-- `DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl`
-- `DPO_522_prompt_a_and_prompt_b_V4_validation_report.json`
-- `DPO_522_prompt_a_and_prompt_b_V4_repair_manifest.jsonl`
-- `DPO_PROMPT_A_OG.md`
-- `DPO_PROMPT_B.md`
-
-Do not use older planning or provenance files as implementation guidance. In particular, do not port old handoff plans, old training-stack plans, or old repair-audit handoffs into the implementation workspace.
-
-## Model Assets Needed Separately
-
-The port bundle does not include model weights or adapters. The implementation machine needs:
-
-- `Qwen3-4B-Instruct-2507`
-- `Qwen3-4B-Instruct-2507-FP8`
-- `sft/models/steering-sft-v1.1/trial-17/best_adapter/`
-
-The SFT adapter is the frozen reference behavior and must not be overwritten.
+Training needs external Qwen checkpoints and the frozen SFT trial-17 adapter. No weights are included in this dataset directory. See [SFT](../../sft/README.md), [DPO](../README.md), and [reproducibility](../../REPRODUCIBILITY.md).

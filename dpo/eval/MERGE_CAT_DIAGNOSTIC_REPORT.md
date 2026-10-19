@@ -71,7 +71,7 @@
 model.base_model.set_adapter(["default", "dpo"])
 ```
 
-**vLLM constraint** (`dpo/DPO_HANDOFF.md`): one LoRA per request; cannot stack `default` + `dpo` in a single vLLM forward.
+**vLLM constraint**: the serving path uses one combined LoRA per request. See the [DPO guide](../README.md) for the current export representation.
 
 ---
 
@@ -544,7 +544,7 @@ Read in this order for full context.
 |------|-----|
 | `dpo/eval/MERGE_CAT_DIAGNOSTIC_REPORT.md` | **This document** |
 | `dpo/eval/DPO_FINAL_EVAL_PLAN.md` | Original Phase 1 eval intent |
-| `dpo/DPO_HANDOFF.md` | Locked train/serve decisions |
+| [DPO guide](../README.md) | Current training and serving decisions |
 
 ### 2 — Training policy (how trial-29 was trained)
 
@@ -616,7 +616,7 @@ Read in this order for full context.
 | File | Why |
 |------|-----|
 | `dpo/eval/candidate_metadata_finalists.json` | Official candidate list |
-| `dpo/train/HANDOFF.md` | Train/eval handoff notes |
+| [Evaluation guide](../../docs/evaluation.md) | Current interpretation of saved results |
 
 ---
 

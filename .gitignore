@@ -8,6 +8,7 @@ sft/SFT_DATA_V3.jsonl
 sft/eval_results/
 sft/sft_eval/*.json
 sft/sft_eval/*.jsonl
+!sft/sft_eval/eval_skeletons.json
 Qwen*/
 *.npz
 *.safetensors
@@ -34,6 +35,11 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.log
+
+# Local editor state and generated stack dashboard
+.cursor/
+.vscode/
+.saulie/
 
 # Large optional dataset copies (V4 repaired is tracked)
 dpo/dataset/DPO_522_prompt_a_and_prompt_b_V2.jsonl

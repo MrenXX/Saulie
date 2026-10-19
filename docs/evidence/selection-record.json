@@ -1,0 +1,16 @@
+{
+  "evidence_type": "Author decisions recovered from project-specific Cursor history. Raw chat sessions remain private.",
+  "source_session": "8601f315-f1ab-4d96-83c4-1b26936d0171",
+  "records": [
+    {
+      "source_jsonl_line": 413,
+      "decision": "The author reported that trials 4 and 20 were the LLM-judge finalists and asked to compare both in a vLLM conversation loop."
+    },
+    {
+      "source_jsonl_line": 425,
+      "decision": "The author selected trial 4 for backend integration after the manual comparison."
+    }
+  ],
+  "verification": "The deployment script added in commit 87b5982 configures trial 4. The surviving training summary independently names trial 16 as its numerical winner.",
+  "limitation": "No structured judge_round1.json or judge_round2.json scorecards were located in the specified project folders. The author decision is documented, but a numerical judge win rate cannot be reconstructed."
+}

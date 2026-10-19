@@ -74,7 +74,7 @@ Example debug entries:
 |------|------|---------------|--------------|-------|
 | 1 | kids desk lamp, focused beam | no (probes) | no (probes) | same |
 
-Baseline direct turn 1 searched immediately. Harness turn 1 is `pressure_mode: off` (pressure_turn=1) and model asks clarifying question instead.
+The linked baseline JSON records no emitted or executed tool on direct turn 1. The harness also asks a clarifying question with pressure off. This case does not demonstrate a tool-use improvement.
 
 ---
 

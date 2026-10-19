@@ -1,0 +1,97 @@
+{
+  "status": "Historical scripts and prompt found locally. Their presence establishes an experiment setup, not completed runs or final model ancestry.",
+  "files": [
+    {
+      "path": "finetune.py",
+      "sha256": "35c8535eec7fee615d0dd039cb3debff34789c8cf66b180056964bcc2a4d0bd2",
+      "creation_utc": "2025-08-28T18:42:05.985276+00:00",
+      "mtime_utc": "2025-10-05T18:39:04.735298+00:00",
+      "source": "windows/saulgman_sft/finetune.py",
+      "configuration_excerpts": [
+        {
+          "line": 74,
+          "text": "MODEL_ID        = ABS_PTH + r\"models/Llama-3.2-3B-Instruct\""
+        },
+        {
+          "line": 75,
+          "text": "DATA_PATH       = ABS_PTH + r\"saulgman/merged_data_v1_560exps.jsonl\""
+        },
+        {
+          "line": 81,
+          "text": "SEED = 42 # Seed for reproducibility"
+        }
+      ]
+    },
+    {
+      "path": "finetune2.py",
+      "sha256": "bf7da0c256c2a48c778962f853108bbed592fa2e1abdbf69c1134cca2aa2a946",
+      "creation_utc": "2025-09-06T19:59:02.404712+00:00",
+      "mtime_utc": "2025-09-12T19:18:10.532523+00:00",
+      "source": "windows/saulgman_sft/finetune2.py",
+      "configuration_excerpts": [
+        {
+          "line": 48,
+          "text": "MODEL_ID = ABS_PTH + r\"models/Llama-3.2-3B-Instruct\""
+        },
+        {
+          "line": 49,
+          "text": "DATA_PATH = ABS_PTH + r\"saulgman/merged_data_v1_560exps.jsonl\""
+        },
+        {
+          "line": 54,
+          "text": "SEED = 42"
+        }
+      ]
+    },
+    {
+      "path": "finetune3.py",
+      "sha256": "81ce2c6117909696827fd7319de020bcc8cb49d80d337576809c15b71da46b05",
+      "creation_utc": "2025-09-07T17:05:00.677860+00:00",
+      "mtime_utc": "2025-10-11T20:04:56.881794+00:00",
+      "source": "windows/saulgman_sft/finetune3.py",
+      "configuration_excerpts": [
+        {
+          "line": 13,
+          "text": "MODEL_ID = ABS_PTH + r\"models/Llama-3.2-3B-Instruct\""
+        },
+        {
+          "line": 14,
+          "text": "DATA_PATH = ABS_PTH + r\"saulgman/merged_data_v1_560exps.jsonl\""
+        },
+        {
+          "line": 18,
+          "text": "SEED = 42"
+        }
+      ]
+    },
+    {
+      "path": "finetune4.py",
+      "sha256": "365dea18e7f6351451e7cd5169623f38ba90c6ff8b6200e36af8d2992fbe00a7",
+      "creation_utc": "2025-10-11T20:30:41.426892+00:00",
+      "mtime_utc": "2025-10-19T16:43:30.093656+00:00",
+      "source": "windows/saulgman_sft/finetune4.py",
+      "configuration_excerpts": [
+        {
+          "line": 12,
+          "text": "MODEL_ID = ABS_PTH + r\"models/Llama-3.2-3B-Instruct\""
+        },
+        {
+          "line": 13,
+          "text": "DATA_PATH = ABS_PTH + r\"saulgman/merged_data_v1.1_570exps.jsonl\""
+        },
+        {
+          "line": 17,
+          "text": "SEED = 42"
+        }
+      ]
+    },
+    {
+      "path": "data_gen_prompt.txt",
+      "sha256": "f596323f12aa5f838ca6174b35b3d087e5ebb592dcf1f6d2cd96580968f9f74f",
+      "creation_utc": "2025-08-20T20:52:42.898630+00:00",
+      "mtime_utc": "2025-08-20T20:52:42.899631+00:00",
+      "source": "windows/saulgman_sft/data_gen_prompt.txt",
+      "configuration_excerpts": []
+    }
+  ]
+}

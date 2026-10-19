@@ -1,5 +1,7 @@
 # Round 1 judge packet (external)
 
+The saved generation packet is complete. Structured returned judge scores were not recovered in the documentation audit. See [evaluation status](../../docs/evaluation.md).
+
 ## Files to send the judge
 
 1. [`llm_judge_prompt_dpo.md`](llm_judge_prompt_dpo.md)
@@ -21,7 +23,7 @@ Use `--fresh` only when you intentionally want to discard the checkpoint and sta
 Check `checkpoint_complete: true` in the JSON when the full slate is done.
 
 
-Production path: **vLLM FP8** + cat-merged LoRA (`r=32`), not HF BnB8.
+The generation path uses vLLM FP8 plus a combined LoRA. The slate has rank-32 and rank-40 adapters and uses vLLM rank capacity 64. The chosen production trial 4 uses rank 32.
 
 Sampling locked at generation time:
 

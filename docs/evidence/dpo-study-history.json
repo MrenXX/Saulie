@@ -1,0 +1,125 @@
+{
+  "source": "Local saved study summaries. Counts are snapshots, including stale RUNNING states where present.",
+  "studies": [
+    {
+      "study_version": null,
+      "study_name": "steering-dpo-v1.0-v4-seed42",
+      "counts": {
+        "RUNNING": 0,
+        "COMPLETE": 21,
+        "PRUNED": 2,
+        "FAIL": 2,
+        "WAITING": 0,
+        "total": 25,
+        "attempted": 25
+      },
+      "best_trial": 1,
+      "best_objective": null,
+      "best_accuracy": 1.0,
+      "best_v1_5_survival_score": null,
+      "target_reached": true,
+      "source": "dpo/train/models/steering-dpo-v1.0/optuna-run-20260523-041252/trial_summary_v1.0.json",
+      "mtime_utc": "2026-05-23T21:02:17.950543+00:00"
+    },
+    {
+      "study_version": "v1.1",
+      "study_name": "steering-dpo-v1.1-v4-seed42",
+      "counts": {
+        "RUNNING": 2,
+        "COMPLETE": 21,
+        "PRUNED": 4,
+        "FAIL": 4,
+        "WAITING": 0,
+        "total": 31,
+        "attempted": 31
+      },
+      "best_trial": 23,
+      "best_objective": 1.0,
+      "best_accuracy": 1.0,
+      "best_v1_5_survival_score": null,
+      "target_reached": true,
+      "source": "dpo/train/models/steering-dpo-v1.1/optuna-run-20260526-042551/trial_summary_v1.1.json",
+      "mtime_utc": "2026-05-27T13:57:20.968681+00:00"
+    },
+    {
+      "study_version": "v1.2",
+      "study_name": "steering-dpo-v1.2-plan-a-seed42-064345",
+      "counts": {
+        "RUNNING": 0,
+        "COMPLETE": 2,
+        "PRUNED": 0,
+        "FAIL": 0,
+        "WAITING": 0,
+        "total": 2,
+        "attempted": 2
+      },
+      "best_trial": 0,
+      "best_objective": 0.38461538461538464,
+      "best_accuracy": 0.38461538461538464,
+      "best_v1_5_survival_score": null,
+      "target_reached": true,
+      "source": "dpo/train/models/steering-dpo-v1.2/optuna-run-20260530-064345/trial_summary_v1.2.json",
+      "mtime_utc": "2026-05-31T21:28:31.982152+00:00"
+    },
+    {
+      "study_version": "v1.3",
+      "study_name": "steering-dpo-v1.3-sft-merged-plan-b-seed42",
+      "counts": {
+        "RUNNING": 0,
+        "COMPLETE": 4,
+        "PRUNED": 0,
+        "FAIL": 0,
+        "WAITING": 0,
+        "total": 4,
+        "attempted": 4
+      },
+      "best_trial": 2,
+      "best_objective": 1.0,
+      "best_accuracy": 1.0,
+      "best_v1_5_survival_score": null,
+      "target_reached": true,
+      "source": "dpo/train/models/steering-dpo-v1.3-sft-merged/optuna-run-20260531-152833/trial_summary_v1.3.json",
+      "mtime_utc": "2026-05-31T21:28:09.302332+00:00"
+    },
+    {
+      "study_version": "v1.4",
+      "study_name": "steering-dpo-v1.4-plan-b-seed42",
+      "counts": {
+        "RUNNING": 0,
+        "COMPLETE": 4,
+        "PRUNED": 0,
+        "FAIL": 0,
+        "WAITING": 0,
+        "total": 4,
+        "attempted": 4
+      },
+      "best_trial": 2,
+      "best_objective": 1.0,
+      "best_accuracy": 1.0,
+      "best_v1_5_survival_score": null,
+      "target_reached": true,
+      "source": "dpo/train/models/steering-dpo-v1.4/optuna-run-20260531-202654/trial_summary_v1.4.json",
+      "mtime_utc": "2026-05-31T21:28:04.808376+00:00"
+    },
+    {
+      "study_version": "v1.5",
+      "study_name": "steering-dpo-v1.5-hybrid-seed42",
+      "counts": {
+        "RUNNING": 0,
+        "COMPLETE": 21,
+        "PRUNED": 2,
+        "FAIL": 8,
+        "WAITING": 0,
+        "total": 31,
+        "attempted": 31
+      },
+      "best_trial": 16,
+      "best_objective": 0.9797833556543181,
+      "best_accuracy": 0.9807692307692307,
+      "best_v1_5_survival_score": 0.9797833556543181,
+      "target_reached": true,
+      "source": "dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial_summary_v1.5.json",
+      "mtime_utc": "2026-06-02T18:11:19.555080+00:00"
+    }
+  ]
+}

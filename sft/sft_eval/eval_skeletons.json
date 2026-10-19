@@ -1,0 +1,149 @@
+[
+  {
+    "id": "eval_A4_001",
+    "opening_type": "A",
+    "target_turns": 4,
+    "user_turns": [
+      "My hands are always freezing when I'm typing at my computer.",
+      "Yeah it's mostly during winter. My home office is in the coldest room in the house and a space heater just makes the air dry."
+    ]
+  },
+  {
+    "id": "eval_A4_002",
+    "opening_type": "A",
+    "target_turns": 4,
+    "user_turns": [
+      "I get tension headaches almost every afternoon around 3pm.",
+      "Probably posture, honestly. I hunch over my laptop on the couch because my desk chair is awful."
+    ]
+  },
+  {
+    "id": "eval_A6_001",
+    "opening_type": "A",
+    "target_turns": 6,
+    "user_turns": [
+      "The water from my tap tastes awful, like chlorine and metal.",
+      "I've been buying bottled water but it's getting expensive and I feel guilty about the plastic.",
+      "No I haven't tried any filters. I honestly don't know where to start with those."
+    ]
+  },
+  {
+    "id": "eval_C6_001",
+    "opening_type": "C",
+    "target_turns": 6,
+    "user_turns": [
+      "I've been trying to read more this year but I keep falling asleep after two pages.",
+      "Usually at night in bed. It's the only quiet time I get.",
+      "I've thought about audiobooks but I zone out when I'm just listening to something."
+    ]
+  },
+  {
+    "id": "eval_C6_002",
+    "opening_type": "C",
+    "target_turns": 6,
+    "user_turns": [
+      "I started working night shifts last month and my whole routine is thrown off.",
+      "The worst part is I can't sleep during the day. My bedroom gets so much sunlight.",
+      "I've tried curtains but they're those thin decorative ones, they don't block anything."
+    ]
+  },
+  {
+    "id": "eval_D6_001",
+    "opening_type": "D",
+    "target_turns": 6,
+    "user_turns": [
+      "I feel like I'm always running behind no matter how early I wake up.",
+      "I think it's because I spend twenty minutes just deciding what to wear. My closet is chaos.",
+      "It's not even that I have too many clothes, it's that I can't see what I have. Everything is just crammed in there."
+    ]
+  },
+  {
+    "id": "eval_D6_002",
+    "opening_type": "D",
+    "target_turns": 6,
+    "user_turns": [
+      "My apartment just feels... stale. I don't know how else to describe it.",
+      "Not dirty exactly. The air just sits there. Especially in the bathroom after a shower.",
+      "There's one tiny window but it faces another building so I never open it."
+    ]
+  },
+  {
+    "id": "eval_B8_001",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "What's the deepest point in the ocean?",
+      "That's insane. I can barely handle the deep end of a swimming pool.",
+      "Ha, not exactly. I just get anxious in water where I can't see the bottom. I do like being near the ocean though.",
+      "I actually go to the beach a lot but I mostly just sit there and read. The sand gets everywhere though, it's the one annoying part."
+    ]
+  },
+  {
+    "id": "eval_B8_002",
+    "opening_type": "B",
+    "target_turns": 8,
+    "user_turns": [
+      "How do volcanoes actually form?",
+      "I've always been fascinated by geology. I collect rocks whenever I go hiking.",
+      "Nothing too serious, just day hikes on weekends. I've been trying to go more often but I always forget to bring enough water.",
+      "Yeah I bring a bottle but it's never enough for a long hike. I end up cutting trips short because I'm worried about dehydrating."
+    ]
+  },
+  {
+    "id": "eval_C8_001",
+    "opening_type": "C",
+    "target_turns": 8,
+    "user_turns": [
+      "My weekends just disappear and I feel like I never actually rest.",
+      "Saturday is errands and chores. Sunday I try to relax but I end up thinking about Monday.",
+      "I've tried journaling and making lists but I still feel scattered. I think it's because I never know how long things will take.",
+      "Exactly, I'll think grocery shopping takes 30 minutes and it takes two hours. Then the whole day is gone."
+    ]
+  },
+  {
+    "id": "eval_C8_002",
+    "opening_type": "C",
+    "target_turns": 8,
+    "user_turns": [
+      "I've been getting really into growing herbs on my windowsill.",
+      "Basil and cilantro mostly. The basil does great but the cilantro keeps dying on me.",
+      "I think I'm either overwatering or underwatering, I can never tell. The soil is either bone dry or soaked.",
+      "I just water whenever I remember, which is either twice a day or not for three days. I know that's the problem but I don't know what the right schedule even is."
+    ]
+  },
+  {
+    "id": "eval_D8_001",
+    "opening_type": "D",
+    "target_turns": 8,
+    "user_turns": [
+      "Everything just takes me longer than it should.",
+      "Simple stuff. Making breakfast, getting out the door, even replying to texts. It all piles up.",
+      "I don't think it's motivation. I want to do these things. It's more like I can't find anything when I need it and then I'm scrambling.",
+      "My bag is the worst. I dig through it for five minutes looking for my wallet or earbuds every single time."
+    ]
+  },
+  {
+    "id": "eval_B10_001",
+    "opening_type": "B",
+    "target_turns": 10,
+    "user_turns": [
+      "Why do cats purr?",
+      "That's actually fascinating. My cat purrs nonstop, even at the vet.",
+      "She's a rescue, about three years old. Very attached to me, follows me everywhere.",
+      "The only problem is she scratches the furniture constantly. I've tried telling her no but obviously that doesn't work.",
+      "I've heard about scratching posts but she ignores the one I bought. It's one of those small flat ones from the grocery store."
+    ]
+  },
+  {
+    "id": "eval_D10_001",
+    "opening_type": "D",
+    "target_turns": 10,
+    "user_turns": [
+      "I just feel like my space doesn't reflect who I am anymore.",
+      "I moved in three years ago and everything is still the temporary furniture I bought in a rush.",
+      "It's not about spending money on new stuff. It's more that the lighting makes everything feel cold and impersonal.",
+      "All overhead lights, those harsh ceiling fixtures that came with the apartment. I never turn them on anymore, I just use my phone flashlight sometimes.",
+      "I know that's ridiculous. I've thought about getting some kind of lamp situation going but I have zero sense of interior design."
+    ]
+  }
+]

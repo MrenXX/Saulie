@@ -1,0 +1,35 @@
+{
+  "exported_on": "2026-10-19",
+  "files": [
+    {
+      "source": "wsl/saulie/sft/models/steering-sft-v1.1/trial_summary_v1.1.json",
+      "published_path": "docs/evidence/sft-study-v1.1.json",
+      "sha256": "9abe8325421a26485ba3009a82e19e5e4da74b92b2ae15a115a930a51f71628c",
+      "bytes": 7097
+    },
+    {
+      "source": "wsl/saulie/sft/models/steering-sft-v1.2/trial_summary_v1.2.json",
+      "published_path": "docs/evidence/sft-study-v1.2.json",
+      "sha256": "9b99e56c905da67ed6ed28d2068816001abb85894b62609cf0cdecb14e136606",
+      "bytes": 1794
+    },
+    {
+      "source": "wsl/saulie/sft/eval_results/eval_generations_top5_20260331_040936.json",
+      "published_path": "docs/evidence/sft-conversations.json",
+      "sha256": "23ffa9eee938d5c4848e6f8508da4832e19a349c21b39e5aaf76ce6011d60356",
+      "bytes": 344732
+    },
+    {
+      "source": "wsl/saulie/sft/sft_eval/eval_skeletons.json",
+      "published_path": "sft/sft_eval/eval_skeletons.json",
+      "sha256": "0bf4a5c8c31d296626564a6895f834f6b6c06972085c316cadfb273f788b822a",
+      "bytes": 6377
+    },
+    {
+      "source": "wsl/saulie/dpo/eval/generations_prod_ladder.json",
+      "published_path": "dpo/eval/generations_prod_ladder.json",
+      "sha256": "ee1a93a4bfb0aac3cbe6c3a20d957c188d6801bd33ff4a223bd4fc67e96aed76",
+      "bytes": 689553
+    }
+  ]
+}

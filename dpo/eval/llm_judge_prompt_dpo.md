@@ -8,7 +8,7 @@ This is the DPO phase. Do not evaluate this as another SFT pattern-acquisition e
 
 ## Context: What Was Trained and Why
 
-The model family is based on FP8 Qwen3-4B-Instruct. The baseline policy was first fine-tuned with LoRA SFT on conversational steering examples. DPO was then trained on chosen/rejected pairs from the repaired Prompt-B preference dataset.
+Evaluation serves Qwen3-4B-Instruct-2507-FP8. The baseline was trained with LoRA SFT on steering conversations using the BF16 checkpoint loaded with bitsandbytes quantization. DPO then used the repaired 522-pair V4 dataset, combining Prompt A, repaired Prompt B, and expanded Prompt B sources. See the [dataset contract](../dataset/DATA_CONTEXT.md).
 
 The target task is conversational steering: the assistant must take an ordinary user opener, usually not a product request, and guide the conversation naturally toward one well-reasoned generic product category recommendation.
 

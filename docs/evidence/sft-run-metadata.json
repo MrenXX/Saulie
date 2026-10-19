@@ -1,0 +1,83 @@
+{
+  "source": "Selected SFT MLflow params and final metric values, exported from the local tracking store.",
+  "runs": [
+    {
+      "name": "optuna-study-20260328-204557",
+      "params": {
+        "neftune_noise_alpha": "5.0",
+        "best_max_grad_norm": "0.5",
+        "n_trials": "15",
+        "data_hash": "ced5b49dd3d0",
+        "data_path": "train/SFT_DATA_V3.jsonl",
+        "best_num_train_epochs": "3",
+        "max_seq_len": "832",
+        "best_gradient_accumulation_steps": "4",
+        "val_size": "50",
+        "best_learning_rate": "0.0001597327855951753",
+        "best_lr_scheduler_type": "linear",
+        "USE_QUANT_VERSION": "False",
+        "model_id": "Qwen3-4B-Instruct-2507",
+        "test_size": "50",
+        "train_size": "400"
+      },
+      "metrics": {
+        "best_trial_number": 13.0,
+        "best_eval_loss": 2.184276819229126
+      }
+    },
+    {
+      "name": "trial-17",
+      "params": {
+        "learning_rate": "0.00012074558410393839",
+        "neftune_noise_alpha": "5.0",
+        "lora_r": "16",
+        "max_seq_len": "832",
+        "lora_dropout": "0.1",
+        "effective_batch_size": "4",
+        "lr_scheduler_type": "linear",
+        "lora_alpha": "32",
+        "adapter_path": "train/models/steering-sft-v1.1/trial-17/best_adapter",
+        "num_train_epochs": "3",
+        "lora_target_modules": "q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj",
+        "model_id": "Qwen3-4B-Instruct-2507",
+        "max_grad_norm": "0.3",
+        "trial_number": "17",
+        "gradient_accumulation_steps": "4",
+        "warmup_ratio": "0.1",
+        "weight_decay": "0.05"
+      },
+      "metrics": {
+        "train_loss": 1.9978849093119304,
+        "eval_loss": 2.2226924896240234
+      }
+    },
+    {
+      "name": "optuna-study-20260325-021109",
+      "params": {
+        "neftune_noise_alpha": "5.0",
+        "best_max_grad_norm": "0.5",
+        "best_warmup_ratio": "0.1",
+        "n_trials": "20",
+        "best_weight_decay": "0.05",
+        "data_hash": "ced5b49dd3d0",
+        "data_path": "train/SFT_DATA_V3.jsonl",
+        "best_num_train_epochs": "3",
+        "max_seq_len": "832",
+        "best_lora_dropout": "0.1",
+        "best_gradient_accumulation_steps": "4",
+        "val_size": "50",
+        "best_lora_r": "16",
+        "best_learning_rate": "0.00012575696104888642",
+        "best_lr_scheduler_type": "linear",
+        "USE_QUANT_VERSION": "False",
+        "model_id": "Qwen3-4B-Instruct-2507",
+        "test_size": "50",
+        "train_size": "400"
+      },
+      "metrics": {
+        "best_trial_number": 16.0,
+        "best_eval_loss": 2.219367265701294
+      }
+    }
+  ]
+}

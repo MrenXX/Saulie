@@ -1,62 +1,46 @@
-# DPO v1.5 final eval (`dpo_eval` branch)
+# DPO evaluation
 
-Behavioral evaluation for the v1.5 hybrid Optuna finalists: merge validation, vLLM FP8 generation, and blind LLM-judge packets.
+Use [evaluation and recorded results](../../docs/evaluation.md) for interpretation and [the DPO guide](../README.md) for training. This directory contains generation runners, export diagnostics, judge rubrics, and runtime comparisons.
 
-**Start here:** [`DPO_FINAL_EVAL_EXECUTION_PLAN.md`](DPO_FINAL_EVAL_EXECUTION_PLAN.md)  
-**Judge handoff:** [`JUDGE_PACKET_README.md`](JUDGE_PACKET_README.md)  
-**Merge gate:** [`MERGE_SCRIPT_VALIDATION_FIX_PLAN.md`](MERGE_SCRIPT_VALIDATION_FIX_PLAN.md)
+## Saved evidence
 
-## Production inference path
+- [Round 1 conversations](generations_round1.json): complete, seven models on 34 scenarios.
+- [Unblind map](generations_round1_unblind.json): local mapping for the six candidate IDs.
+- [Merge summary](merge_v15_slate_validation.md) and [JSON report](merge_v15_slate_report.json): export checks for six finalists.
+- [Base/SFT/DPO conversations](generations_prod_ladder.json): complete, three models on 60 scenarios.
+- [Scenarios](eval_skeletons.json), [judge rubric](llm_judge_prompt_dpo.md), and [generation configuration](v15_eval_config.py).
+- [Model/prompt matrix](matrix_runs/), [latency report](LATENCY_REPORT.md), and [raw latency runs](latency_runs/).
 
-Official eval and deploy pick use **vLLM FP8 + cat-merged LoRA** (`trial-N/sft_dpo_cat`), not HF 8-bit stack.
+Structured final judge scores were not recovered. The [selection record](../../docs/evidence/selection-record.json) documents the author's choice of trial 4 after comparing judge finalists 4 and 20. The training-objective winner was trial 16.
 
-| Script | Role |
-|--------|------|
-| [`run_v15_final_eval.py`](run_v15_final_eval.py) | Entry point: deploy + Round 1/2 generation |
-| [`v15_eval_config.py`](v15_eval_config.py) | Skeleton splits, sampling, manifests |
-| [`vllm_scripts/deploy_qwenie_eval.sh`](vllm_scripts/deploy_qwenie_eval.sh) | FP8 vLLM container |
-| [`vllm_scripts/eval_generate_vllm.py`](vllm_scripts/eval_generate_vllm.py) | Multi-turn gen + checkpoint resume |
-| [`vllm_scripts/vllm_lora_runtime.py`](vllm_scripts/vllm_lora_runtime.py) | Runtime LoRA load/unload |
+## Re-run commands
 
-## Artifacts on this branch
-
-| File | Description |
-|------|-------------|
-| [`generations_round1.json`](generations_round1.json) | Round 1 blind conversations (7 models × 34 skeletons) |
-| [`generations_round1_unblind.json`](generations_round1_unblind.json) | Local trial mapping — do not send to judge |
-| [`v15_final_eval_manifest.jsonl`](v15_final_eval_manifest.jsonl) | Round 1 model manifest |
-| [`merge_v15_slate_validation.md`](merge_v15_slate_validation.md) | Merge gate summary |
-| [`merge_v15_slate_report.json`](merge_v15_slate_report.json) | Per-trial merge metrics |
-| [`llm_judge_prompt_dpo.md`](llm_judge_prompt_dpo.md) | Judge rubric |
-| [`eval_skeletons.json`](eval_skeletons.json) | 60 user-turn skeletons |
-
-## Round 1 blind mapping
-
-| Judge ID | Trial |
-|----------|------:|
-| `steering-sft-v1.1_trial-17` | 17 |
-| `candidate_A` | 19 |
-| `candidate_B` | 16 |
-| `candidate_C` | 8 |
-| `candidate_D` | 27 |
-| `candidate_E` | 20 |
-| `candidate_F` | 4 |
-
-## Commands
+These require the environment, trained adapters, GPU memory, and keys described in [reproducibility](../../REPRODUCIBILITY.md). Deploy commands may replace named containers.
 
 ```bash
-# Merge all finalists
+# Export and audit the fixed finalist slate.
 bash dpo/train/scripts/merge_v15_eval_slate.sh
 
-# Deploy vLLM
+# Start FP8 vLLM with capacity for the slate's rank-40 adapters.
 MAX_LORA_RANK=64 bash dpo/eval/vllm_scripts/deploy_qwenie_eval.sh
 
-# Round 1 (resumes automatically if checkpoint exists)
+# Generate or resume Round 1.
 python dpo/eval/run_v15_final_eval.py --round 1 --anonymize --skip-deploy
+
+# Compare base, frozen SFT, and deployed DPO on all 60 scenarios.
+python dpo/eval/run_prod_ladder_eval.py
 ```
 
-## Legacy / debug (ignore for final judge)
+The production choice has rank 32. The evaluation slate needs rank capacity 64 because some other finalists have rank 40.
 
-- `dpo_phase1_*`, `smoke_trial*`, `RUN_PLAN_A_*`, rescue scripts — earlier diagnostics before v1.5 final protocol
-- [`eval_generate_hf.py`](eval_generate_hf.py) — HF path only; not for official judge JSON
-- [`OLD_DPO_FINAL_EVAL_PLAN.md`](OLD_DPO_FINAL_EVAL_PLAN.md) — superseded plan
+Runners support checkpoint resume. Use `--fresh` only for an intentional replacement of saved output. New generations should be preserved separately from the tracked historical evidence.
+
+## Judge packets
+
+[Round 1 packet instructions](JUDGE_PACKET_README.md) separate blind outputs from candidate metadata. [The later comparison packet](JUDGE_PACKET_PROD_LADDER.md) documents that only the base receives a system prompt.
+
+These are experiment instructions, not evidence that a judge returned the scores. Ordinary-chat scenarios use a retention rubric and should not be rewarded for forced product recommendations.
+
+## Historical diagnostics
+
+`dpo_phase1_*`, `smoke_trial*`, and the rescue scripts concern earlier adapters or training representations. The [semantic report](TRAIN_SETUP_SEMANTIC_REPORT.md) and [rescue results](RESCUE_SMOKE_RESULTS.md) remain useful historical records. They should not be presented as the final deployment's score.

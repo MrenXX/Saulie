@@ -1,0 +1,6 @@
+# Keep hashed evidence stable without changing legacy file formatting.
+/docs/evidence/*.json text eol=lf
+/sft/sft_eval/eval_skeletons.json text eol=lf
+/dpo/eval/generations_prod_ladder.json text eol=lf
+/dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl text eol=lf
+/dpo/train/dataset/dpo_v4_split_seed_42.jsonl text eol=lf

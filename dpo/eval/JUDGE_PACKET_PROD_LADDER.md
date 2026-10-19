@@ -1,5 +1,7 @@
 # Prod ladder judge packet (external)
 
+The linked 60-scenario generation artifact is complete. It was recovered during the documentation audit. This guide defines the intended judging procedure; it does not supply returned scores. [Evaluation status](../../docs/evaluation.md)
+
 ## Goal
 
 Compare **base FP8 → SFT trial-17 → prod DPO trial-4** on the same 60 conversation skeletons. Prod should win on steering quality, especially Type B/D, while preserving ordinary conversation (Type O).

@@ -90,5 +90,5 @@ Expect many `data: {... "delta": {"content": ...}}` lines, not one large chunk.
 
 ## Related docs
 
-- [`MODEL_PROMPT_MATRIX_COMPARISON.md`](MODEL_PROMPT_MATRIX_COMPARISON.md) — tool reliability, performative search
+- [Evaluation](docs/evaluation.md) covers tool reliability and the saved model/prompt comparisons.
 - [`dpo/eval/LATENCY_REPORT.md`](dpo/eval/LATENCY_REPORT.md) — E2E timings (non-stream path)

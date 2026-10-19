@@ -39,7 +39,7 @@ Two **Qdrant collections** can coexist; switch with `QDRANT_COLLECTION`.
 
 ## Root cause fix (why search was broken)
 
-The original index used `SERVER_BATCH_SIZE=128` while the TensorRT BGE-M3 engine max batch is **2**. That corrupted ~99% of dense vectors in Qdrant. Fixes applied in `index2.py` and `index_mccauley.py`:
+Historical debugging attributed invalid dense vectors to indexing with `SERVER_BATCH_SIZE=128` against a TensorRT engine whose maximum batch is **2**. The original corruption percentage is not backed by a preserved audit in this repo. Current safeguards in `index2.py` and `index_mccauley.py` are:
 
 - `SERVER_BATCH_SIZE=2` (must match TRT engine)
 - Embed **`embed_text`** (category + title + features), not name-only
@@ -149,7 +149,7 @@ python query2.py
 python smoke_hybrid.py
 ```
 
-`search_hybrid(query_text, main_category=None, top_k=5)` returns hybrid results with reconstructed product URLs.
+`search_hybrid(query_text, top_k=5, main_category=None, prefetch_limit=None, timing_out=None)` returns hybrid results with reconstructed product URLs.
 
 ---
 
@@ -177,7 +177,7 @@ python compare_fusion_report.py
 
 See [`fusion_comparison_report.md`](fusion_comparison_report.md) for the full breakdown.
 
-### Results summary (June 2025 run)
+### Saved results summary
 
 | Dataset | Best fusion | #1 relevant (of 18) | Relevant in top-3 (of 54) |
 |---------|-------------|----------------------|---------------------------|
@@ -192,6 +192,14 @@ FUSION_METHOD=rrf
 ```
 
 See [`fusion_comparison_report.md`](fusion_comparison_report.md) for per-query breakdown.
+
+These are exploratory keyword-rubric scores from a small saved query set, committed in June 2026. They are not a large annotated relevance benchmark. Approximate catalog sizes describe the historical indexes, not a live service count.
+
+## Reproduction limits
+
+The tracked TensorRT build script requires an existing ONNX export and any external tensor files. Downloading BGE-M3 weights alone does not create that export. The audited machine has the artifacts, but a complete export recipe is not published. See [reproducibility](../REPRODUCIBILITY.md).
+
+The current main branch has hybrid fusion and optional category filtering. The additional dense-cosine gate on `fix/tool-pressure-reset-and-rag-gate` is not merged here. [Architecture and branch scope](../docs/architecture.md)
 
 ---
 

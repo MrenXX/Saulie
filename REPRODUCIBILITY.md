@@ -1,206 +1,89 @@
-# Reproducible Setup Guide
+# Reproducibility
 
-This document explains how to recreate the Saulie development environment from scratch.
+Git contains the code, DPO input and split, saved study results, and selected synthetic evaluation outputs. It does not contain every artifact needed for a fresh GPU deployment or an exact historical SFT rerun.
 
-## Files at a glance
-
-| File | What it is |
-|------|------------|
-| [`requirements.txt`](requirements.txt) | Every Python package with exact versions (from `pip freeze`) |
-| [`environment.yml`](environment.yml) | Conda recipe: creates env `saulgman` with Python 3.11 and installs `requirements.txt` |
-| [`.env.example`](.env.example) | Template for secrets and config — copy to `.env` and edit |
-| [`docker/versions.env`](docker/versions.env) | Pinned Docker image tags/digests |
-| [`docker/setup_containers.sh`](docker/setup_containers.sh) | Creates Qdrant + BGE containers if missing |
-| [`docker/docker-compose.yml`](docker/docker-compose.yml) | Qdrant + nginx via compose (optional) |
-| [`rag/embed_models/bge-m3/serve.py`](rag/embed_models/bge-m3/serve.py) | BGE FastAPI embed server (runs **inside** the TensorRT container) |
-| [`rag/embed_models/bge-m3/build_engine.sh`](rag/embed_models/bge-m3/build_engine.sh) | Compile BGE-M3 ONNX → TensorRT engine |
-| [`SECURITY.md`](SECURITY.md) | Demo security model (nginx auth, localhost binds, `.env` secrets) |
-
-**What is `environment.yml`?** It is not a second dependency list. It only says: "make a conda env named `saulgman` with Python 3.11, then pip-install from `requirements.txt`." One command instead of two.
-
----
-
-## Prerequisites
-
-- NVIDIA GPU with CUDA (RTX 4070 12GB or similar tested)
-- [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or Anaconda
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) with WSL2 GPU integration enabled
-- [ngrok](https://ngrok.com/) CLI (optional, for remote access) — tested with v3.39.6+
-
----
-
-## Step 1: Clone and configure
+## Inspect the project without a GPU
 
 ```bash
-git clone https://github.com/MrenXX/Saulie.git /root/saulie
-cd /root/saulie
-cp .env.example .env
-# Edit .env — set NGROK_KEY, API keys, paths if different from defaults
+git clone https://github.com/MrenXX/Saulie.git
+cd Saulie
+python scripts/check_docs.py
 ```
 
----
+The checker uses the Python standard library. It checks local Markdown targets and anchors, exported evidence hashes, preference-data counts and split IDs, and saved evaluation coverage. It does not start models or containers.
 
-## Step 2: Python environment
+Read [history](docs/project-history.md), [SFT](sft/README.md), [DPO](dpo/README.md), and [evaluation](docs/evaluation.md) for the methods and their limits.
+
+## Environment
+
+The historical target is Ubuntu 22.04 under WSL2 with NVIDIA CUDA support, Docker GPU access, Conda, and tmux. The training code was designed around a 12 GB memory budget, but not every saved run establishes a specific GPU model.
+
+Several entry points assume `/root/saulie`. Use that layout in a dedicated environment, or review hardcoded paths before moving it. The Python recipe is [`environment.yml`](environment.yml), with versions in [`requirements.txt`](requirements.txt). Docker references are in [`docker/versions.env`](docker/versions.env), captured from the June 2026 environment.
 
 ```bash
+cd /root/saulie
 conda env create -f environment.yml
 conda activate saulgman
+cp .env.example .env
 ```
 
-If the env already exists and you want to refresh packages:
+Replace the example keys and confirm paths. Match `LLM_API_KEY` and `VLLM_API_KEY`. The BGE container has its own Python and TensorRT environment; the Conda package list does not lock all of its dependencies.
 
-```bash
-conda activate saulgman
-pip install -r requirements.txt
-```
+## External artifacts
 
----
+Supply these before starting the full stack:
 
-## Step 3: RAG workspace layout
+- `Qwen3-4B-Instruct-2507/`: [upstream BF16 checkpoint](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507), used for training with bitsandbytes quantization.
+- `Qwen3-4B-Instruct-2507-FP8/`: [upstream FP8 checkpoint](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507-FP8), used for serving.
+- `sft/models/steering-sft-v1.1/trial-17/best_adapter/`: the trained SFT adapter. It has no published download in this repo.
+- `dpo/train/models/steering-dpo-v1.5/optuna-run-20260602-052732/trial-4/sft_dpo_cat/`: the combined serving adapter. It also has no published download.
+- `rag/embed_models/bge-m3/`: [BGE-M3 files](https://huggingface.co/BAAI/bge-m3), including tokenizer and sparse projection weights.
+- `rag/embed_models/bge-m3/onnx/model.onnx` and any external tensor data, followed by a GPU-compatible `bge_m3.engine`.
+- A populated Qdrant collection, rebuilt from catalog metadata or restored separately.
 
-All RAG code and runtime data live under `saulie/rag/`. Heavy artifacts (Qdrant storage, model weights, TRT engine, CSVs) are gitignored — see [`rag/.gitignore`](rag/.gitignore).
+Do not overwrite the frozen SFT adapter while experimenting. Full model snapshots should retain their config and tokenizer files, not just weight tensors. [Artifact manifest](docs/evidence/README.md)
 
-Set in `.env`:
+## BGE and catalog setup
 
-```bash
-RAG_ROOT=/root/saulie/rag
-```
+The tracked build script compiles an existing ONNX model. It does not export BGE from PyTorch to ONNX. The audited machine has that export and its external tensor data, but a complete export recipe is not published. This is a real clean-machine reproduction gap.
 
-Download BGE-M3 model weights into `rag/embed_models/bge-m3/` (HuggingFace `BAAI/bge-m3`), then build the TensorRT engine:
-
-```bash
-bash docker/setup_containers.sh          # creates BGE container
-docker exec tensorrt_bge-m3 bash /workspace/build_engine.sh
-```
-
-Full RAG indexing steps: [`rag/README.md`](rag/README.md).
-
-### BGE embed server (`serve.py`)
-
-The embed API is **not** part of the `saulgman` conda env. It runs inside the `tensorrt_bge-m3` Docker container, which has its own Python + TensorRT stack preinstalled in `nvcr.io/nvidia/tensorrt:24.12-py3`.
-
-| Item | Detail |
-|------|--------|
-| Source file | [`rag/embed_models/bge-m3/serve.py`](rag/embed_models/bge-m3/serve.py) |
-| Mount path in container | `/workspace/serve.py` (bind-mount from `RAG_ROOT/embed_models/bge-m3`) |
-| Framework | FastAPI + uvicorn |
-| Endpoint | `POST /embed` — body `{"text": "..."}` or `{"text": ["...", "..."]}` (max 2) |
-| Response | `{"dense": [[...]], "sparse": {"indices": [...], "values": [...]}}` |
-| Engine | Loads `/workspace/onnx/bge_m3.engine` (built by `build_engine.sh`) |
-| Max batch | 2 (must match TRT engine profile) |
-
-Start manually:
-
-```bash
-docker exec -d tensorrt_bge-m3 sh -c "cd /workspace && python -u serve.py"
-```
-
-Or let `docker/setup_containers.sh` / `start_saulie.sh` start it for you.
-
-Health check:
-
-```bash
-curl -X POST http://127.0.0.1:8888/embed \
-  -H "Content-Type: application/json" \
-  -d '{"text":"healthcheck"}'
-```
-
----
-
-## Step 4: Docker infrastructure
-
-Pinned images are in [`docker/versions.env`](docker/versions.env):
-
-| Service | Image | Port |
-|---------|-------|------|
-| BGE embed | `nvcr.io/nvidia/tensorrt:24.12-py3` | 8888 |
-| Qdrant | `qdrant/qdrant@sha256:0fb8897...` | 1234 |
-| vLLM | `vllm/vllm-openai@sha256:014a95f...` | 8000 |
-| nginx | `nginx:1.25-alpine` | 8080 |
-
-Create Qdrant + BGE:
+Once a compatible export and the other BGE files exist:
 
 ```bash
 bash docker/setup_containers.sh
+docker exec tensorrt_bge-m3 bash /workspace/build_engine.sh
+docker exec -d tensorrt_bge-m3 sh -c 'cd /workspace && python -u serve.py'
+curl -X POST http://127.0.0.1:8888/embed \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"healthcheck"}'
 ```
 
-Or use compose for Qdrant + nginx only:
+The build script backs up an existing engine. Rebuilding for a GPU does not validate the quality of the exported model. Confirm finite normalized dense vectors and valid sparse outputs. The engine profile is batch at most two and sequence length at most 256.
 
-```bash
-docker compose -f docker/docker-compose.yml --env-file docker/versions.env up -d
-```
+Follow [the RAG guide](rag/README.md) to download catalog metadata, prepare records, index with batch two, and validate the collection. Run its relative-path commands from `rag/`.
 
-Deploy vLLM (requires model weights on disk):
+## Start the demo
 
-```bash
-bash dpo/eval/vllm_scripts/deploy_finalist_pick.sh
-```
-
----
-
-## Step 5: Model weights (not in git)
-
-Download separately and place at:
-
-| Path | Purpose |
-|------|---------|
-| `/root/saulie/Qwen3-4B-Instruct-2507` | BF16 base (training) |
-| `/root/saulie/Qwen3-4B-Instruct-2507-FP8` | FP8 base (vLLM inference) |
-| `sft/models/steering-sft-v1.1/trial-17/best_adapter` | SFT LoRA |
-| `dpo/train/models/steering-dpo-v1.5/.../trial-4/sft_dpo_cat` | DPO cat-merged LoRA |
-
-These are gitignored. Copy from your training machine or HuggingFace.
-
----
-
-## Step 6: Start the stack
+After the assets and catalog exist:
 
 ```bash
 conda activate saulgman
 bash start_saulie.sh
-```
-
-Health check:
-
-```bash
 curl http://127.0.0.1:9000/health
 ```
 
----
+[Deployment](docs/deployment.md) covers requests, remote-client constants, ports, and troubleshooting. [Security](SECURITY.md) describes the actual demo bindings and authentication limits.
 
-## What is NOT reproducible from git alone
+## Training reproduction
 
-- Qwen3 model weights and LoRA adapters
-- BGE-M3 model files and compiled TRT engine (`bge_m3.engine`)
-- Qdrant index data (`rag/qdrant_storage/`)
-- ngrok public URL (changes on restart)
-- MLflow run artifacts and Optuna study outputs
+For a new SFT run, supply a dataset and review the trainer constants. Exact historical SFT reproduction is blocked by the missing input with logged hash prefix `ced5b49dd3d0`, unpublished adapter assets, and later trainer edits. The current 500-row local V3 file has a different hash.
 
----
+For a new DPO run, the V4 input and seed-42 split are tracked. Training still requires the frozen SFT adapter and model checkpoints. [DPO commands](dpo/README.md) describe the current v1.5 entry points, which create new GPU work.
 
-## Updating pinned versions
+Saved study summaries support inspection. They do not guarantee identical Optuna scheduling, trial numbering, sampling, or numerical results on another device. Two workers and runtime failures affected the original study.
 
-**Python packages** (after upgrading in a test env):
+## Validation performed for this overhaul
 
-```bash
-pip freeze > requirements.txt
-# Re-add the 3-line header comment at the top
-```
+The documentation checker, artifact hashes, saved counts, command flags, report generation, and source-state preservation were checked. The full GPU environment was not rebuilt. Models were not retrained, catalogs were not reindexed, and the user's live services were not restarted.
 
-**Docker images** (after pulling a new image and verifying it works):
-
-```bash
-docker inspect <container> --format '{{.Config.Image}}'
-# Update docker/versions.env with the new tag or digest
-```
-
----
-
-## Troubleshooting
-
-| Problem | Check |
-|---------|-------|
-| BGE returns empty / agent says "0 products" | `curl -X POST http://127.0.0.1:8888/embed -d '{"text":"test"}'` |
-| vLLM won't start | `docker logs eval_deploy_qwenie` — usually missing model path |
-| Agent can't find RAG | Confirm `RAG_ROOT=/root/saulie/rag` in `.env` and `rag/query2.py` exists |
-| ngrok skipped | Set `NGROK_KEY` in `.env` |
+Remaining artifact recovery and verification work is listed in [the audit](docs/documentation-audit.md).

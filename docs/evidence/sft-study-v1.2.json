@@ -1,0 +1,79 @@
+[
+  {
+    "trial": 13,
+    "eval_loss": 2.1843,
+    "params": {
+      "learning_rate": 0.0001597327855951753,
+      "lr_scheduler_type": "linear",
+      "num_train_epochs": 3,
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 0.5
+    }
+  },
+  {
+    "trial": 14,
+    "eval_loss": 2.1855,
+    "params": {
+      "learning_rate": 0.00015897811598764033,
+      "lr_scheduler_type": "linear",
+      "num_train_epochs": 2,
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 0.5
+    }
+  },
+  {
+    "trial": 5,
+    "eval_loss": 2.1865,
+    "params": {
+      "learning_rate": 8.946514769365051e-05,
+      "lr_scheduler_type": "constant_with_warmup",
+      "num_train_epochs": 4,
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 0.5
+    }
+  },
+  {
+    "trial": 10,
+    "eval_loss": 2.1886,
+    "params": {
+      "learning_rate": 0.0001901943588270651,
+      "lr_scheduler_type": "linear",
+      "num_train_epochs": 3,
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 0.5
+    }
+  },
+  {
+    "trial": 8,
+    "eval_loss": 2.1888,
+    "params": {
+      "learning_rate": 0.00010348682626743025,
+      "lr_scheduler_type": "constant_with_warmup",
+      "num_train_epochs": 4,
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 0.3
+    }
+  },
+  {
+    "trial": 12,
+    "eval_loss": 2.1898,
+    "params": {
+      "learning_rate": 0.0001986110910028046,
+      "lr_scheduler_type": "linear",
+      "num_train_epochs": 3,
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 0.5
+    }
+  },
+  {
+    "trial": 11,
+    "eval_loss": 2.1941,
+    "params": {
+      "learning_rate": 0.0001837748696998135,
+      "lr_scheduler_type": "linear",
+      "num_train_epochs": 3,
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 0.5
+    }
+  }
+]
