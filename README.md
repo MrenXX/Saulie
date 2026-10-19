@@ -1,63 +1,68 @@
 # Saulie
 
-A conversational shopping agent built with supervised fine-tuning, direct preference optimization, and hybrid product retrieval. The project follows a small language model through data curation, training, behavioral evaluation, and a local API demo.
+Saulie is a conversational sales agent I built for my Master's project in Data Science. It asks questions, identifies what the user needs, and searches a product catalog when it has enough context to make a recommendation.
 
-The trained model learns to ask useful questions and connect a user's needs to a generic product category. At runtime, a separate retrieval tool searches a catalog for specific items. Training conversational behavior and retrieving catalog facts are different parts of the system.
+I wanted to run the model and catalog locally, without calling a hosted language model for every message. The system uses Qwen3-4B-Instruct-2507, LoRA adapters, and hybrid retrieval, with a design budget of 12 GB of GPU memory.
 
-## The project in one minute
+## Training
 
-1. **Build the examples.** Iterate on synthetic conversations, then curate chosen/rejected preference pairs.
-2. **SFT teaches the behavior.** Adapt Qwen3-4B-Instruct-2507 with LoRA. The later pipeline freezes `steering-sft-v1.1/trial-17` as its baseline.
-3. **DPO refines preferences.** Train a separate LoRA against that frozen SFT reference using 522 repaired preference pairs. Score assistant tokens while keeping multi-turn user replies as context.
-4. **Evaluate actual conversations.** Check ordinary chat, steering, fluency, adapter export, and the FP8 serving path. High preference accuracy alone did not guarantee usable English.
-5. **Serve with retrieval.** Combine the SFT and selected DPO adapters into one LoRA for vLLM. A FastAPI agent calls BGE-M3 and Qdrant, then streams its response through an OpenAI-compatible API.
+The model is trained in two stages:
+
+1. [Supervised fine-tuning](sft/README.md) teaches conversational steering from about 500 synthetic dialogues. The examples start with a problem, an unrelated question, a lifestyle situation, or a vague complaint. The model has to ask useful questions and reach a product category without waiting for an explicit shopping request.
+2. [Direct preference optimization](dpo/README.md) refines that behavior using 522 chosen/rejected pairs. These target repetitive phrasing, weak steering, and poor product fit. The SFT adapter stays frozen while a separate DPO adapter trains on top of it.
+
+Product names, prices, and links come from retrieval at inference time. Training recommendations use generic categories so the model learns how to recommend rather than memorizing an inventory.
+
+## Architecture
 
 ```mermaid
 flowchart LR
-    A[Curated conversations] --> B[SFT LoRA]
-    B --> C[Frozen SFT baseline]
-    D[Chosen/rejected pairs] --> E[DPO LoRA training]
-    C --> E
-    E --> F[Behavioral eval and adapter export]
-    F --> G[FP8 vLLM and agent API]
-    H[BGE-M3 and Qdrant product search] --> G
+    C[Client] --> N[nginx and optional ngrok]
+    N --> A[FastAPI agent]
+    A --> L[vLLM: Qwen FP8 and combined LoRA]
+    A --> R[Product search]
+    R --> B[BGE-M3: dense and sparse embeddings]
+    R --> Q[Qdrant]
 ```
 
-## Read the work in order
+The agent manages the conversation and executes `search_products` calls. BGE-M3 produces dense and sparse vectors in one pass, and Qdrant combines both rankings with reciprocal rank fusion. vLLM serves the FP8 base with a single adapter containing the SFT and DPO updates. Responses stream over SSE.
 
-- [Project history](docs/project-history.md) traces the Windows Llama experiments, WSL Qwen training, DPO revisions, and deployment work.
-- [Data preparation](docs/data.md) separates SFT conversations from DPO preference data and explains their versions.
-- [SFT](sft/README.md) describes the training objective, masking, search, and frozen trial-17 baseline.
-- [DPO](dpo/README.md) explains the reference policy, multi-turn scoring, experiments, and final adapter.
-- [Evaluation and results](docs/evaluation.md) links saved outputs and explains what each measurement establishes.
-- [Recorded conversation examples](docs/examples.md) compare base, SFT, and DPO on the same saved scenario.
-- [Architecture](docs/architecture.md) and [deployment](docs/deployment.md) cover retrieval, tools, streaming, and configuration.
-- [Reproducibility](REPRODUCIBILITY.md) separates inspecting evidence from running a stack that needs external artifacts.
+## Results
 
-## What the saved evidence shows
+I evaluated generated conversations with two LLM judges, then used direct conversations to choose between the final candidates. Across 52 steering scenarios, mean scores averaged over both judges were 2.97/5 for the prompted base, 3.16 for SFT, and 3.32 for DPO. Judge A counted clean recommendations in 13, 20, and 27 of the 52 conversations respectively.
 
-- SFT v1.1 has 20 completed trial summaries. Trial 16 had the lowest validation loss, `2.2194`; the DPO pipeline uses trial 17, `2.2227`. [SFT evidence](docs/evidence/sft-study-v1.1.json)
-- The final DPO study recorded 21 completed trials across 31 attempts, with 11 unique completed configurations. Its numerical winner was trial 16. The author selected trial 4 for deployment after behavioral review. [Training summary](dpo/study_results/trial_summary_v1.5.json), [selection record](docs/evidence/selection-record.json)
-- Round 1 contains seven models on 34 scenarios. A later comparison contains base, SFT, and deployed DPO outputs on all 60 scenarios. These are generated conversations, not published judge scorecards. [Evaluation details](docs/evaluation.md)
-- In the saved 18-query retrieval comparison, McAuley with RRF scored 15/18 first-result matches against 10/18 for the Indian catalog. The scorer uses a keyword rubric. [Retrieval report](rag/fusion_comparison_report.md)
-- An archived local benchmark recorded about 70.5 median decode tokens per second and a 2.49-second p95 tool turn. These are small-sample historical measurements. [Latency report](dpo/eval/LATENCY_REPORT.md)
+The deployed model is SFT trial 17 plus DPO v1.5 trial 4. Trial 4 was selected through conversational evaluation rather than the training objective. DPO improved direct-problem and vague-complaint openings most; SFT remained slightly better on unrelated and lifestyle openings. [Evaluation and results](docs/evaluation.md)
 
-## Inspect without a GPU
+For retrieval, the McAuley catalog with RRF returned a relevant first result on 15/18 test queries. The local serving benchmark measured about 70.5 median decode tokens per second and a 2.49-second p95 tool turn. [Retrieval comparison](rag/fusion_comparison_report.md), [latency measurements](dpo/eval/LATENCY_REPORT.md)
+
+## Setup
+
+The stack runs under Ubuntu 22.04 in WSL2 with NVIDIA CUDA, Docker, and Conda. Model weights, trained adapters, and the product index must be supplied separately. Follow [the setup guide](REPRODUCIBILITY.md) before starting the services.
 
 ```bash
-git clone https://github.com/MrenXX/Saulie.git
-cd Saulie
+conda activate saulgman
+bash start_saulie.sh
+```
+
+The default configuration uses `dpo-v15-trial-4`, the `compressed` system prompt, and the `amazon_products_v2` collection. [API usage and deployment](docs/deployment.md)
+
+## Documentation
+
+- [Development decisions](docs/project-history.md)
+- [Data generation and preparation](docs/data.md)
+- [SFT](sft/README.md) and [DPO](dpo/README.md)
+- [Evaluation and results](docs/evaluation.md)
+- [Conversation example](docs/examples.md)
+- [Architecture](docs/architecture.md) and [product retrieval](rag/README.md)
+- [Setup](REPRODUCIBILITY.md), [deployment](docs/deployment.md), and [security](SECURITY.md)
+- [Limitations and further work](docs/limitations.md)
+
+Training summaries, evaluation outputs, and the DPO dataset are included. To check their counts, hashes, and documentation links without starting GPU services:
+
+```bash
 python scripts/check_docs.py
 ```
 
-Documentation, study summaries, synthetic evaluation conversations, and DPO data can be reviewed directly. Model weights, trained adapters, the SFT training file, and the product index are not distributed here.
+## License
 
-To run the demo after supplying those artifacts, follow [the setup guide](REPRODUCIBILITY.md). The configured deployment is `dpo-v15-trial-4`, the `compressed` prompt, and `amazon_products_v2` with RRF.
-
-## Scope and limits
-
-Saulie is a local research and portfolio project. It is not a public hosted service or a validated production shopping system. Early Windows experiments used Llama-3.2-3B; the deployed model uses Qwen3-4B. The full GPU stack was not rebuilt during the documentation audit.
-
-The historical SFT run logged a dataset hash that differs from the current local file. Structured final judge scorecards and a published BGE ONNX export recipe also remain missing. [The audit and remaining work](docs/documentation-audit.md) describe these limits.
-
-`main` is the canonical project view. Older `deployment`, `dpo_eval`, and `rag` branches are historical focused snapshots. Code uses the [MIT license](LICENSE); external models and catalog data retain their own terms.
+The code is under the [MIT license](LICENSE). External models and catalog data retain their own terms.

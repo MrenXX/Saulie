@@ -1,6 +1,6 @@
 # Prod ladder judge packet (external)
 
-The linked 60-scenario generation artifact is complete. It was recovered during the documentation audit. This guide defines the intended judging procedure; it does not supply returned scores. [Evaluation status](../../docs/evaluation.md)
+The linked generation output contains all 60 scenarios for each model. [Aggregate judge results](../../docs/evaluation.md) report the comparison; this page describes how to prepare the packet.
 
 ## Goal
 

@@ -1,76 +1,91 @@
 # Direct preference optimization
 
-DPO is the second training phase in the Qwen pipeline. SFT first learns conversational steering from demonstrations. DPO then trains a separate adapter to prefer better continuations while using frozen SFT behavior as its reference.
+SFT taught the steering pattern, but it left formulaic openings, abrupt transitions, and recommendations that did not always fit the conversation. I used DPO to train on explicit contrasts between better and worse continuations.
 
-The aim was to reduce repetitive phrasing, weak or forced steering, and recommendations that ignore the user's details. Earlier DPO candidates could score well on preference accuracy and still produce broken conversations.
+The SFT adapter stays frozen. A separate DPO adapter trains on top of it, using SFT behavior as the reference policy.
 
 ## Preference data
 
-The accepted input is [`DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl`](dataset/DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl).
+The [V4 input](dataset/DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl) contains 522 pairs: 330 synthetic Prompt A pairs, 92 repaired Prompt B pairs based on SFT outputs, and 100 expanded Prompt B pairs. They target style, steering, and product fit.
 
-- Prompt A supplies 330 synthetic preference pairs.
-- Repaired Prompt B supplies 92 pairs based on SFT trial-17 outputs. Local repair history starts with 93 and discards one.
-- Expanded Prompt B supplies another 100 pairs.
+The [seed-42 split](train/dataset/dpo_v4_split_seed_42.jsonl) has 418 training, 52 validation, and 52 test pairs. [Generation and repair](../docs/data.md)
 
-Final categories are 220 style, 121 steering, and 181 product-fit pairs. The [seed-42 split](train/dataset/dpo_v4_split_seed_42.jsonl) has 418 training, 52 validation, and 52 test rows.
+In 209 rows, chosen or rejected continuations contain scripted user replies. [`dpo_data.py`](train/dpo_data.py) keeps those replies as context but scores assistant tokens only. [`dpo_trainer_compat.py`](train/dpo_trainer_compat.py) carries the masks into TRL. The builder rejects trajectories beyond 704 tokens rather than dropping turns through truncation.
 
-Each row contains a shared `prompt` and separate `chosen` and `rejected` message lists. In 209 rows, at least one continuation contains a user message. Some branches have different scripted user replies. These are preferences over full trajectories, not always two answers to an identical final turn.
+## Training policy and reference
 
-[`dpo_data.py`](train/dpo_data.py) preserves the trajectory as context while scoring assistant tokens only. [`dpo_trainer_compat.py`](train/dpo_trainer_compat.py) carries those masks into TRL. Prompt, user, and padding tokens must not contribute to the preference score. The builder rejects overlength trajectories rather than silently truncating at the configured 704-token limit.
+Both policies share one frozen Qwen base loaded with bitsandbytes 8-bit:
 
-See [data preparation](../docs/data.md) and the [dataset contract](dataset/DATA_CONTEXT.md).
+```text
+reference = base + frozen SFT
+policy    = base + frozen SFT + trainable DPO
+```
 
-## Policy and reference
+Sharing the base avoids the memory cost of a second full model. Active adapters determine the forward path, and reference log probabilities are cached. Only the DPO parameters have gradients.
 
-The final unmerged training setup uses:
+The reference is SFT behavior rather than the unadapted base because the objective is to refine the first stage without discarding it. [`train_dpo.py`](train/train_dpo.py) builds the policy; adapter diagnostics check which parameters train.
 
-- Qwen3-4B-Instruct-2507 loaded with bitsandbytes 8-bit quantization.
-- Frozen SFT trial 17.
-- A new trainable DPO LoRA added to that SFT behavior.
-- A frozen SFT reference adapter, with reference log probabilities cached for comparison.
+## Over-optimisation
 
-Only DPO parameters train. Diagnostics check active adapters and non-DPO trainable parameters. v1.3 instead merged SFT into a dense base for a historical comparison. That is not the final v1.5 setup.
+The first studies exposed a problem with selecting on preference metrics alone. Several trials reached accuracy 1.0 but generated repetitive, ungrammatical text and occasional Chinese characters.
 
-## The SFT term inside v1.5 DPO
+Preference accuracy measures the ordering of two branches. It can improve while both branches become less likely if the rejected branch falls faster. In v1.1 trial 29, margin reached 11.67 while chosen log probability fell to about -672; healthy later trials stayed around -230. That explained why a large margin was a poor selection target, though the precise cause of the language drift was not isolated.
 
-The original SFT phase remains a distinct completed stage. v1.5 DPO adds a supervised chosen-response term to its preference loss, controlled by `rpo_alpha`. Its purpose is to retain chosen behavior during preference training. It is not another name for the original SFT study.
+Scaling DPO weight down at inference helped some early adapters, but it also weakened their learned behavior. I changed training and selection instead: smaller ranks, fewer epochs, a supervised anchor, and checks on absolute chosen likelihood. [Semantic review](eval/TRAIN_SETUP_SEMANTIC_REPORT.md)
 
-[`rpo_loss_bundle`](train/train_dpo.py) builds preference and `sft` losses with weights `1.0` and `rpo_alpha`. The study explores length handling, including `ld_0.3` and IPO. These settings are separate from WPO example weighting.
+## RPO anchor and selection objective
 
-## Experiment progression
+v1.5 adds a supervised loss on chosen responses:
 
-- v1.0 optimized preference accuracy. Its main saved study completed 21 trials and recorded a best validation accuracy of 1.0.
-- v1.1 added a hybrid ranking and source, category, and length diagnostics. GPU locking and stalled-trial handling were also revised.
-- Semantic review found that full-strength early adapters could break English despite strong validation metrics. Reduced DPO weights helped on small diagnostic samples.
-- v1.2 tried conservative fixed rescue configurations on the unmerged stack.
-- v1.3 compared an SFT-merged dense base. v1.4 repeated the comparison on the unmerged stack.
-- v1.5 returned to the unmerged stack, added the supervised anchor, and used a custom survival score before conversational evaluation.
+```text
+loss = preference_loss + rpo_alpha * chosen_response_sft_loss
+```
 
-[Project history](../docs/project-history.md), [study snapshots](../docs/evidence/dpo-study-history.json), and the [semantic review](eval/TRAIN_SETUP_SEMANTIC_REPORT.md) preserve this progression. Objectives differ, so scores across versions do not form one comparable leaderboard.
+This is an extra term during DPO, distinct from the original SFT phase. Its purpose is to keep chosen responses likely in absolute terms while the preference loss separates them from rejected responses. [`rpo_loss_bundle`](train/train_dpo.py) implements it with TRL's preference and `sft` losses.
 
-## Final v1.5 study
+The earlier v1.1 hybrid score still gave high scores to broken models. v1.5 replaced it with a custom `survival_score`. It checks preference accuracy, balanced category/source performance, style, margin, length effects, chosen log probability, and adapter/mask correctness. Its margin term favors a moderate gap instead of rewarding unlimited growth. [`evaluate_v1_5_trial`](train/dpo_diagnostics.py)
 
-The run is `optuna-run-20260602-052732`. It requested 20 completions with two workers. The saved summary records 31 attempts, 21 complete, eight failed, and two pruned. Concurrent workers explain the one-completion overshoot. It records 11 unique completed configurations, not 21 distinct configurations.
+The score filters the shortlist for generation testing. It does not decide the final deployment model.
 
-The survival score combines accuracy, macro scores across source families and categories, style accuracy, margin quality, and chosen-response likelihood relative to controls. Hard gates and penalties handle some failures. The implementation is [`evaluate_v1_5_trial`](train/dpo_diagnostics.py).
+## Experiment versions
 
-The numerical winner is trial 16, with score `0.9797833556543181` and validation preference accuracy `51/52`. The deployed choice is trial 4, also `51/52`, with a lower survival score of `0.9267774472820075`.
+- v1.0 selected on preference accuracy.
+- v1.1 introduced the hybrid score, richer diagnostics, GPU locking, and stalled-trial handling.
+- v1.2 tested conservative rescue configurations on the unmerged SFT/DPO stack.
+- v1.3 tested training with SFT merged into a dense base.
+- v1.4 repeated the comparison on the unmerged stack.
+- v1.5 returned to the unmerged stack with the RPO anchor and survival objective.
 
-Recovered author history records trials 4 and 20 as judge finalists, followed by a manual vLLM comparison and selection of trial 4. Structured judge scorecards were not located, so no numerical judge margin is claimed. [Selection record](../docs/evidence/selection-record.json)
+The final run, `optuna-run-20260602-052732`, completed 21 trials across 31 attempts, including eight failed and two pruned attempts. Two workers overshot the target of 20 completions by one. There were 11 unique completed parameter configurations. [Study summary](study_results/trial_summary_v1.5.json), [earlier studies](../docs/evidence/dpo-study-history.json)
 
-Trial 4 uses one epoch, batch one with accumulation eight, beta `0.05`, learning rate `1.5e-5`, rank 16, dropout `0.05`, `rpo_alpha=1.0`, and `length_mode=ld_0.3`. [Complete training summary](study_results/trial_summary_v1.5.json)
+## Selecting trial 4
+
+Trial 16 had the highest training objective, `0.9798`. Trial 4 scored `0.9268`; both had validation preference accuracy 51/52.
+
+I took six candidates into blind conversational judging. Trial 4 ranked first for both judges in round one. On the second-round steering holdout, trial 20 had a slightly higher mean, but the judges split their recommendations because one favored trial 4 on the harder opening types.
+
+A qualitative test with people talking directly to trials 4 and 20 favored trial 4. I selected it for deployment and retained trial 20 as backup. [Judging results](../docs/evaluation.md)
+
+Trial 4 uses one epoch, batch one with accumulation eight, beta `0.05`, learning rate `1.5e-5`, rank 16, dropout `0.05`, `rpo_alpha=1.0`, and `length_mode=ld_0.3`.
 
 ## Export for serving
 
-vLLM receives one adapter containing SFT and DPO contributions, produced by [`merge_sft_dpo_lora.py`](train/merge_sft_dpo_lora.py) with a PEFT `cat` combination. It does not attach two independent LoRAs to the same request.
+The training setup uses two adapters, while the vLLM serving path accepts one per request. I combine their low-rank factors with PEFT's `cat` operation:
 
-Trial 4 combines rank 16 SFT and rank 16 DPO into rank 32. Other finalists have rank 40 and require vLLM rank capacity 64. The production launcher only needs 32 for trial 4.
+```text
+combined_update = SFT_update + DPO_update
+combined_rank   = SFT_rank + DPO_rank
+```
 
-The export audit checks weight-delta algebra. Stack-to-export and BnB-to-FP8 forward drift are separate diagnostics. Passing the delta check does not establish identical generated text. [Merge validation](eval/merge_v15_slate_validation.md)
+Concatenation preserves the sum without folding the adapters into a differently quantized base. Adding the factors directly would introduce cross terms. [`merge_sft_dpo_lora.py`](train/merge_sft_dpo_lora.py) reconstructs both updates in full precision and refuses export if their maximum difference exceeds `1e-5`.
+
+For trial 4, rank 16 plus rank 16 gives rank 32. Some other finalists have rank 40, so the evaluation server uses vLLM rank capacity 64.
+
+Training uses bitsandbytes 8-bit; serving uses FP8 because those were the compatible paths in the training and inference environments. The merge script therefore also compares forward drift and short generations on both bases. Those diagnostics are separate from the weight-update check. [Merge validation](eval/merge_v15_slate_validation.md)
 
 ## Commands
 
-These need the [artifacts and training environment](../REPRODUCIBILITY.md). The main launcher starts a new GPU study and writes new run directories.
+These require the [training environment, checkpoints, and frozen SFT adapter](../REPRODUCIBILITY.md):
 
 ```bash
 conda activate saulgman
@@ -78,7 +93,7 @@ python dpo/train/scripts/preflight_v1_5.py
 bash dpo/train/scripts/run_v1_5_main.sh
 ```
 
-Inspect a completed study without training:
+Generate an HTML report from the included study summary without training:
 
 ```bash
 python -m dpo.train.study_report \
@@ -86,4 +101,4 @@ python -m dpo.train.study_report \
   --output /tmp/saulie-v15-study.html
 ```
 
-Next, follow [evaluation](eval/README.md) and [deployment](../docs/deployment.md). A training score, valid export, fluent conversation, and grounded product search are separate checks.
+[Evaluation commands](eval/README.md), [deployment](../docs/deployment.md)

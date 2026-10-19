@@ -86,6 +86,12 @@ def main():
     for path, models, scenarios in [("dpo/eval/generations_round1.json", 7, 34), ("dpo/eval/generations_prod_ladder.json", 3, 60)]:
         result = load(path)
         checks[path + " coverage"] = result["checkpoint_complete"] is True and len(result["models"]) == models and all(len(m["conversations"]) == scenarios for m in result["models"].values())
+    judged = load("docs/evidence/judge-results.json")
+    checks["reported judge coverage"] = len(judged["round_1"]["mean_steering"]) == 7 and len(judged["round_2"]["mean_steering"]) == 5 and len(judged["training_stages"]["scores"]) == 3 and len(judged["opening_types"]["mean_steering"]) == 4
+    scores = [r[k] for part in ("round_1", "round_2") for r in judged[part]["mean_steering"] for k in ("A", "B")]
+    scores += [r[k] for r in judged["training_stages"]["scores"] for k in ("steering_A", "steering_B", "ordinary_A", "ordinary_B", "mean_steering", "mean_ordinary")]
+    checks["judge score range"] = all(1 <= score <= 5 for score in scores)
+    checks["reported cross-judge means"] = all(abs((r[k + "_A"] + r[k + "_B"]) / 2 - r["mean_" + k]) <= 0.0050001 for r in judged["training_stages"]["scores"] for k in ("steering", "ordinary"))
     for label, passed in checks.items():
         if not passed:
             errors.append("Evidence check failed: " + label)

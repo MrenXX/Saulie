@@ -8,7 +8,7 @@ This guide assumes the [environment and external artifacts](../REPRODUCIBILITY.m
 
 Copy [`.env.example`](../.env.example) to a local `.env` and replace the example key values. Keep `LLM_API_KEY` equal to `VLLM_API_KEY`. Set `NGINX_API_KEY` for clients using the proxy. `NGROK_KEY` is only needed for the optional public tunnel.
 
-The historical scripts expect `/root/saulie` and `/root/miniconda3/envs/saulgman/bin/python`. Set `SAULIE_PYTHON` if the interpreter differs. The production deploy script still hardcodes model and adapter locations under `/root/saulie`; setting `SAULIE_REPO` does not make every path portable.
+Scripts default to `/root/saulie` and `/root/miniconda3/envs/saulgman/bin/python`. Set `SAULIE_PYTHON` if the interpreter differs. Update model and adapter paths in the deploy script if the checkout is elsewhere; setting `SAULIE_REPO` alone does not update those paths.
 
 Useful settings are:
 
@@ -29,7 +29,7 @@ curl http://127.0.0.1:9000/health
 
 The launcher prepares RAG services, vLLM, the agent, nginx, and an optional ngrok tunnel. It opens a tmux dashboard by default. For startup without that dashboard, set `SAULIE_NO_DASHBOARD=1` before running it.
 
-The expected health payload identifies the configured model and active prompt. A successful health check alone does not verify that retrieval returns relevant items.
+The health payload identifies the configured model and active prompt. Use `rag/smoke_hybrid.py` to check product retrieval as well.
 
 ## Call the local agent
 
@@ -58,7 +58,7 @@ Export `NGINX_API_KEY` into that shell first. [Streaming behavior](../AGENT_STRE
 python remote_chat.py
 ```
 
-The checked-in tunnel URL is historical. Do not treat it as an active project demo link.
+Replace the example tunnel URL with the one shown by the running stack.
 
 ## Stop and troubleshoot
 
@@ -71,6 +71,6 @@ bash stop_saulie.sh
 - No products: check the collection and index before blaming the model. Use [`smoke_hybrid.py`](../rag/smoke_hybrid.py).
 - vLLM bind failure on WSL: the script supports `VLLM_BIND=0.0.0.0`, which also changes network exposure. [Demo security](../SECURITY.md)
 - Agent cannot connect: align `LLM_BASE_URL`, vLLM port, and both local model API keys.
-- Tool calls happen too early: inspect the saved pressure defaults and report before tuning. Runtime pressure is separate from DPO weights.
+- Tool calls happen too early: review the pressure schedule and the model/prompt comparison before tuning.
 
 Deployment and benchmark entry points may stop and recreate named containers. Use a separate environment when preserving a running demo.

@@ -1,6 +1,6 @@
 # DPO training invariants
 
-This page documents the current implementation checks. Historical agent approval steps and implementation plans have been removed from the public instructions.
+The trainer checks adapter state, assistant-only masks, trajectory lengths, and reference behavior before using the results to rank a trial.
 
 ## Adapter behavior
 

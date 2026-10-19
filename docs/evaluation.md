@@ -1,83 +1,114 @@
-# Evaluation and recorded results
+# Evaluation
 
-Training metrics, conversation quality, export correctness, retrieval relevance, and latency answer different questions. The saved artifacts support a review of each, but not one universal project score.
+I used training metrics to shortlist adapters and generated conversations to select the model. Low SFT loss did not reliably predict steering quality, and high DPO preference accuracy sometimes selected models with broken English.
 
-## SFT behavior
+Two LLM judges scored the conversations: Claude Opus 4.8 with Max reasoning and GPT-5.5 with xhigh reasoning. They are labeled Judge A and Judge B below. Scores use a 1-5 rubric.
 
-[SFT trial summaries](evidence/sft-study-v1.1.json) rank validation loss. The [March 31 conversations](evidence/sft-conversations.json) contain 11 models on 14 scenarios each, including the base and candidates from v1.1 and v1.2. The [rubric](../sft/sft_eval/llm_judge_prompt.md) evaluates conversational steering and naturalness.
+The aggregate results are transcribed from Tables 5.2-5.6 of my project report. [Judge results JSON](evidence/judge-results.json)
 
-Local judge notes report learned steering alongside formulaic openings. They disagree on candidate rankings and were not a uniform structured scoring run. Trial 17 is the later frozen baseline; it is not the loss winner. [SFT details](../sft/README.md)
+## SFT selection
 
-## DPO preference validation
+I generated conversations from the shortlisted SFT adapters on [14 fixed scenarios](../sft/sft_eval/eval_skeletons.json). The review covered steering, question quality, recommendation landing, tone, naturalness, and difficult openings.
 
-The fixed validation split contains 52 pairs. Accuracy `0.9807692307692307` means 51/52 preferred branches scored above their rejected branches. It is not a 98% user satisfaction rate, retrieval precision, or conversation success rate.
+Trial 17 was selected through this review, although trials 16 and 15 had slightly lower validation loss. The [outputs](evidence/sft-conversations.json) include the base and ten SFT candidates. [SFT method](../sft/README.md)
 
-The [v1.5 summary](../dpo/study_results/trial_summary_v1.5.json) names trial 16 as the survival-objective winner. The deployed trial 4 has a different objective value despite the same 51/52 preference accuracy. [DPO method](../dpo/README.md)
+## DPO judging protocol
 
-The [early semantic review](../dpo/eval/TRAIN_SETUP_SEMANTIC_REPORT.md) explains why preference scores were insufficient. It reviews 180 generated conversations across ten scenarios, three earlier candidates, and six DPO weights. It is a small diagnostic study of the HF training setup, not the final FP8 deployment evaluation.
+The [DPO scenario set](../dpo/eval/eval_skeletons.json) contains 52 steering conversations across four opening types and eight ordinary conversations. The latter check whether the model can chat without forcing a sale.
 
-## Adapter export checks
+The first round compared SFT trial 17 with six DPO finalists on 26 steering and eight ordinary scenarios. Candidate labels hid trial numbers and training metrics from the judges. The [generation output](../dpo/eval/generations_round1.json) contains 238 conversations.
 
-The [finalist merge report](../dpo/eval/merge_v15_slate_validation.md) checks trials 19, 16, 8, 27, 20, and 4. Weight-delta algebra is the blocking check. Forward drift and short generation checks are additional diagnostics.
+The second round compared trials 4, 19, 20, and 27 against SFT on the other 26 steering scenarios. The runner also reuses the eight ordinary controls; only the steering set is a fresh holdout.
 
-The FP8 comparison in that report uses HF as a serving proxy. It does not replace generating conversations through vLLM. All six finalists were retained for the recorded evaluation; this is not proof that they are equally good models.
+Generation uses vLLM FP8 with temperature 0.7, top-p 0.8, top-k 20, repetition penalty 1.05, and at most 256 tokens per assistant turn. [Configuration](../dpo/eval/v15_eval_config.py), [rubric](../dpo/eval/llm_judge_prompt_dpo.md)
 
-## Round 1 conversations
+## DPO results
 
-[`generations_round1.json`](../dpo/eval/generations_round1.json) records a complete June 5 run: SFT trial 17 plus six anonymized candidates, each on 34 scenarios. That is 238 conversations. Each model sees 26 steering and eight ordinary-chat scenarios.
+Round-one mean steering scores, Judge A followed by Judge B:
 
-The [unblind map](../dpo/eval/generations_round1_unblind.json) maps candidates A through F to trials 19, 16, 8, 27, 20, and 4. Keep it out of a judge's scoring packet.
+- Trial 4: 3.74 and 3.36.
+- Trial 19: 3.63 and 3.14.
+- Trial 20: 3.40 and 3.11.
+- Trial 27: 3.36 and 3.14.
+- Trial 16: 3.34 and 2.87.
+- Trial 8: 3.21 and 3.01.
+- SFT trial 17: 3.38 and 2.98.
 
-Generation uses vLLM FP8, temperature 0.7, top-p 0.8, top-k 20, repetition penalty 1.05, and 256 maximum tokens per assistant turn. The [configuration](../dpo/eval/v15_eval_config.py) defines the scenario split and parameters.
+Trial 4 led both judges in round one. On the second-round steering holdout:
 
-The runner supports a second round on the other 26 steering scenarios while reusing the eight ordinary controls. This means the two rounds are not fully independent held-out evaluations. A completed Round 2 JSON and structured judge scorecards were not recovered in the audited project folders.
+- Trial 4: 3.77 and 3.40.
+- Trial 20: 3.83 and 3.46.
+- Trial 27: 3.70 and 3.29.
+- Trial 19: 3.52 and 3.22.
+- SFT trial 17: 3.45 and 3.06.
 
-The [selection record](evidence/selection-record.json) preserves the author's report that trials 4 and 20 were judge finalists, followed by the manual choice of trial 4. Without scorecards, no numerical judge margin or independently verified final ranking is published.
+Both judges gave trial 20 a slightly higher mean, but Judge A preferred trial 4 for its handling of unrelated and vague openings. Judge B preferred trial 20. I then had participants talk directly to both candidates and compare steering, style, and recommendations. That qualitative comparison favored trial 4, which I deployed with trial 20 as backup. It was not a counted vote or a large user study.
 
-## Base, SFT, and deployed DPO
+The training objective would have selected trial 16. Its survival score was 0.9798, compared with 0.9268 for trial 4. Both reached preference accuracy 51/52 on the validation pairs. These metrics rank supplied continuations; the judges assess generated conversations. [Training summary](../dpo/study_results/trial_summary_v1.5.json)
 
-[`generations_prod_ladder.json`](../dpo/eval/generations_prod_ladder.json) records the June 10 comparison of three models on all 60 scenarios, totaling 180 conversations. It was recovered locally and added during this overhaul.
+## Contribution of each stage
 
-Only the base received the [bootstrap system prompt](../dpo/eval/eval_inference_system_prompt.md). SFT and DPO used bare scenario turns. This is useful for inspecting learned behavior, but it is not a comparison with identical prompts across all models.
+I also compared the prompted base, SFT trial 17, and DPO trial 4 on all 60 scenarios. The base received a detailed [bootstrap system prompt](../dpo/eval/eval_inference_system_prompt.md); the trained models used bare user turns. These were text-only category recommendations without product retrieval.
 
-The models generated generic product recommendations without the live retrieval tool. These outputs cannot establish catalog grounding or tool reliability. [Recorded examples](examples.md)
+Mean steering scores, Judge A followed by Judge B:
 
-## Model, prompt, and tool behavior
+- Base: 2.86 and 3.07, cross-judge mean 2.97.
+- SFT: 3.25 and 3.07, cross-judge mean 3.16.
+- DPO: 3.42 and 3.21, cross-judge mean 3.32.
 
-The [matrix outputs](../dpo/eval/matrix_runs/) compare SFT, half-weight DPO, and full-weight DPO with three runtime prompts on scripted agent flows. The [tool-pressure smoke report](../dpo/eval/matrix_runs/tool_pressure_smoke_report.md) adds a runtime logits processor comparison.
+Mean ordinary-conversation scores were 3.31, 3.73, and 3.90 across judges for base, SFT, and DPO respectively.
 
-Those tests inspect whether tools execute and whether conversation remains usable. Their flags are heuristic, and the scenarios are small. The direct-request baseline and harness both ask a clarifying question without a tool call in the linked JSON.
+Judge A counted clean recommendation landings in 13/52 base conversations, 20/52 SFT conversations, and 27/52 DPO conversations. Conversations with no recommendation fell from 20 to 15 to eight. Forced recommendations in the eight ordinary conversations fell from six to three to one.
 
-The positive result is narrow: pressure caused search execution in the motivating camping and kitchen runs. It also caused some early searches. It does not prove a general hallucination reduction rate.
+The [complete generation output](../dpo/eval/generations_prod_ladder.json) contains 180 conversations. [Example](examples.md)
 
-## Retrieval comparison
+## Where DPO helped and where it did not
 
-The [fusion report](../rag/fusion_comparison_report.md) uses 18 product intents. It counts first-result keyword matches and relevant hits among the top three.
+Cross-judge steering means by opening type, SFT followed by DPO:
 
-- Indian RRF: 10/18 first-result matches and 32/54 top-three matches.
+- Direct problem: 3.10 to 3.49.
+- Unrelated or factual: 3.27 to 3.22.
+- Emotional or lifestyle: 3.34 to 3.31.
+- Vague complaint: 2.95 to 3.25.
+
+DPO helped most on direct problems and vague complaints. It slightly reduced scores on the other two types. Trial 4 also received one severe-failure flag and two factual-hallucination flags from Judge A. It remains a specialized steering model, and SFT is a useful fallback for less sales-focused conversation.
+
+These results come from fixed scenarios and LLM judging. The project report includes the aggregates; per-conversation judge score files and the completed Round 2 generation JSON are not included in the repository.
+
+## Adapter and runtime checks
+
+Before judging the finalists, I checked that concatenating SFT and DPO preserved their weight updates. The [merge report](../dpo/eval/merge_v15_slate_validation.md) covers all six finalists. Weight-delta equality blocks a bad export; forward drift and short FP8 generations provide additional diagnostics.
+
+The [model/prompt comparison](../dpo/eval/matrix_runs/) tests SFT, half-weight DPO, and full-weight DPO under three prompts. Half-weight DPO failed to call search in those runs. Full-weight trial 4 with the shorter prompt became the default.
+
+The later [tool-pressure comparison](../dpo/eval/matrix_runs/tool_pressure_smoke_report.md) increased search execution in camping and kitchen scenarios, but sometimes triggered it too early. Its heuristic flags and small scenario set are useful for debugging rather than estimating a general success rate.
+
+## Retrieval
+
+The [18-query comparison](../rag/fusion_comparison_report.md) tests two catalogs and two fusion methods:
+
+- Indian RRF: 10/18 relevant first results and 32/54 relevant top-three hits.
 - Indian DBSF: 10/18 and 28/54.
 - McAuley RRF: 15/18 and 44/54.
 - McAuley DBSF: 14/18 and 43/54.
 
-These results support the local choice of McAuley with RRF. Category filters differ between catalogs, and keyword matching can miss semantic failures or accept weak matches. This is not a large annotated retrieval benchmark.
+I selected McAuley with RRF. Relevance uses a keyword rubric, and category filters differ between catalogs.
 
 ## Latency
 
-The [June 11 report](../dpo/eval/LATENCY_REPORT.md) and [raw runs](../dpo/eval/latency_runs/) separately measure isolated vLLM, isolated RAG, and non-streaming agent requests.
+The [local benchmark](../dpo/eval/LATENCY_REPORT.md) measures isolated vLLM, isolated retrieval, and non-streaming agent requests:
 
-- Short-prompt vLLM TTFT: p95 27.26 ms from five requests.
+- Short-prompt model TTFT: p95 27.26 ms from five requests.
 - Decode rate: median 70.53 tokens per second across ten observations.
-- Isolated search: p95 31.13 ms across 24 observations.
-- Agent tool turn: p95 2489.61 ms from six observations.
+- Retrieval: p95 31.13 ms across 24 observations.
+- Full tool turn: p95 2489.61 ms from six observations.
 
-The report does not establish public-tunnel latency, streaming client TTFT, sustained load capacity, or a hardware-independent guarantee. The saved run files do not establish a consistent per-run GPU identity, so these numbers are not advertised as an RTX 4070 benchmark.
+The tool turn includes generation before search and generation after its results. These timings exclude public-tunnel latency and do not measure streaming client TTFT or sustained concurrent load. [Raw runs](../dpo/eval/latency_runs/)
 
-## Re-run boundaries
+## Re-running evaluation
 
-Use [the evaluation command guide](../dpo/eval/README.md) after supplying the adapters and environment. Most generation commands start or require GPU services. The evidence checker can validate saved counts and hashes without them:
+Follow [the command guide](../dpo/eval/README.md) after supplying the model assets. To check the included files, counts, and hashes without GPU services:
 
 ```bash
 python scripts/check_docs.py
 ```
-
-The documentation overhaul verified these artifacts and references. It did not retrain models, repeat judge panels, reindex catalogs, or restart the user's services.

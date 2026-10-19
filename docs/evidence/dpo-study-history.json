@@ -1,5 +1,5 @@
 {
-  "source": "Local saved study summaries. Counts are snapshots, including stale RUNNING states where present.",
+  "source": "Study summary exports for DPO v1.0 through v1.5. State counts reflect each export time.",
   "studies": [
     {
       "study_version": null,

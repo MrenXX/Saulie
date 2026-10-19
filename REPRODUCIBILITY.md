@@ -1,6 +1,6 @@
 # Reproducibility
 
-Git contains the code, DPO input and split, saved study results, and selected synthetic evaluation outputs. It does not contain every artifact needed for a fresh GPU deployment or an exact historical SFT rerun.
+The repository includes training code, the DPO dataset and split, study results, and evaluation conversations. Running the full stack also requires model weights, trained adapters, and retrieval assets.
 
 ## Inspect the project without a GPU
 
@@ -12,13 +12,13 @@ python scripts/check_docs.py
 
 The checker uses the Python standard library. It checks local Markdown targets and anchors, exported evidence hashes, preference-data counts and split IDs, and saved evaluation coverage. It does not start models or containers.
 
-Read [history](docs/project-history.md), [SFT](sft/README.md), [DPO](dpo/README.md), and [evaluation](docs/evaluation.md) for the methods and their limits.
+See [development decisions](docs/project-history.md), [SFT](sft/README.md), [DPO](dpo/README.md), and [evaluation](docs/evaluation.md) for the training method and results.
 
 ## Environment
 
-The historical target is Ubuntu 22.04 under WSL2 with NVIDIA CUDA support, Docker GPU access, Conda, and tmux. The training code was designed around a 12 GB memory budget, but not every saved run establishes a specific GPU model.
+The stack uses Ubuntu 22.04 under WSL2 with NVIDIA CUDA support, Docker GPU access, Conda, and tmux. Training was designed around a 12 GB memory budget.
 
-Several entry points assume `/root/saulie`. Use that layout in a dedicated environment, or review hardcoded paths before moving it. The Python recipe is [`environment.yml`](environment.yml), with versions in [`requirements.txt`](requirements.txt). Docker references are in [`docker/versions.env`](docker/versions.env), captured from the June 2026 environment.
+Several entry points assume `/root/saulie`. Use that layout or update the hardcoded paths before moving it. The Python recipe is [`environment.yml`](environment.yml), with versions in [`requirements.txt`](requirements.txt). Docker images are pinned in [`docker/versions.env`](docker/versions.env).
 
 ```bash
 cd /root/saulie
@@ -45,7 +45,7 @@ Do not overwrite the frozen SFT adapter while experimenting. Full model snapshot
 
 ## BGE and catalog setup
 
-The tracked build script compiles an existing ONNX model. It does not export BGE from PyTorch to ONNX. The audited machine has that export and its external tensor data, but a complete export recipe is not published. This is a real clean-machine reproduction gap.
+The build script compiles an existing ONNX model and its external tensor data. The PyTorch-to-ONNX export step is not included, so supply a compatible export before running it.
 
 Once a compatible export and the other BGE files exist:
 
@@ -82,8 +82,6 @@ For a new DPO run, the V4 input and seed-42 split are tracked. Training still re
 
 Saved study summaries support inspection. They do not guarantee identical Optuna scheduling, trial numbering, sampling, or numerical results on another device. Two workers and runtime failures affected the original study.
 
-## Validation performed for this overhaul
+## Further work
 
-The documentation checker, artifact hashes, saved counts, command flags, report generation, and source-state preservation were checked. The full GPU environment was not rebuilt. Models were not retrained, catalogs were not reindexed, and the user's live services were not restarted.
-
-Remaining artifact recovery and verification work is listed in [the audit](docs/documentation-audit.md).
+Downloadable trained adapters, the original SFT dataset version, and a complete BGE export recipe would make reproduction easier. [Limitations and further work](docs/limitations.md)

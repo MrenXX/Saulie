@@ -1,6 +1,6 @@
 # Round 1 judge packet (external)
 
-The saved generation packet is complete. Structured returned judge scores were not recovered in the documentation audit. See [evaluation status](../../docs/evaluation.md).
+The generation packet is complete. See [evaluation results](../../docs/evaluation.md) for the reported aggregate scores.
 
 ## Files to send the judge
 

@@ -1,78 +1,74 @@
-# Data preparation and provenance
+# Data generation and preparation
 
-Saulie uses SFT demonstration conversations, DPO preference trajectories, and product catalog records for retrieval. Catalog products are not the SFT or DPO training corpus.
+I used separate datasets for conversational behavior and product retrieval. SFT learns from complete dialogues, DPO learns from preferred and rejected continuations, and the product catalog is queried during inference.
 
-The [provenance export](evidence/data-provenance.json) records parsed counts and hashes from the October 19, 2026 audit. Source labels such as `windows/DATA` identify historical folders, not required paths on a new machine.
+## SFT conversations
 
-## Early Windows conversations
+I generated about 500 dialogues with several language models using a common specification for the task, persona, opening types, and conversation length. Multiple generators provided variation, but also produced similar examples independently, so deduplication mattered before splitting the data.
 
-`saulgman_sft` contains generation prompts, teacher-named batches, four Llama training script versions, and merged datasets. Their creation and modification times place this work mainly in August through October 2025. A later repaired file appears in March 2026.
+The dialogues cover four kinds of opener:
 
-The scripts point to Llama-3.2-3B-Instruct. Teacher filenames include Gemini, GPT, Claude, DeepSeek, and Grok labels. Names alone do not verify the exact generating model or API version.
+- A direct problem, which gives the clearest route to a product category.
+- An unrelated or factual question, where the model must find a relevant transition.
+- An emotional or lifestyle situation, where the recommendation depends on personal context.
+- A vague complaint, where the model needs to clarify the problem first.
 
-- `merged_data_v1_560exps.jsonl` parses as 559 surviving records.
-- `merged_data_v1.1_570exps.jsonl` has 570 records.
-- `fixed_dataset_512.jsonl` has 512 records.
+Conversation lengths range from four to sixteen turns. The generation target gives longer budgets to harder openings, with roughly 15% four-turn dialogues, 40% six-turn, 30% eight-turn, and 15% ten turns or more.
 
-These artifacts do not prove that every record or script contributed to the final Qwen model. [Legacy evidence](evidence/legacy-windows.json)
+### Generation rules
 
-## Qwen SFT curation
+The user never explicitly asks for a product. The base model can already answer those requests; the data is meant to teach the harder transition from a situation to a recommendation.
 
-Windows `DATA` preserves corrected source batches, intermediate files, and versions. The audit counted 366 records in `SFT_DATA_V1.jsonl` and 500 in `SFT_DATA_V2.jsonl`. Current WSL `sft/SFT_DATA_V3.jsonl` also has 500.
+The assistant recommends a generic category in the final message. Keeping brands, prices, and links out of the training target avoids teaching product recall that can go stale. The retrieval layer supplies those details later. Post-recommendation follow-up dialogues were outside the initial dataset's scope.
 
-Current V3 opening types are A: 186, B: 131, C: 89, and D: 94. Rows contain messages and metadata for stratification. The [SFT guide](../sft/README.md) explains the historical 400/50/50 split sizes.
+User and assistant turns alternate strictly. Openings must vary, and the style specification excludes emojis and em dashes. These rules help keep the small dataset focused on the intended behavior.
 
-Exact parsed-row comparison finds 379 V2 rows in current V3. This confirms overlap and edits. It does not prove an uninterrupted training lineage or identify historical training bytes.
+### Repetition and leakage checks
 
-March MLflow studies log SHA-256 prefix `ced5b49dd3d0`. Current V3 has this SHA-256:
+I checked generated material against an exclusion list and against previously accepted examples. The generation checks used RapidFuzz opening-similarity thresholds of 75 against the exclusion corpus and 80 against accepted peers. Additional `SequenceMatcher` checks flagged similar conversations and product wording for review.
 
-```text
-958f1a0131d2b1de9dcd0fdea64d134725383decf8199714373ad5f66748f8c3
-```
+The data went through three curation versions. The current V3 copy has 500 rows, with opening types A: 186, B: 131, C: 89, and D: 94. Training uses an 80/10/10 split stratified by opening type and length bucket. The SFT runs used 400 training, 50 validation, and 50 test conversations.
 
-An exact match for the historical hash was not recovered from the supplied dataset locations. The SFT training file remains outside Git. Do not silently substitute the current file when reporting or reproducing trial 17.
+### Earlier datasets
 
-## DPO generation and repair
+The initial Llama experiments used `merged_data_v1_560exps.jsonl` and `merged_data_v1.1_570exps.jsonl`. The retained copies contain 559 and 570 rows respectively. A later repaired copy contains 512. Qwen data preparation produced 366-row V1 and 500-row V2 sets before V3.
 
-Prompt A defines synthetic pairs across style, steering, and product fit. Local Part A preserves the initial 330 pairs, category-specific repairs, pivot-diversity work, and validation reports. Its repaired source has 111 style, 110 steering, and 109 product-fit rows.
+These versions are recorded in the [dataset manifest](evidence/data-provenance.json). They are separate iterations rather than one dataset to concatenate. [SFT training](../sft/README.md)
 
-Prompt B uses frozen SFT trial-17 behavior to mine weaker continuations and construct preferred alternatives. The local repair set has 93 original pairs and 92 accepted pairs after one discard. That subset is heavily style-focused. Another 100-pair source expands product-fit and steering coverage.
+## DPO preference pairs
 
-The accepted V4 dataset combines:
+The preference set targets three problems left after SFT: formulaic style, weak steering, and poor product fit. It combines fully synthetic comparisons with the SFT model's actual mistakes.
 
-- `prompt_a`: 330.
-- `prompt_b_repaired`: 92.
-- `prompt_b_exp500`: 100.
-- Total: 522. Categories: 220 style, 121 steering, 181 product fit.
+- Prompt A generates 330 synthetic pairs with a clear difference between chosen and rejected behavior.
+- Prompt B uses SFT trial-17 responses as the rejected side and a better rewrite as chosen. Repair retained 92 of the original 93 pairs.
+- Another 100 Prompt B pairs expand product-fit and steering coverage.
 
-`exp500` is a source label, not the final pair count. Older V2 metadata is historical provenance; V4 is the active input in [`dpo/train/paths.py`](../dpo/train/paths.py).
+The final 522 pairs contain 220 style, 121 steering, and 181 product-fit examples. The source label `prompt_b_exp500` refers to the expanded generation run; its contribution to the final set is 100 pairs.
 
-Public artifacts include [V4 data](../dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl), the [repair manifest](../dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_repair_manifest.jsonl), [validation report](../dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_validation_report.json), [repair utility](../dpo/dataset/repair_dpo_522_v4.py), and [generation specifications](../dpo/dataset/DATA_CONTEXT.md).
+The active input is [V4 repaired data](../dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_repaired.jsonl). The [repair manifest](../dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_repair_manifest.jsonl), [validation report](../dpo/dataset/DPO_522_prompt_a_and_prompt_b_V4_validation_report.json), and [repair script](../dpo/dataset/repair_dpo_522_v4.py) describe its processing. [Dataset contract and generation prompts](../dpo/dataset/DATA_CONTEXT.md)
 
-## Multi-turn preference semantics
+### Multi-turn continuations
 
-`prompt`, `chosen`, and `rejected` are message lists. In 209 rows, a branch includes a user reply. Branches may follow different scripted replies, so preference concerns complete counterfactual trajectories.
+Each row contains a shared `prompt` and separate `chosen` and `rejected` message lists. In 209 rows, a continuation includes a user reply. Some branches follow different scripted replies because the comparison concerns where the conversation leads.
 
-User messages stay visible to attention but receive zero scored tokens. Assistant messages receive the preference score. [`dpo_data.py`](../dpo/train/dpo_data.py) builds and audits the masks. [Training invariants](../dpo/train/DPO_IMPLEMENTATION_FIXES.md)
+User replies remain visible as context but contribute no scored tokens. Only assistant turns contribute to the preference objective. [`dpo_data.py`](../dpo/train/dpo_data.py) builds and checks those masks.
 
-The deterministic [split manifest](../dpo/train/dataset/dpo_v4_split_seed_42.jsonl) assigns every stable ID once, with 418/52/52 train/validation/test rows. The training summary's data prefix `f3b9ade4dc53` and full split hash match the tracked files.
+The [seed-42 split](../dpo/train/dataset/dpo_v4_split_seed_42.jsonl) assigns 418 pairs to training, 52 to validation, and 52 to test, stratified by source and correction category.
 
-## Evaluation data
+## Evaluation scenarios
 
-Earlier [SFT scenarios](../sft/sft_eval/eval_skeletons.json) support the saved 11-model, 14-scenario comparison. Later [DPO scenarios](../dpo/eval/eval_skeletons.json) contain 60 scenarios, including ordinary conversation controls. These are distinct evaluation sets.
+Evaluation uses conversation skeletons containing only user turns. Each model fills in its own assistant turns, which gives the judges the same situations to compare.
 
-The DPO protocol generates assistant turns against fixed user turns. It measures behavior under scripted conditions, not an interactive user study. [Evaluation details](evaluation.md)
+The [SFT set](../sft/sft_eval/eval_skeletons.json) has 14 scenarios. The later [DPO set](../dpo/eval/eval_skeletons.json) has 52 steering scenarios plus eight ordinary conversations. The ordinary cases check whether training makes the model force a product into a conversation that does not call for one. [Evaluation](evaluation.md)
 
 ## Product catalogs
 
-Retrieval first used an Indian Amazon CSV and later compared it with McAuley's Amazon Reviews 2023 metadata. Preparation filters ratings, review counts, missing prices, duplicate IDs, and incomplete text. Category, title, and features form the embedding text.
+I compared an Indian Amazon export with McAuley's [Amazon Reviews 2023 metadata](https://amazon-reviews-2023.github.io/). Preparation removes duplicates and incomplete records, filters ratings and review counts, and builds embedding text from category, title, and features.
 
-Saved documentation reports roughly 114,000 Indian and 443,000 McAuley records after cleaning. These are approximate historical collection sizes, not a live Qdrant count. Prices and availability are metadata snapshots.
+The resulting indexes contain approximately 114,000 Indian products and 443,000 McAuley products. I selected McAuley with RRF from the 18-query comparison. Titles, prices, ratings, and links are catalog snapshots; availability is not checked against live retailer stock. [Retrieval preparation and indexing](../rag/README.md)
 
-[The RAG guide](../rag/README.md) covers preparation, indexing, and validation. The upstream [Amazon Reviews 2023 project](https://amazon-reviews-2023.github.io/) supplies the McAuley metadata. External data and model terms are separate from the code license.
+## Dataset versions and hashes
 
-## Published audit evidence
+The training summaries identify the DPO file with hash prefix `f3b9ade4dc53` and include the split hash. Both match the tracked inputs.
 
-The overhaul adds SFT summaries, selected run metadata, SFT fixtures and outputs, and the completed base/SFT/DPO comparison. The [export manifest](evidence/export-manifest.json) records hashes of copied files.
-
-Raw Cursor sessions, credentials, weights, full tracking stores, catalog storage, and discarded drafts remain local. The [audit](documentation-audit.md) lists remaining gaps.
+The March SFT runs log hash prefix `ced5b49dd3d0`, while the current local V3 file starts with `958f1a0131d2`. The original matching SFT input is not included, so the current copy cannot reproduce trial 17 exactly. [Reproducibility](../REPRODUCIBILITY.md)

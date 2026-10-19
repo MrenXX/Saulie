@@ -1,75 +1,67 @@
-# Project history
+# Development decisions
 
-Public Git history begins with the DPO stack in May 2026. Local artifacts show earlier Windows work. This account combines commits, saved summaries, MLflow parameters, hashes, and selected author decisions from Cursor history.
+I built Saulie to explore whether a small, locally hosted model could lead a useful shopping conversation. The difficult part was getting from an ordinary opening to a justified recommendation. Answering a direct product request was already within the base model's capabilities.
 
-Creation time is weak evidence after a migration. Several Windows repair folders were created in May while their contents retain earlier modification times. Dates below identify surviving records, not necessarily when work first began.
+## Choosing the model
 
-## August to October 2025: Windows Llama experiments
+I started with Llama-3.2-3B-Instruct. It was light enough to work with, but its tool calling was unreliable for the search step I needed later. I moved to Qwen3-4B-Instruct-2507 for its instruction following and tool use while staying close to the same memory budget.
 
-`saulgman_sft` preserves synthetic batches and `finetune.py` through `finetune4.py`. They configure Llama-3.2-3B-Instruct, LoRA, and successive merged conversation files. Later versions attempt more explicit token handling and training adjustments.
+The task is text-only, so I did not need a multimodal model. An instruction-tuned checkpoint also gave me a better starting point than a raw base model with only a few hundred training examples. LoRA let me train the behavior without updating or storing another full set of base weights.
 
-This establishes the setup, not a complete set of successful runs or direct adapter ancestry for the deployed Qwen model. [Historical evidence](evidence/legacy-windows.json)
+## Teaching steering before preference
 
-## March 2026: data repairs and Qwen SFT
+I separated training into SFT and DPO because they solve different problems. SFT demonstrates the task: engage with the opener, ask a useful question, connect the answer to a need, and recommend a category. DPO compares stronger and weaker ways of carrying out that task.
 
-Windows `DATA` contains corrected batches and 366-record and 500-record SFT versions. WSL holds a later 500-record V3. [Provenance](data.md)
+The SFT data deliberately avoids direct requests for products. Those would make the task too easy and spend the limited training set on behavior the base already had. Recommendations are generic categories rather than brands or model names. The catalog supplies real items later, so updating inventory does not require retraining.
 
-March 23 artifacts show a Qwen `steering-sft-v1` study. March 25 v1.1 has 20 completed records. Trial 16 had the lowest validation loss; the later pipeline froze trial 17.
+The first SFT study exposed two training problems: loss included user tokens, and a misnamed setting disabled warmup. I fixed both in v1.1 and added regularization. v1.2 narrowed the remaining search. Validation loss helped shortlist adapters, but the differences were small and did not tell me which model steered best.
 
-March 28 v1.2 has seven completed entries. March 31 outputs compare the base and ten SFT candidates on 14 scenarios each. Qualitative notes identify formulaic openings and uneven naturalness. [SFT method](../sft/README.md)
+I selected v1.1 trial 17 through generated-conversation review. It was third by validation loss, behind trials 16 and 15. The review considered steering, question quality, the recommendation, tone, naturalness, and difficult openings. That adapter became the frozen starting point for DPO. [SFT training](../sft/README.md)
 
-The original SFT data hash is logged, but its exact bytes were not recovered. The current trainer also contains later edits, preventing an exact historical rerun from Git alone.
+## Correcting the SFT model's actual mistakes
 
-## April to May: preference data
+I built preference data from both synthetic contrasts and SFT trial-17 outputs. The latter put the model's own weak responses on the rejected side, with better rewrites on the chosen side. This targeted the repetitive openings, weak transitions, and mismatched recommendations I was seeing in conversation.
 
-Prompt A generated synthetic pairs. Prompt B used SFT trial-17 outputs to construct alternatives. Part A and Part B folders preserve repairs, category checks, diversity adjustments, and one discarded Prompt B pair.
+Some comparisons need several turns to show whether a question leads somewhere useful. Their continuations therefore include scripted user replies. I kept those replies as context but masked them out of the loss so training only scores what the assistant controls. [Data preparation](data.md)
 
-Accepted V4 combines 330 Prompt A, 92 repaired Prompt B, and 100 expanded Prompt B pairs. Full trajectories include branch-local user replies, requiring assistant-only preference scoring. [Data preparation](data.md)
+## Diagnosing DPO over-optimisation
 
-## May 22 to 27: initial DPO studies
+Early DPO trials reached perfect preference accuracy while producing broken English, repetition, and occasional Chinese text. The metric compared chosen and rejected branches, so it could improve even when both became less likely in absolute terms.
 
-v1.0 studied preference accuracy. The main snapshot records 21 completions and best validation accuracy 1.0. v1.1 added a hybrid ranking and diagnostics.
+For example, v1.1 trial 29 reached accuracy 1.0 and margin 11.67 while its chosen log probability fell to about -672. Healthy later candidates were around -230. I treated that combination as a warning of over-optimisation. The exact cause of the language drift was not isolated.
 
-Two workers sharing a GPU created slow or apparently stalled work. Fixes expanded the GPU lock across construction, training, save, diagnostics, and cleanup. Heartbeats, budgets, and progress logs distinguished slow diagnostics from abandoned trials. [Postmortem](../dpo/train/docs/FAILED_TRIAL_POSTMORTEM.md)
+Reducing DPO weight at inference helped some conversations, but it diluted an already damaged adapter. I instead reduced training strength, tested smaller ranks and fewer epochs, and added an RPO supervised term to keep chosen responses likely. I also changed the Optuna objective. The first hybrid score still rated broken trials too highly; v1.5 added stricter checks on absolute likelihood, category performance, length effects, and reward margin.
 
-The first public training-stack commit is [`0de7d27`](https://github.com/MrenXX/Saulie/commit/0de7d27).
+The resulting score filtered candidates for conversation testing. It did not replace that testing. [DPO experiments](../dpo/README.md)
 
-## May 28 to 31: scores versus conversations
+## Sharing the base during training
 
-Semantic review found repetitive or incoherent output from strong-scoring DPO adapters. Full-strength v1.1 trial 29 was unusable on the saved ten-scenario review. Smaller residual weights preserved more fluency. This was a behavioral failure, not sufficient proof of an export bug.
+Loading separate policy and reference models would use too much memory. Both policies share the same frozen base instead. The reference uses the SFT behavior, while the training policy adds the new DPO adapter. Adapter switching and cached reference log probabilities avoid loading a second full model.
 
-The work tested conservative unmerged training in v1.2, an SFT-merged dense base in v1.3, and corresponding unmerged experiments in v1.4. These comparisons were not all parts of the final stack. [Semantic report](../dpo/eval/TRAIN_SETUP_SEMANTIC_REPORT.md), [study snapshots](evidence/dpo-study-history.json)
+Training uses the BF16 checkpoint loaded in bitsandbytes 8-bit. The FP8 path in the training environment could not train these adapters, while FP8 was the serving format used by the vLLM setup. I kept that split and checked behavior after moving the adapter to the serving base.
 
-## June 2: v1.5
+## Combining adapters for vLLM
 
-The final study added a supervised chosen-response anchor and a custom survival objective. It returned to frozen SFT plus trainable DPO adapters.
+The serving path accepts one LoRA per request. During training the policy uses both SFT and DPO, so I needed a single adapter with the same combined update.
 
-The main run records 31 attempts, 21 completions, and 11 unique completed configurations. Trial 16 wins the training objective. [DPO guide](../dpo/README.md), [`108425a`](https://github.com/MrenXX/Saulie/commit/108425a)
+Baking SFT into the base would change the numerical setup against which DPO was trained. Instead, I concatenated the low-rank factors so their product equals the sum of the two updates. For trial 4, two rank-16 adapters become one rank-32 adapter. The export checks the update matrices directly before testing forward drift and generated text. [Adapter export](../dpo/README.md#export-for-serving)
 
-## June 5 to 7: evaluation and deployment choice
+## Selecting trial 4
 
-Round 1, generated June 5, contains SFT trial 17 and six anonymized DPO candidates on 34 scenarios. Export checks compare stacked contributions, the combined adapter, and an HF FP8 serving proxy.
+Trial 16 had the highest v1.5 training score. Trial 4 won both judges' first-round steering scores. In the second round, trial 20 had a slightly higher mean, but the judges disagreed on the final recommendation: one favored trial 4's handling of difficult openings, while the other preferred trial 20.
 
-Recovered author history reports trials 4 and 20 as judge finalists. After manual vLLM comparison, the author chose trial 4. The June 7 deployment commit configures that choice. Structured judge scorecards were not found, so the decision is recorded without invented scores. [Decision evidence](evidence/selection-record.json), [`87b5982`](https://github.com/MrenXX/Saulie/commit/87b5982)
+I then had people talk directly to both models and compare their steering, style, and recommendations. That qualitative test favored trial 4. I deployed it and kept trial 20 as the backup. [Results and judging protocol](evaluation.md)
 
-## June 8 to 14: retrieval and serving
+## Building retrieval within the memory budget
 
-The repository integrated catalog preparation, BGE-M3, Qdrant hybrid retrieval, prompt variants, SSE streaming, nginx, and optional ngrok access. The saved catalog comparison favors McAuley with RRF on its small query set.
+I chose BGE-M3 because one model produces both semantic and keyword vectors. This supports hybrid search without loading a second encoder or a separate reranker. Qdrant keeps the index local, and TensorRT reduces embedding latency.
 
-June 10 outputs compare base, SFT, and DPO on 60 scenarios. June 11 latency files separately measure isolated vLLM, retrieval, and the non-streaming API. [Evaluation](evaluation.md)
+An indexing bug initially hid the value of that setup. The indexer requested batches of 128 from an engine built for at most two, leaving invalid dense vectors in the database. I rebuilt with batch two, richer product text, and vector checks that stop on invalid output. The McAuley catalog with RRF then performed best in the catalog/fusion comparison. [Retrieval](../rag/README.md)
 
-June 14 renamed `train/` to `sft/` and consolidated RAG under `saulie/rag/`. The separate `/root/rag` location now contains storage, not another complete source pipeline. [`eda6d94`](https://github.com/MrenXX/Saulie/commit/eda6d94), [`2ec01aa`](https://github.com/MrenXX/Saulie/commit/2ec01aa)
+## Fixing the serving behavior
 
-## June 15 onward: runtime tool behavior
+The first API wrapper forced search too early and imposed a rigid prompt full of repeated phrases. It overrode the probing behavior I had trained. I removed the forced first-turn search and rewrote the persona as guidance rather than a list of lines to repeat.
 
-The model sometimes talked as if it had searched without executing the tool. A custom vLLM logits processor added increasing tool pressure. Saved smoke outputs show more calls in the motivating scenarios, with early-search tradeoffs.
+I compared SFT, half-weight DPO, and full-weight DPO under three prompts. Full-weight trial 4 with the shorter `compressed` prompt was the best fit for deployment. A later logits processor addressed missed search calls with increasing pressure across turns, though its early-search tradeoff still needs tuning.
 
-Further reset and dense-cosine gate work exists on `fix/tool-pressure-reset-and-rag-gate`, outside the audited public `main`. Main's retrieval code must not be described as containing that gate. [Branch scope](architecture.md)
-
-The July 6 main commit updates the compressed prompt. August 24 commits clean the README, add the license, and untrack many agent plans and handoffs.
-
-## October 19: documentation reconstruction
-
-The overhaul separates training, data, evaluation, and runtime responsibilities. It restores selected evidence and replaces deleted agent-plan links with public guides. It records the SFT hash mismatch, missing scorecards, and incomplete external-artifact reproduction path.
-
-[The audit](documentation-audit.md) describes changes and remaining work. Training, deployment, and retrieval implementation were not changed.
+The services run separately so I can restart or debug the model, embeddings, index, and API independently. Streaming and keep-alive comments make longer replies usable through nginx and the optional ngrok tunnel. [Architecture](architecture.md), [deployment](deployment.md)

@@ -1,7 +1,5 @@
 {
-  "audited_on": "2026-10-19",
   "historical_sft_logged_hash_prefix": "ced5b49dd3d0",
-  "historical_sft_exact_bytes_recovered": false,
   "historical_sft_split_sizes": {
     "train": 400,
     "validation": 50,
@@ -503,5 +501,7 @@
       "rows": 379
     }
   ],
-  "overlap_method": "Exact equality of full parsed JSON rows after sorting object keys. Overlap does not establish that a file was used in a run."
+  "overlap_method": "Exact equality of full parsed JSON rows after sorting object keys. Overlap does not establish that a file was used in a run.",
+  "generated_on": "2026-10-19",
+  "original_sft_input_included": false
 }

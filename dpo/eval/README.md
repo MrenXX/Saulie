@@ -2,7 +2,7 @@
 
 Use [evaluation and recorded results](../../docs/evaluation.md) for interpretation and [the DPO guide](../README.md) for training. This directory contains generation runners, export diagnostics, judge rubrics, and runtime comparisons.
 
-## Saved evidence
+## Evaluation files
 
 - [Round 1 conversations](generations_round1.json): complete, seven models on 34 scenarios.
 - [Unblind map](generations_round1_unblind.json): local mapping for the six candidate IDs.
@@ -11,7 +11,7 @@ Use [evaluation and recorded results](../../docs/evaluation.md) for interpretati
 - [Scenarios](eval_skeletons.json), [judge rubric](llm_judge_prompt_dpo.md), and [generation configuration](v15_eval_config.py).
 - [Model/prompt matrix](matrix_runs/), [latency report](LATENCY_REPORT.md), and [raw latency runs](latency_runs/).
 
-Structured final judge scores were not recovered. The [selection record](../../docs/evidence/selection-record.json) documents the author's choice of trial 4 after comparing judge finalists 4 and 20. The training-objective winner was trial 16.
+The [judging results](../../docs/evaluation.md) include both rounds and the base/SFT/DPO comparison. Trial 4 was selected after blind judging and direct comparison with trial 20. Trial 16 had the highest training objective.
 
 ## Re-run commands
 
@@ -39,7 +39,7 @@ Runners support checkpoint resume. Use `--fresh` only for an intentional replace
 
 [Round 1 packet instructions](JUDGE_PACKET_README.md) separate blind outputs from candidate metadata. [The later comparison packet](JUDGE_PACKET_PROD_LADDER.md) documents that only the base receives a system prompt.
 
-These are experiment instructions, not evidence that a judge returned the scores. Ordinary-chat scenarios use a retention rubric and should not be rewarded for forced product recommendations.
+Ordinary-chat scenarios use a retention rubric and should not be rewarded for forced product recommendations. Aggregate results are in [judge-results.json](../../docs/evidence/judge-results.json); per-conversation score files are not included.
 
 ## Historical diagnostics
 

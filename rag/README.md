@@ -39,7 +39,7 @@ Two **Qdrant collections** can coexist; switch with `QDRANT_COLLECTION`.
 
 ## Root cause fix (why search was broken)
 
-Historical debugging attributed invalid dense vectors to indexing with `SERVER_BATCH_SIZE=128` against a TensorRT engine whose maximum batch is **2**. The original corruption percentage is not backed by a preserved audit in this repo. Current safeguards in `index2.py` and `index_mccauley.py` are:
+The indexer requested `SERVER_BATCH_SIZE=128` from a TensorRT engine whose maximum batch was **2**. That mismatch left invalid dense vectors in Qdrant. I rebuilt the index with aligned batches and added checks to stop bad output from being stored. The safeguards in `index2.py` and `index_mccauley.py` are:
 
 - `SERVER_BATCH_SIZE=2` (must match TRT engine)
 - Embed **`embed_text`** (category + title + features), not name-only
@@ -197,7 +197,7 @@ These are exploratory keyword-rubric scores from a small saved query set, commit
 
 ## Reproduction limits
 
-The tracked TensorRT build script requires an existing ONNX export and any external tensor files. Downloading BGE-M3 weights alone does not create that export. The audited machine has the artifacts, but a complete export recipe is not published. See [reproducibility](../REPRODUCIBILITY.md).
+The TensorRT build script requires an existing ONNX export and its external tensor files. Downloading BGE-M3 weights alone does not create that export; the PyTorch-to-ONNX recipe is not included. See [reproducibility](../REPRODUCIBILITY.md).
 
 The current main branch has hybrid fusion and optional category filtering. The additional dense-cosine gate on `fix/tool-pressure-reset-and-rag-gate` is not merged here. [Architecture and branch scope](../docs/architecture.md)
 

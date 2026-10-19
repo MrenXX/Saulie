@@ -1,74 +1,65 @@
 # Supervised fine-tuning
 
-SFT is the first training phase in the Qwen pipeline. It teaches conversational behavior from completed examples. DPO is a later phase that compares preferred and rejected continuations against a frozen SFT reference.
+SFT teaches the conversational task before DPO refines it. I trained Qwen3-4B-Instruct-2507 on about 500 synthetic dialogues in which the user starts with a situation rather than a shopping request. The assistant has to engage, ask useful questions, and reach a justified product category.
 
-The target pattern is to engage with an opener, ask questions that expose useful constraints, and connect those details to one generic product category. It does not teach live inventory, current prices, or product URLs. [Runtime retrieval](../rag/README.md) supplies catalog facts separately.
+Recommendations stay generic during training. Specific items come from [retrieval](../rag/README.md) at inference time, so changing the catalog does not require another fine-tune. [Data generation](../docs/data.md)
 
-## Inputs and loss
+## Input and loss
 
-[`train_sft.py`](train_sft.py) reads JSONL with `messages` and `metadata`. Metadata includes `opening_type` and conversation length for stratification. The loader uses seed 42, reserves 10% for test, then splits validation from the remainder. Saved March studies record 400 training, 50 validation, and 50 test conversations.
+[`train_sft.py`](train_sft.py) reads JSONL rows with `messages` and `metadata`. Opening type and length bucket are used for stratification. Seed 42 produces 400 training, 50 validation, and 50 test conversations for the 500-row set.
 
-The trainer sets `assistant_only_loss=True`. `patch_chat_template_for_assistant_loss` adds generation markers to the Qwen chat template so user text remains context and only assistant responses contribute to loss. It performs a small mask check before training. Packing is disabled and the sequence limit is 832 tokens.
+Only assistant tokens contribute to loss. `patch_chat_template_for_assistant_loss` adds generation markers to the Qwen template so TRL can build the assistant mask. The sequence limit is 832 tokens, packing is disabled, and gradient checkpointing reduces memory use.
 
-The standard path loads the BF16 Qwen checkpoint with bitsandbytes 8-bit quantization. The script also has an FP8 loading option. FP8 is the later serving format, so evaluation references to an FP8 model do not mean all training used FP8.
+The standard training path loads the BF16 checkpoint with bitsandbytes 8-bit quantization. LoRA updates the attention and MLP projections while the base stays frozen. The script also retains an FP8 loading option from the initial experiments; the selected training setup uses bitsandbytes.
 
-## Training and tracking
+## Training studies
 
-The stack uses Transformers, TRL, PEFT, Optuna, and MLflow. Each trial reloads the base, trains its LoRA, evaluates validation loss, and saves a `best_adapter`. Optuna minimizes validation loss. Generated conversations assess behavioral quality separately.
+I used Optuna to search hyperparameters and MLflow to track runs. Each trial reloads the base, trains an adapter, evaluates validation loss, and saves its best checkpoint.
 
-The current script uses rank 16, alpha 32, dropout 0.1, and attention plus MLP projection targets. It enables gradient checkpointing and NEFTune noise. It searches learning rate, epoch count, gradient accumulation, and clipping.
+- v1.0 explored a broad range in 13 trials. It exposed loss on user tokens and a warmup configuration bug.
+- v1.1 corrected both, added weight decay and NEFTune noise, and ran 20 trials.
+- v1.2 fixed most settings and narrowed the remaining search. Its configuration requests 15 trials; the included summary contains seven completed trials.
 
-This is an editable research entry point, not an immutable recipe for each historical study. Present defaults name `steering-sft-v1.2`, request 15 trials, and fix the scheduler to `constant_with_warmup`. Saved v1.1 and v1.2 results include `linear` schedulers. Saved parameters take precedence when describing an old run.
+With so few dialogues, weight decay and NEFTune noise were intended to reduce overfitting to the generated examples.
 
-## Saved studies
+The current script contains the v1.2 defaults: rank 16, alpha 32, dropout 0.1, and a search over learning rate, epochs, accumulation, and clipping. It fixes the scheduler to `constant_with_warmup`. Earlier results include linear schedulers, so use the run parameters when reproducing an earlier study.
 
-- March 23, 2026: local `steering-sft-v1` adapters and MLflow records establish an earlier Qwen study. A complete standalone ranking was not recovered.
-- March 25: v1.1 has 20 completed trial records. Trial 16 has the lowest recorded validation loss, `2.2194`. Trial 17 records `2.2227`.
-- March 28: v1.2 has seven completed records. Trial 13 has the lowest recorded loss, `2.1843`. The parent run requested 15 trials, which must not be reported as 15 completed trials.
-- March 31: a saved comparison covers the base and ten SFT candidates on 14 scenarios per model. Its old filename says `top5`, but the contents have 11 models.
+[v1.1 results](../docs/evidence/sft-study-v1.1.json), [v1.2 results](../docs/evidence/sft-study-v1.2.json), [run metadata](../docs/evidence/sft-run-metadata.json)
 
-Evidence: [v1.1 summary](../docs/evidence/sft-study-v1.1.json), [v1.2 summary](../docs/evidence/sft-study-v1.2.json), [selected MLflow metadata](../docs/evidence/sft-run-metadata.json), [conversation outputs](../docs/evidence/sft-conversations.json).
+## Selecting trial 17
 
-Local qualitative judging identified repetitive openings and uneven naturalness. Different judge notes favored different trials. Those notes explain the preference phase, but they do not form a consistent numerical leaderboard.
+Validation loss was useful for shortlisting, but it did not measure whether a conversation reached a sensible recommendation. The best three v1.1 losses were 2.2194 for trial 16, 2.2211 for trial 15, and 2.2227 for trial 17. These differences were small.
 
-## Frozen DPO baseline
+I generated conversations from the shortlisted adapters and judged six aspects: steering, questions, recommendation landing, tone, naturalness, and difficult openings. Trial 17 was selected through that review despite ranking third by loss. It became the frozen starting point and reference for DPO.
 
-The later pipeline fixes this adapter:
+The [comparison outputs](../docs/evidence/sft-conversations.json) contain the base and ten SFT candidates on 14 scenarios each. The [judge rubric](sft_eval/llm_judge_prompt.md) defines the dimensions. The models learned the broad steering pattern, but repetitive openings and weak phrasing remained, which motivated the preference stage.
+
+Trial 17 uses rank 16, alpha 32, dropout 0.1, learning rate `0.00012074558410393839`, three epochs, a linear scheduler, and effective batch size four. Targets are `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, and `down_proj`.
+
+The adapter path used by the later pipeline is:
 
 ```text
 sft/models/steering-sft-v1.1/trial-17/best_adapter
 ```
 
-[`dpo/train/paths.py`](../dpo/train/paths.py) defines the path. Trial 17 is the chosen baseline, not the lowest-loss v1.1 trial. A full selection scorecard explaining its choice over trial 16 was not recovered.
+## Run training
 
-Its saved configuration records rank 16, alpha 32, dropout 0.1, and targets `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, and `down_proj`. It uses learning rate `0.00012074558410393839`, three epochs, a linear scheduler, and effective batch four. MLflow records validation loss `2.2226924896240234`.
-
-DPO keeps this adapter frozen. Deployment exports its contribution together with the selected DPO contribution into one LoRA.
-
-## Dataset provenance limit
-
-Saved study metadata logs SHA-256 prefix `ced5b49dd3d0`. The current local `SFT_DATA_V3.jsonl` has 500 rows and hash prefix `958f1a0131d2`. They are different files. Neither the current script nor the filename proves which exact bytes trained trial 17.
-
-The audit did not recover an exact hash match in the supplied dataset locations. [Data provenance](../docs/data.md) preserves both facts rather than treating the current file as the historical input.
-
-## Run a new study
-
-Prepare the [environment and model assets](../REPRODUCIBILITY.md), supply the dataset, and review the configuration constants in `train_sft.py`. Use a new experiment name and output location to preserve existing adapters.
+Prepare the [environment and external assets](../REPRODUCIBILITY.md), supply the dataset, and review the constants at the top of `train_sft.py`. Set a new experiment name to keep its output separate from the existing adapters.
 
 ```bash
 conda activate saulgman
 python sft/train_sft.py
 ```
 
-This starts training with the current constants. It does not recreate trial 17 exactly.
+The March runs logged dataset hash prefix `ced5b49dd3d0`. The current local V3 copy has a different hash, so this command starts a new study rather than exactly recreating trial 17. [Dataset versions](../docs/data.md#dataset-versions-and-hashes)
 
-## Evaluate SFT
+## Generate evaluation conversations
 
-The [SFT skeletons](sft_eval/eval_skeletons.json) and [judge rubric](sft_eval/llm_judge_prompt.md) are tracked. After restoring adapters, review paths and model lists before running the legacy scripts:
+Restore the adapters and review paths and model lists in the evaluation scripts:
 
 ```bash
 bash sft/sft_eval/deploy_qwenie_eval.sh
 python sft/sft_eval/eval_generate_vllm.py
 ```
 
-Use the [saved comparison](../docs/evidence/sft-conversations.json) to inspect original outputs without GPU services. Later DPO checks live in [`dpo/eval`](../dpo/eval/README.md).
+The [14 scenarios](sft_eval/eval_skeletons.json) fix the user turns. Each adapter generates the assistant turns for review. [DPO](../dpo/README.md) then uses preferred and rejected continuations to refine the selected SFT behavior.

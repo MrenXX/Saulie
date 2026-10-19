@@ -1,0 +1,205 @@
+{
+  "source": {
+    "title": "End-to-End Design and Development of an Edge-Optimized Fine-Tuned Sales Agent with Multi-Turn RAG and API-Based Serving",
+    "document": "2026.RAPPORT.M2DS.amine_marnewi.pdf",
+    "academic_year": "2025/2026",
+    "sha256": "8c8d87d65f53c2d89f5e10818b37d3e3d7337b5743f2898bdfbd2417ea87408a",
+    "description": "Aggregate evaluation results from the project report. The original PDF and per-conversation judge score files are not bundled here."
+  },
+  "score_scale": {
+    "min": 1,
+    "max": 5
+  },
+  "judges": {
+    "A": "Claude Opus 4.8, Max reasoning",
+    "B": "GPT-5.5, xhigh reasoning"
+  },
+  "round_1": {
+    "table": "5.2",
+    "pdf_page": 53,
+    "printed_page": 44,
+    "steering_scenarios": 26,
+    "ordinary_scenarios": 8,
+    "mean_steering": [
+      {
+        "model": "trial-4",
+        "A": 3.74,
+        "B": 3.36
+      },
+      {
+        "model": "trial-19",
+        "A": 3.63,
+        "B": 3.14
+      },
+      {
+        "model": "trial-20",
+        "A": 3.4,
+        "B": 3.11
+      },
+      {
+        "model": "trial-27",
+        "A": 3.36,
+        "B": 3.14
+      },
+      {
+        "model": "trial-16",
+        "A": 3.34,
+        "B": 2.87
+      },
+      {
+        "model": "trial-8",
+        "A": 3.21,
+        "B": 3.01
+      },
+      {
+        "model": "sft-trial-17",
+        "A": 3.38,
+        "B": 2.98
+      }
+    ]
+  },
+  "round_2": {
+    "table": "5.3",
+    "pdf_page": 54,
+    "printed_page": 45,
+    "fresh_steering_scenarios": 26,
+    "mean_steering": [
+      {
+        "model": "trial-4",
+        "A": 3.77,
+        "B": 3.4
+      },
+      {
+        "model": "trial-20",
+        "A": 3.83,
+        "B": 3.46
+      },
+      {
+        "model": "trial-27",
+        "A": 3.7,
+        "B": 3.29
+      },
+      {
+        "model": "trial-19",
+        "A": 3.52,
+        "B": 3.22
+      },
+      {
+        "model": "sft-trial-17",
+        "A": 3.45,
+        "B": 3.06
+      }
+    ],
+    "judge_recommendations": {
+      "A": "trial-4, favored handling of difficult opening types",
+      "B": "trial-20"
+    },
+    "human_comparison": "Participants talked directly to trials 4 and 20 and compared steering, style, and recommendation quality. This qualitative comparison favored trial 4; no counted vote or participant total is reported."
+  },
+  "training_stages": {
+    "table": "5.4",
+    "pdf_page": 55,
+    "printed_page": 46,
+    "steering_scenarios": 52,
+    "ordinary_scenarios": 8,
+    "system_prompt": "Base received a bootstrap prompt; SFT and DPO received bare user turns. No live retrieval tools were used.",
+    "scores": [
+      {
+        "model": "base",
+        "steering_A": 2.86,
+        "ordinary_A": 3.33,
+        "steering_B": 3.07,
+        "ordinary_B": 3.29,
+        "mean_steering": 2.97,
+        "mean_ordinary": 3.31
+      },
+      {
+        "model": "sft-trial-17",
+        "steering_A": 3.25,
+        "ordinary_A": 3.8,
+        "steering_B": 3.07,
+        "ordinary_B": 3.65,
+        "mean_steering": 3.16,
+        "mean_ordinary": 3.73
+      },
+      {
+        "model": "dpo-trial-4",
+        "steering_A": 3.42,
+        "ordinary_A": 3.9,
+        "steering_B": 3.21,
+        "ordinary_B": 3.89,
+        "mean_steering": 3.32,
+        "mean_ordinary": 3.9
+      }
+    ]
+  },
+  "behavioral_counts": {
+    "table": "5.5",
+    "pdf_page": 55,
+    "printed_page": 46,
+    "judge": "A",
+    "steering_scenarios": 52,
+    "ordinary_scenarios": 8,
+    "counts": [
+      {
+        "model": "base",
+        "clean_landings": 13,
+        "no_landing": 20,
+        "forced_in_ordinary": 6,
+        "severe_failures": 4,
+        "factual_hallucination_flags": 0
+      },
+      {
+        "model": "sft-trial-17",
+        "clean_landings": 20,
+        "no_landing": 15,
+        "forced_in_ordinary": 3,
+        "severe_failures": 0,
+        "factual_hallucination_flags": 0
+      },
+      {
+        "model": "dpo-trial-4",
+        "clean_landings": 27,
+        "no_landing": 8,
+        "forced_in_ordinary": 1,
+        "severe_failures": 1,
+        "factual_hallucination_flags": 2
+      }
+    ]
+  },
+  "opening_types": {
+    "table": "5.6",
+    "pdf_page": 56,
+    "printed_page": 47,
+    "mean_steering": [
+      {
+        "type": "A",
+        "description": "Direct problem",
+        "base": 2.78,
+        "sft": 3.1,
+        "dpo": 3.49
+      },
+      {
+        "type": "B",
+        "description": "Indirect or unrelated",
+        "base": 3.01,
+        "sft": 3.27,
+        "dpo": 3.22
+      },
+      {
+        "type": "C",
+        "description": "Emotional or lifestyle",
+        "base": 2.98,
+        "sft": 3.34,
+        "dpo": 3.31
+      },
+      {
+        "type": "D",
+        "description": "Vague complaint",
+        "base": 3.11,
+        "sft": 2.95,
+        "dpo": 3.25
+      }
+    ]
+  }
+}

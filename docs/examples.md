@@ -1,6 +1,6 @@
-# Recorded conversation example
+# Conversation example
 
-This is the first scenario in the saved June 10 base/SFT/DPO comparison, not a newly generated demonstration. All models receive the same user turns. Only the base receives a bootstrap system prompt. These are generic recommendations without live retrieval.
+This scenario compares the prompted base, SFT trial 17, and DPO trial 4 on the same user turns. Only the base receives a bootstrap system prompt. The models recommend generic categories without live retrieval.
 
 Source: [`generations_prod_ladder.json`](../dpo/eval/generations_prod_ladder.json), scenario `eval_A4_001`. Punctuation is normalized in this excerpt. Original JSON is unchanged. [Evaluation conditions](evaluation.md)
 
@@ -90,6 +90,4 @@ Assistant:
 A heater fixes the air temperature but not the hand-to-air gap, which is what's making them cold. A heated hand towel with a built-in mug warmer sits right on your desk and keeps your palms toasty without blowing hot air everywhere. You can actually type through the frost instead of rewarming between keys.
 ```
 
-SFT lands a short category recommendation. DPO introduces an unusual combined product idea without an inventory check. This sample shows why conversational and retrieval evaluations must stay separate.
-
-One scenario does not establish a model ranking. The full artifact contains 60 scenarios per model.
+The DPO response combines an unusual product idea without checking inventory, one of the product-fit problems that remains. In the deployed agent, search supplies actual catalog items. The [full comparison](../dpo/eval/generations_prod_ladder.json) contains 60 scenarios per model.

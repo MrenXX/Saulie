@@ -1,5 +1,5 @@
 {
-  "status": "Historical scripts and prompt found locally. Their presence establishes an experiment setup, not completed runs or final model ancestry.",
+  "status": "Configuration files for the early Llama-3.2-3B-Instruct experiments.",
   "files": [
     {
       "path": "finetune.py",
