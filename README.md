@@ -11,19 +11,50 @@ The model is trained in two stages:
 1. [Supervised fine-tuning](sft/README.md) teaches conversational steering from about 500 synthetic dialogues. The examples start with a problem, an unrelated question, a lifestyle situation, or a vague complaint. The model has to ask useful questions and reach a product category without waiting for an explicit shopping request.
 2. [Direct preference optimization](dpo/README.md) refines that behavior using 522 chosen/rejected pairs. These target repetitive phrasing, weak steering, and poor product fit. The SFT adapter stays frozen while a separate DPO adapter trains on top of it.
 
-Product names, prices, and links come from retrieval at inference time. Training recommendations use generic categories so the model learns how to recommend rather than memorizing an inventory.
+Product names, prices, and links come from retrieval at inference time. Training recommendations use generic categories so the model learns how to recommend rather than memorizing an inventory. Optuna tunes the training runs, and MLflow records their parameters and metrics.
 
 ## Architecture
 
 ```mermaid
-flowchart LR
-    C[Client] --> N[nginx and optional ngrok]
-    N --> A[FastAPI agent]
-    A --> L[vLLM: Qwen FP8 and combined LoRA]
-    A --> R[Product search]
-    R --> B[BGE-M3: dense and sparse embeddings]
-    R --> Q[Qdrant]
+flowchart TB
+    Client["CLI client<br/>OpenAI-compatible API"] <-->|"HTTPS + SSE"| Tunnel["ngrok tunnel<br/>optional remote access"]
+
+    subgraph Host["Ubuntu / WSL2"]
+        Proxy["nginx :8080<br/>Bearer auth + rate limits<br/>SSE proxy"]
+
+        subgraph Agent["FastAPI agent :9000"]
+            Loop["Conversation loop<br/>History + persona<br/>SSE streaming"]
+            Tool["search_products<br/>Hybrid search"]
+            Loop <-->|"Tool calls / results"| Tool
+        end
+
+        subgraph Model["vLLM container :8000"]
+            Adapter["SFT17 + DPO4<br/>Rank-32 LoRA cat merge"]
+            LLM["Qwen3-4B FP8<br/>Prefix cache + tool parser<br/>Tool-pressure processor"]
+            Adapter -. "load" .-> LLM
+        end
+
+        subgraph Embedding["TensorRT container :8888"]
+            Embed["BGE-M3 embed API<br/>Dense / sparse vectors"]
+        end
+
+        subgraph Database["Qdrant container :1234"]
+            Index["Dense HNSW / sparse index<br/>RRF + category filter<br/>Metadata + product IDs"]
+        end
+
+        Ops["Start/stop + tmux<br/>Health checks + logs"]
+
+        Proxy <-->|"Chat completions"| Loop
+        Loop <-->|"Generate / stream"| LLM
+        Tool <-->|"Query text / vectors"| Embedding
+        Tool <-->|"Hybrid query / products"| Database
+        Ops -. "monitor" .-> Loop
+    end
+
+    Tunnel <-->|"HTTP + SSE"| Proxy
 ```
+
+Solid arrows show request/response traffic. Dotted arrows show adapter loading and monitoring.
 
 The agent manages the conversation and executes `search_products` calls. BGE-M3 produces dense and sparse vectors in one pass, and Qdrant combines both rankings with reciprocal rank fusion. vLLM serves the FP8 base with a single adapter containing the SFT and DPO updates. Responses stream over SSE.
 
